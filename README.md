@@ -159,18 +159,22 @@ Of which a default QPID broker with no persistence support was observed to cache
 (ca. 25,000 messages of 20 bytes each).
 
 
+Downloading
+-----------
+
+A [.dmg](http://www.setf.de/archives/amqp-10100214-0.3.dmg) is available for MCL-5.2.
+
 Building
 ---------
 
   1. Obtain the required libraries (see [amqp.asd](file://amqp.asd)). The sources are reflected in the respective
 system names:
 
-      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/)
-      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/)
-      * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) :
-         This should suffice for ccl and sbcl.
+      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`
+      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61`
+      * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-7-0`;
          MCL requires patches, which still need to travel upstream.
-      * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) 
+      * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) : `@ 2.0.1`
       * [com.b9.puri.ppcre](http://github.com/lisp/com.b9.puri.ppcre) @github/lisp :
          This version modifies the [original](http://puri.b9.com/) to replace the parser with
          a cl-ppcre implementation which supports userinfo and to add an argument to `merge-uri` for non-strict
@@ -212,3 +216,6 @@ in this combined form,  under the GAL as well
 
  [5]: agpl.txt
  [6]: http://common-lisp.net/project/bordeaux-threads/darcs/bordeaux-threads/CONTRIBUTORS
+
+--------
+![made with mcl](mcl.gif "Made With MCL")

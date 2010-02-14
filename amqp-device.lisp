@@ -268,9 +268,10 @@
 (defmethod terminate ((object simple-stream))
   (device-close object t))
 
-
-
-
+(when (fboundp 'stream-close)
+  (defmethod stream-close ((stream amqp-device))
+    (when (next-method-p) (call-next-method))
+    (device-close stream t)))
 
 
 ;;;

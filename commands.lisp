@@ -116,7 +116,7 @@
      (apply #'amqp::send-bind queue-class :exchange exchange :queue queue
             args)
      (command-loop (queue-class)
-       (amqp:bind-ok (queue)
+       (amqp:bind-ok (queue) 
         (amqp:log :debug queue "bound.")
         (return-from command-loop))
        (t

@@ -176,12 +176,6 @@
 ;;; as per the gray interface, close is replaced with a generic function.
 ;;; in an implmentation which supports simple streams, the simple-stream method delegates to device-close
 ;;; 
-(cond ((typep #'close 'generic-function)
-       (defmethod close ((stream simple-stream) &key abort)
-         (device-close stream abort)))
-      ((fboundp 'stream-close)
-       (defmethod stream-close ((stream amqp-device))
-         (when (next-method-p) (call-next-method))
-         (device-close stream t)))
-      (t
-       (error "No interface operator found for device-close.")))
+(when (typep #'close 'generic-function)
+  (defmethod close ((stream simple-stream) &key abort)
+    (device-close stream abort)))

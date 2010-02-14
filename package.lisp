@@ -77,6 +77,7 @@
    :channel-handler
    :channel-handlers
    :channel-limit-reached
+   :channel-p
    :channel.connection
    :class-class
    :class-exchange
@@ -100,6 +101,7 @@
    :connection-client-properties
    :connection-error
    :connection-forced-error
+   :connection-p
    :connection-server-properties
    :connection.exchange
    :connection.queue

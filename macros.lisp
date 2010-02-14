@@ -612,13 +612,18 @@
        
        )))
 
-(defun pprint-def-amqp-method (xp list &rest args)
+#+mcl
+;;; 20100214: 1.0.35 decided today, that this passage shouldn't modify the "standard pprint dispatch table"
+;;; ok. hmmm. as the purpose of this is to print them reasonably for top-level debugging, which happens
+;;; in mcl, that's the way it is.
+(progn
+  (defun pprint-def-amqp-method (xp list &rest args)
     (declare (ignore args))
-  (funcall (formatter "~:<~1I~W~^ ~@_~W~^ ~@_~:/pprint-fill/~^ ~@:_~:/pprint-fill/~^ ~@:_(~{(~{~s~@{~%~3t~s ~s~}~})~^~%~2t~})~^~@{ ~_~W~^~}~:>")
-	    xp list))
+    (funcall (formatter "~:<~1I~W~^ ~@_~W~^ ~@_~:/pprint-fill/~^ ~@:_~:/pprint-fill/~^ ~@:_(~{(~{~s~@{~%~3t~s ~s~}~})~^~%~2t~})~^~@{ ~_~W~^~}~:>")
+	     xp list))
 
-(set-pprint-dispatch '(cons (member def-amqp-class)) (pprint-dispatch '(defclass) nil))
-(set-pprint-dispatch '(cons (member def-amqp-method)) 'pprint-def-amqp-method)
+  (set-pprint-dispatch '(cons (member def-amqp-class)) (pprint-dispatch '(defclass) nil))
+  (set-pprint-dispatch '(cons (member def-amqp-method)) 'pprint-def-amqp-method))
 
 
 (defmacro def-amqp-command (name lambda-list &rest options)

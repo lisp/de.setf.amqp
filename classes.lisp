@@ -118,9 +118,9 @@
 
 (defmethod shared-initialize ((instance frame-decoder) (slots t) &rest initargs
                               &key context (channel nil channel-s) (connection nil connection-s))
-  (when (and (not channel-s) (typep context 'amqp:channel))
+  (when (and (not channel-s) (amqp:channel-p context))
     (setf channel context))
-  (when (and (not connection-s) (typep context 'amqp:connection))
+  (when (and (not connection-s) (amqp:connection-p context))
     (setf channel context))
   (apply #'call-next-method instance slots
          :channel channel
@@ -171,7 +171,7 @@
     :initform (error "connection required")
     :initarg :connection
     :reader object-connection))
-  (:documentation "Specified for all classes other than the conection itself in
+  (:documentation "Specified for all classes other than the connection itself in
  order to delegate to it."))
 
 (defclass amqp-channeled-object (amqp-connected-object)

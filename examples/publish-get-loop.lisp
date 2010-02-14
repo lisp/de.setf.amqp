@@ -15,13 +15,14 @@
 ;;;  You should have received a copy of the GNU Affero General Public License along with 'de.setf.amqp'.
 ;;;  If not, see the GNU [site](http://www.gnu.org/licenses/).
 
+;;;  If you received this together with an MC image, place that image in a directory together with the MCL
+;;;  [kernel](ftp://ftp.clozure.com/pub/MCL/MCL-5.2-Final3.dmg) and double-click it. 
 
-;;; to observe the protocol exchange
-;;; (setf *log-level* :debug)
 
 (defun publish-get-loop (publish-channel get-channel data count
                                          &key (queue "q1") (exchange "ex")
                                          (routing-key "/")
+                                         ;; specify :debug to observe the protocol exchange
                                          ((:log-level *log-level*) *log-level*))
   (let* ((publish-basic (amqp:basic publish-channel))
          (get-basic (amqp:basic get-channel))
