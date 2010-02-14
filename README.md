@@ -170,9 +170,10 @@ Building
   1. Obtain the required libraries (see [amqp.asd](file://amqp.asd)). The sources are reflected in the respective
 system names:
 
-      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`; Take check out the svn source; 
+      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`; Take the svn source; 
         If you use `0.4.1`, you will also need `split-sequence`.
-      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61` (also [0-55](http://common-lisp.net/project/closer/ftp/))
+      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : [`@ 0-61`](http://common-lisp.net/project/closer/ftp/closer-mop_0.61.tar.gz)
+        (also [0-55](http://common-lisp.net/project/closer/ftp/))
       * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-8-0` (or @ patch 165)
       * [net.common-lisp.alexandria](http://common-lisp.net/projects/alexandria/) : 
       * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) : `@ 2.0.1`
@@ -228,4 +229,3 @@ in this combined form,  under the GAL as well
 ![made with mcl](http://www.digitool.com/img/mcl-made-1.gif "Made With MCL")
 
 
-http://common-lisp.net/project/closer/ftp/closer-mop_0.61.tar.gz
