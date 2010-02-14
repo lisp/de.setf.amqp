@@ -186,8 +186,8 @@ system names:
       * [de.setf.utility](http://github.com/lisp/de.setf.utility) :
          This includes the `de.setf.utility.mime` module.
 
-  3. Add the [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp)
-     utility to `asdf`.
+  3. Obtain and load [`asdf`](http://common-lisp.net/projects/asdf/), and add the
+     [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp) utility.
   4. Place the libraries in a source tree to mirror their global identity as reflected in the required system 
      names, and add the root of this tree to the `asdf` registry.
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
