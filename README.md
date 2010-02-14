@@ -210,5 +210,5 @@ in this combined form,  under the GAL as well
   - 2003 Kevin Rosenberg
 
 
- [5]: file:///LICENSE
+ [5]: agpl.txt
  [6]: http://common-lisp.net/project/bordeaux-threads/darcs/bordeaux-threads/CONTRIBUTORS
