@@ -18,29 +18,32 @@
   If not, see the GNU [site](http://www.gnu.org/licenses/).")
 
   (long-description "Device-level operations are managed by channel instances, which delegete in turn to
- connection-wrapped tcp sockets. The AMQP standards permit this combination to behave in either of (at least)
- two ways. On one hand, one can use all allowed protocoal variability and treat the socket connection as a
- multiplexed multi-channel stream. In this mode each thread would instantiate its own channel on the shared
- connection. On the other hand, is also possible to constrain the connection's use to dedicate it to a single
- channel - and thereby to a single thread.
+connection-wrapped tcp sockets. The AMQP standards permit this combination to behave in either of (at
+least) two ways. On one hand, one can use all allowed protocoal variability and treat the socket
+connection as a multiplexed multi-channel stream. In this mode each thread would instantiate its own
+channel on the shared connection. On the other hand, is also possible to constrain the connection's use
+to dedicate it to a single channel - and thereby to a single thread.
 
- The multiplexed mechanism sets a much lower demand for system resources, but increases the processing for a single
-channel and constrains the i/o operations to block mode. A dedicated mechanims requires more sockets, but can dedicate
-the buffering to a single thread, which permits more efficient i/o operations.
+ The multiplexed mechanism sets a much lower demand for system resources, but increases the processing
+for a single channel and constrains the i/o operations to block mode. A dedicated mechanims requires
+more sockets, but can dedicate the buffering to a single thread, which permits more efficient i/o
+operations.
 
- When the socket is multiplexed, then it is possible that content frames for one channel will be interleaved with
-frames for another channel, which means it is not possible to guarantee that a given socket read operation will contain
-an expected content frame. The multiplexing requires per-channel queuing and processing upon delivery, whereby the
-actual buffer is not to be predicted. When the socket is dedicated, read operatation can target a given buffer, since
-the intra-channel ordering constraints require that content be delivered in-order and uninterrupted. The protocol
-meta-data can be read and processed in-line ro parameterize the read and recognize exceptions, while data i/o targets
-given buffers. The 1.0pr documentintroduces additional session and context for frame processing, but those are not
-considered here. (see amqp0-8.pdf,p.56 amqp0-9.pdf,p.35)
+ When the socket is multiplexed, then it is possible that content frames for one channel will be
+interleaved with frames for another channel, which means it is not possible to guarantee that a given
+socket read operation will contain an expected content frame. The multiplexing requires per-channel
+queuing and processing upon delivery, whereby the actual buffer is not to be predicted. When the socket
+is dedicated, read operatation can target a given buffer, since the intra-channel ordering constraints
+require that content be delivered in-order and uninterrupted. The protocol meta-data can be read and
+processed in-line ro parameterize the read and recognize exceptions, while data i/o targets given
+buffers. The 1.0pr documentintroduces additional session and context for frame processing, but those are
+not considered here. (see amqp0-8.pdf,p.56 amqp0-9.pdf,p.35)
 
- In the implementation below, the two amqp classes - connection and channel, are each specialized from simple-stream and
- implement the standard interface. The required device operators are implemented for both amqp:channel and amqp:connection,
- despite that stream operations are limited to channels while connections are to be used only to consolidate
- frame-based operations with the network stream. The principle operators are
+ In the implementation below, the two amqp classes - connection and channel, are each specialized from
+simple-stream and implement the standard interface. The required device operators are implemented for
+both amqp:channel and amqp:connection, despite that stream operations are limited to channels while
+connections are to be used only to consolidate frame-based operations with the network stream. The
+principle operators are
 
     device-open (stream #-sbcl slots initargs)
     device-close (stream abort)
@@ -52,26 +55,44 @@ considered here. (see amqp0-8.pdf,p.56 amqp0-9.pdf,p.35)
     device-read-content (device &rest content-arguments)
     device-write-content (device body &rest content-arguments)
 
- The device-open operator returns an instance which can be used directly. In the case of a channel, it connects
- to the respective connection and prepares any exchange/queue specified in uri initialization argument. 
- In that state it can be supplied to publish, consume, or get operations to initiate stream i/o, or to transfer isolated
- objects. In the case of a connection, a socket stream is opened to the designated server and the protocol handshake and
- open-connection phases are completed. (see open-connection and negotiate-client-connection) In that state, one can
- construct and use channels.
+ The device-open operator returns an instance which can be used directly. In the case of a channel, it
+connects to the respective connection and prepares any exchange/queue specified in uri initialization
+argument.  In that state it can be supplied to publish, consume, or get operations to initiate stream
+i/o, or to transfer isolated objects. In the case of a connection, a socket stream is opened to the
+designated server and the protocol handshake and open-connection phases are completed. (see
+open-connection and negotiate-client-connection) In that state, one can construct and use channels. In the
+case of a connection, it should be used only to make channels. Note that the connection class is adjusted to
+match that of the protocol version which it negotiates with the remote broker. That is, a
 
- The device-read and device-write operators are defined at the respective levels to delegate a channel's operations
- to the respective connection and to perform connection i/o through the socket stream. When channel operations 
- with an explicit buffer, are intended to implement data stream-based data transfer for a channel which has already
- initiated a message exchange and observe the body size constraints specified fro the message. Where the size is known
- at the outset, the body-size and body-position govern eof behaviour. Where the size was unkown, the channel implemented
- chunked transfer in terms of maxmial sized messages, and relies on device-flush and device-clear-input to indicate and
- manage the effective eof.
+    (make-instance 'amqp:connection  :uri \"amqp://guest:guest@localhost/\")
 
- The state operators for position and length return meaningful information for fixed content sizes only and have no
- effect to modify channel state.
- 
+will return a connection sub-class. This places constraints on the effective methods for `device-open` and the
+various constituents of the standard instantiation protocol for `simple-stream`.
+The respective effective methods for the base implementation look something like
+
+    initialize-instance : (CONNECTION) (STANDARD-OBJECT)
+    shared-initialize (in mcl) : (CONNECTION T) (AMQP-DEVICE T) :AFTER (SIMPLE-STREAM T) (STANDARD-OBJECT T)
+    reinitialize-instance : (STANDARD-OBJECT)
+    device-open (in sbcl) : (CONNECTION T) (AMQP-SOCKET-DEVICE T) (AMQP-DEVICE T) (SIMPLE-STREAM T) (SLOT-OBJECT T)
+
+The exact form depends on the run-time (cf. `standard-object` v/s `sloto-object`), but all share the topology,
+that no next method call follows the class change. Should protocol-specific specialization be necessary, any
+specialized operation subsequent to the change would need to be independent of these effective methods.
+
+ The device-read and device-write operators are defined at the respective levels to delegate a channel's
+operations to the respective connection and to perform connection i/o through the socket stream. When
+channel operations  with an explicit buffer, are intended to implement data stream-based data transfer
+for a channel which has already initiated a message exchange and observe the body size constraints
+specified fro the message. Where the size is known at the outset, the body-size and body-position govern
+eof behaviour. Where the size was unkown, the channel implemented chunked transfer in terms of maxmial
+sized messages, and relies on device-flush and device-clear-input to indicate and manage the effective
+eof.
+
+ The state operators for position and length return meaningful information for fixed content sizes only
+and have no effect to modify channel state. 
+
  For more information on simple streams, see Franz's documentation[3] and the sbcl implementation[4] of same,
- as well as the discussions of the the alternative fu interface.[5]
+as well as the discussions of the the alternative fu interface.[5]
 
  ---
  [1]: https://jira.amqp.org/confluence/download/attachments/720900/amqp0-8.pdf?version=1

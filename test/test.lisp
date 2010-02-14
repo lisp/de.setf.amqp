@@ -637,3 +637,36 @@
            (setf (aref data 0) byte)
            (drain-connection data stream :start 1))))
       (when socket (usocket:socket-close socket)))))
+
+
+#|
+;;; generic dispatch and keyword processing overhead
+
+(defgeneric test-keywords (context1 context2 &rest args &key key1 key2 key3 key4 key5)
+  (declare (dynamic-extent args))
+  (:method ((context1 t) (context2 null) &rest args)
+    (declare (dynamic-extent args))
+    (every #'identity args))
+  (:method ((context1 fixnum) (context2 cons) &key key1 key2 key3 key4 key5)
+    (test-keywords (1+ context1) (rest context2)
+                   :key1 key1
+                   :key2 key2
+                   :key3 key3
+                   :key4 key4
+                   :key5 key5)))
+
+(defun test-required (context1 context2  key1 key2 key3 key4 key5)
+  (if context2
+    (test-required (1+ context1) (rest context2) key1 key2 key3 key4 key5)
+    (and  key1 key2 key3 key4 key5)))
+
+(defun test-calls (&key (count 1024) (data (make-list 1024)))
+  (time (dotimes (x count)
+          (test-keywords 0 data :key1 1 :key2 'two :key3 "three" :key4 4.0 :key5 #(5))))
+  (time (dotimes (x count)
+          (test-required 0 data 1 'two "three" 4.0 #(5)))))
+
+
+;;; (test-calls :count (* 100 1024):data (make-list 10))
+
+|#

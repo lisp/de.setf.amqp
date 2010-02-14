@@ -303,7 +303,9 @@
 (defpackage :de.setf.amqp.utility
   (:use )
   (:nicknames :amqp.u)
+  (:import-from :de.setf.amqp :*log-level*)
   (:export
+   *log-level*
    :channel-condition
    :channel-error
    :channel-flow-condition
@@ -422,3 +424,13 @@
                 #:stream-write-sequence
                 #:stream-write-string
                 ))
+
+
+(defpackage :de.setf.amqp.user
+  (:nicknames :amqp-user)
+  (:use :common-lisp :puri :de.setf.amqp.utility)
+  #+mcl (:use :ccl)
+  #+mcl (:shadowing-import-from :de.setf.amqp.utility
+                                :connection-error)
+  #+clozure (:use :ccl)
+  #+sbcl (:use :sb-alien :sb-debug :sb-ext :sb-gray :sb-profile))

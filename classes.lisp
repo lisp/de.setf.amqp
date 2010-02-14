@@ -1499,7 +1499,10 @@
     (apply #'amqp:find-protocol-class (type-of instance) version args))
 
   (:method ((designator t) (version symbol) &rest args)
-    (apply #'amqp:find-protocol-class designator (find-package version) args))
+    (apply #'amqp:find-protocol-class designator
+           (or (find-package version)
+               (error "no protocol implementation for version: ~s" version))
+           args))
 
   (:method ((class-name symbol) (package package)  &key (if-does-not-exist :error))
     (let ((found
@@ -1509,7 +1512,8 @@
                    (and symbol (find-class symbol nil))))
                (ecase if-does-not-exist
                  ((nil) nil)
-                 (:error (error "no protocol implementation for version: ~s" (package-name package)))))))
+                 (:error (error "no protocol implementation for class in version: ~s, ~s"
+                                class-name (package-name package)))))))
       (when found
         (assert (find 'amqp:object (closer-mop:class-precedence-list found) :key #'class-name) ()
                 "Class is not a protocol class: ~s." class-name)

@@ -45,14 +45,35 @@ DE.SETF.AMQP: a Common Lisp client library for AMQP
 Status
 ------
 
-It would be nice to generate a table similar to [RabbitMQ's](http://www.rabbitmq.com/specification.html). Eventually.
-In the meantime, the library has been built and [probed](file:///examples/examples.lisp) in the following combinations
+This is intended as the base for a distributed semantic store.
+What one has here is a reasonably complete engineering prototype.
+It consumes phenomenal amounts of memory and runs astonishingly slowly:
+5 - 10 milliseconds and 1 to 10 thousand bytes per round trip.
+A request entails ten levels of generic function dispatch, half of which require keyword processing.
+A response call stack is about as deep, but with somewhat less keyword processing.
+As almost everything between the interface commands and the frame buffers is generated code, once it is clear
+which aspects should remain available for specialization and/or optional arguments, the protocol call
+stack would benefit from recasting uninteresting elements as ordinary functions of fixed arguments - depending
+on implementation type, by a factor of ten to sixty.
+
+It would also be nice to generate a table similar to [RabbitMQ's](http://www.rabbitmq.com/specification.html) to
+record protocol  conformance  and compatibility with brokers. Eventually.
+The present tests are limited to
+
+- [codec](test/AMQP-1-1-0-9-1/test.lisp) unit tests which validate the respective version's codecs for default
+  argument values.
+- in-memory loop-back [tests](test/test.lisp), used to ensure (for a recent version) that a round-trip
+  does not cons
+- simple data exchanges with a broker.
+
+
+The library has been built and [probed](file:///examples/examples.lisp) in the following combinations
 
 <table>
 <tr><td>AMQP broker<br/>lisp implementation</td><th>RabbittMQ</th><th>QPID</th></tr>
-<tr><th>MCL</th><td/><td>MCL-5.2, QPID-0.5</td></tr>
-<tr><th>CCL</th><td/><td>CCL-1.3, QPID-0.5</td></tr>
-<tr><th>SBCL</th><td/><td>SBCL-1.0.35, QPID-0.5</td></tr>
+<tr><th>MCL</th><td/><td>MCL-5.2, QPID-0.5, AMQP-0.9r1</td></tr>
+<tr><th>CCL</th><td/><td>CCL-1.3, QPID-0.5, AMQP-0.9r1</td></tr>
+<tr><th>SBCL</th><td/><td>SBCL-1.0.35, QPID-0.5, AMQP-0.9r1</td></tr>
 </table>
 
 For example,
@@ -134,6 +155,8 @@ For example,
     * 
 
 Which, as an aside, indicates that brokered messages persist between connections until they have been consumed.
+Of which a default QPID broker with no persistence support was observed to cache only about a million bytes
+(ca. 25,000 messages of 20 bytes each).
 
 
 Building
