@@ -170,29 +170,36 @@ Building
   1. Obtain the required libraries (see [amqp.asd](file://amqp.asd)). The sources are reflected in the respective
 system names:
 
-      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`
+      * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`; Take check out the svn source; 
+        If you use `0.4.1`, you will also need `split-sequence`.
       * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61` (also [0-55](http://common-lisp.net/project/closer/ftp/))
-      * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-7-0`;
+      * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-8-0` (or @ patch 165)
          MCL requires patches, which still need to travel upstream.
+      * [net.common-lisp.alexandria](http://common-lisp.net/projects/alexandria/) : 
       * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) : `@ 2.0.1`
       * [com.b9.puri.ppcre](http://github.com/lisp/com.b9.puri.ppcre) @github/lisp :
          This version modifies the [original](http://puri.b9.com/) to replace the parser with
          a cl-ppcre implementation which supports userinfo and to add an argument to `merge-uri` for non-strict
          scheme merging.
-
   2. Obtain the `de.setf.amqp` source and that for the `de.setf.utility` library
 
       * [de.setf.amqp](http://github.com/lisp/de.setf.amqp)
       * [de.setf.utility](http://github.com/lisp/de.setf.utility) :
          This includes the `de.setf.utility.mime` module.
-
-  3. Obtain and load [`asdf`](http://common-lisp.net/projects/asdf/), and add the
+  3. Obtain and load [`asdf`](http://common-lisp.net/projects/asdf/), add the
      [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp) utility.
+     If running MCL, with an `asdf` version that includes mandatory output translations, either disable it or
+     otherwise ensure that it doesn't choke on the default binding for `user-homedir-pathname`.
   4. Place the libraries in a source tree to mirror their global identity as reflected in the required system 
-     names, and add the root of this tree to the `asdf` registry.
+     names, and add the root of this tree to the `asdf` registry. If the central registry entry is a logical
+     pathname, the hierarchical naming mechanism should suffice to map binaries to a "shadow" directory at the
+     root of the source tree. The `bordeaux-threads` -> `alexandria` reference is
+     unqualified, and as such, requires additional registration. 
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
 
+The examples initialization [file](./examples/init.lisp) was used for MCL.
 
+ 
 Licensing
 ---------
 
