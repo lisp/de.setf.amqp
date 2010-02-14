@@ -174,7 +174,6 @@ system names:
         If you use `0.4.1`, you will also need `split-sequence`.
       * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61` (also [0-55](http://common-lisp.net/project/closer/ftp/))
       * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-8-0` (or @ patch 165)
-         MCL requires patches, which still need to travel upstream.
       * [net.common-lisp.alexandria](http://common-lisp.net/projects/alexandria/) : 
       * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) : `@ 2.0.1`
       * [com.b9.puri.ppcre](http://github.com/lisp/com.b9.puri.ppcre) @github/lisp :
@@ -186,6 +185,7 @@ system names:
       * [de.setf.amqp](http://github.com/lisp/de.setf.amqp)
       * [de.setf.utility](http://github.com/lisp/de.setf.utility) :
          This includes the `de.setf.utility.mime` module.
+
   3. Obtain and load [`asdf`](http://common-lisp.net/projects/asdf/), add the
      [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp) utility.
      If running MCL, with an `asdf` version that includes mandatory output translations, either disable it or
@@ -197,7 +197,7 @@ system names:
      unqualified, and as such, requires additional registration. 
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
 
-The examples initialization [file](./examples/init.lisp) was used for MCL.
+The example initialization [file](./examples/init.lisp) was used for MCL.
 
  
 Licensing
