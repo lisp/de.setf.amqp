@@ -154,15 +154,15 @@ For example,
     NIL
     * 
 
-Which, as an aside, indicates that brokered messages persist between connections until they have been consumed.
-Of which a default QPID broker with no persistence support was observed to cache only about a million bytes
+Which, as an aside, illustrates that brokered messages persist between connections until they have been consumed.
+Of which a default QPID broker with no persistence support was observed to cache only about 500k bytes
 (ca. 25,000 messages of 20 bytes each).
 
 
 Downloading
 -----------
 
-A [.dmg](http://www.setf.de/archives/amqp-10100214-0.3.dmg) is available for MCL-5.2.
+A [.dmg](http://github.com/downloads/lisp/de.setf.amqp/amqp-20100214-0.3.dmg) is available for MCL-5.2.
 
 Building
 ---------
@@ -171,7 +171,7 @@ Building
 system names:
 
       * [net.common-lisp.usocket](http://common-lisp.net/project/usocket/) : `@ r520`
-      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61`
+      * [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/) : `@ 0-61` (also [0-55](http://common-lisp.net/project/closer/ftp/))
       * [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) : `@ 0-7-0`;
          MCL requires patches, which still need to travel upstream.
       * [de.weitz.cl-ppcre](http://weitz.de/cl-ppcre/) : `@ 2.0.1`
@@ -219,3 +219,6 @@ in this combined form,  under the GAL as well
 
 --------
 ![made with mcl](http://www.digitool.com/img/mcl-made-1.gif "Made With MCL")
+
+
+http://common-lisp.net/project/closer/ftp/closer-mop_0.61.tar.gz
