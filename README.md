@@ -218,4 +218,4 @@ in this combined form,  under the GAL as well
  [6]: http://common-lisp.net/project/bordeaux-threads/darcs/bordeaux-threads/CONTRIBUTORS
 
 --------
-![made with mcl](mcl.gif "Made With MCL")
+![made with mcl](./mcl.gif "Made With MCL")
