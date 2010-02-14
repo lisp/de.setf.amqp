@@ -186,7 +186,7 @@ system names:
      utility to `asdf`.
   4. Place the libraries in a source tree to mirror their global identity as reflected in the required system 
      names, and add the root of this tree to the `asdf` registry.
-  5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp)`
+  5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp,`_some-version_`)`
 
 
 Licensing
