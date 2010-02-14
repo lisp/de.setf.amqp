@@ -139,11 +139,11 @@ Which, as an aside, indicates that brokered messages persist between connections
 Building
 ---------
 
-1. Obtain the required libraries (see [amqp.asd](file://amqp.asd). The sources are reflected in the respective
+1. Obtain the required libraries (see [amqp.asd](file://amqp.asd)). The sources are reflected in the respective
 system names:
 
  - [net.common-lisp.usocket](http://common-lisp.net/project/usocket/)
- - [net.common-lisp.closer-mop[(http://common-lisp.net/project/closer/)
+ - [net.common-lisp.closer-mop](http://common-lisp.net/project/closer/)
  - [net.common-lisp.bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/) :
    This should suffice for ccl and sbcl.
    MCL requires patches, which still need to travel upstream.
@@ -158,11 +158,11 @@ system names:
  - [de.setf.utility](http://github.com/lisp/de.setf.utility) :
    This includes the `de.setf.utility.mime` module.
 
-3. Add the `[hierarchical-names](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp)`
+3. Add the [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp)
    utility to `asdf`.
 
 4. Place the libraries in a source tree to mirror their global identity as reflected in the required system 
-   names
+   names, and add the root of this tree to the `asdf` registry.
 
 5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp)`
 
