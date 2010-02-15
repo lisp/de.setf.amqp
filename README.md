@@ -198,7 +198,7 @@ system names:
      The `bordeaux-threads` -> `alexandria` reference is unqualified, and as such, requires additional registration. 
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
 
-The example initialization [file](./examples/init.lisp) was used for MCL.
+The example initialization [file](./examples/init.lisp) was used for MCL. Contact [me](mailto:james.anderson@setf.de) should any questions arise.
 
  
 Licensing
@@ -208,18 +208,19 @@ This version is released under version 3 of the GNU Affero license (GAL).[[5]]
 The required components are included as per the respective licenses and covered,
 in this combined form,  under the GAL as well
 
-- usocket : MIT, through 2007. later work unspecified
+- [alexandria](mailto:alexandria-devel@common-lisp.net) : Public Domain
+- [usocket](mailto:usocket-devel@common-lisp.net) : MIT, through 2007. later work unspecified
   - 2003 Erik Enge
   - 2006-2007 Erik Huelsmann 
-- closer-mop : effectively MIT, without the designation
-  - 2005 - 2008 Pascal Costanza
-- bordeaux-threads : effectively MIT, without designation, with additional attribution undated.[[6]]
+- closer-mop :  MIT-style
+  - 2005 - 2010 [Pascal Costanza](mailto:pc@p-cos.net)
+- [bordeaux-threads](mailto:bordeaux-threads-devel@common-lisp.net) : MIT-style, with additional attributions undated.[[6]]
   - -2006 Greg Pfeil
 - cl-ppcre : equivalent to MIT
-  - 2002-2008, Dr. Edmund Weitz
+  - 2002-2008, [Dr. Edmund Weitz](mailto:edi(at)agharta(dot)de)
 - com.b9.puri : LLGPL, by which com.b9.puri.ppcre is also covered by the LLGPL
-  - 1999-2001 Franz, Inc.
-  - 2003 Kevin Rosenberg
+  - 1999-2001 [Franz, Inc](mailto:opensource@franz.com).
+  - 2003 [Kevin Rosenberg](mailto:kevin@rosenberg.net)
 
 
  [5]: agpl.txt
