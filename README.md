@@ -6,20 +6,20 @@ DE.SETF.AMQP: a Common Lisp client library for AMQP
 -------
 
 `de.setf.amqp` implements a native Common Lisp client library for the 'Advanced Message Queueing
- Protocol'. The implementation comprises wire-level codecs, implementations
+ Protocol' ([AMQP](http://en.wikipedia.org/wiki/AMQP)). The implementation comprises wire-level codecs, implementations
  for the standard protocol objects and methods, a functional interface for message-,
  stream- and object-based i/o, and a device-level simple-stream implementation.
 
  The library targets the revisions of the published AMQP protocol as of versions
- 0.8, 0.9, and 0.10. This means that it should work with respective RabbitMQ,
- Apache ActiveMQ, and Qpid implementations. The implementation architecture
+ 0.8, 0.9, and 0.10. This means that it should work with respective [RabbitMQ](http://www.rabbitmq.com/),
+ Apache ActiveMQ, and [Qpid](http://qpid.apache.org/) implementations. The implementation architecture
  should also accommodate a control structure appropriate for the prospective
  1.0 version - as least as described in preliminary drafts.
  For each version, a distinct package comprises the object and method
  definitions for protocol entities and codecs as generated from the respective
  specification documents.[[1]] Each collection is a
  complete projection, which means there is some amount of duplication.
- The package and directory names names follow more-or-less the naming conventions of the
+ The names - classes, operators, fields, packages and directories all follow more-or-less the naming conventions of the
  xml protocol documents[[2]]:
 
 <table>
@@ -192,10 +192,10 @@ system names:
      If running MCL, with an `asdf` version that includes mandatory output translations, either disable it or
      otherwise ensure that it doesn't choke on the default binding for `user-homedir-pathname`.
   4. Place the libraries in a source tree to mirror their global identity as reflected in the required system 
-     names, and add the root of this tree to the `asdf` registry. If the central registry entry is a logical
-     pathname, the hierarchical naming mechanism should suffice to map binaries to a "shadow" directory at the
-     root of the source tree. The `bordeaux-threads` -> `alexandria` reference is
-     unqualified, and as such, requires additional registration. 
+     names, and add the root of this tree to the `asdf` registry. If the central registry entry specifies a logical
+     host with binary [mapping](http://github.com/lisp/de.setf.utility/blob/master/pathnames.lisp),
+     the hierarchical naming mechanism should suffice to map binaries the specified location.
+     The `bordeaux-threads` -> `alexandria` reference is unqualified, and as such, requires additional registration. 
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
 
 The example initialization [file](./examples/init.lisp) was used for MCL.
