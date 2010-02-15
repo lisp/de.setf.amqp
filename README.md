@@ -217,7 +217,7 @@ in this combined form,  under the GAL as well
 - [bordeaux-threads](mailto:bordeaux-threads-devel@common-lisp.net) : MIT-style, with additional attributions undated.[[6]]
   - -2006 Greg Pfeil
 - cl-ppcre : equivalent to MIT
-  - 2002-2008, [Dr. Edmund Weitz](mailto:edi@agharta.de)
+  - 2002-2008, [Dr. Edmund Weitz](http://www.weitz.de)
 - com.b9.puri : LLGPL, by which com.b9.puri.ppcre is also covered by the LLGPL
   - 1999-2001 [Franz, Inc](mailto:opensource@franz.com).
   - 2003 [Kevin Rosenberg](mailto:kevin@rosenberg.net)
