@@ -213,7 +213,7 @@ in this combined form,  under the GAL as well
   - 2003 Erik Enge
   - 2006-2007 Erik Huelsmann 
 - closer-mop :  MIT-style
-  - 2005 - 2010 [Pascal Costanza](mailto:pc@p-cos.net)
+  - 2005 - 2010 [Pascal Costanza](http://p-cos.net)
 - [bordeaux-threads](mailto:bordeaux-threads-devel@common-lisp.net) : MIT-style, with additional attributions undated.[[6]]
   - -2006 Greg Pfeil
 - cl-ppcre : equivalent to MIT
