@@ -1103,50 +1103,14 @@
                 channel
 
       (call-next-method)
-      ;; once that has been done, adjust the channel class
-      (let ((connection-channel-class (class-find-object-class connection 'amqp:channel)))
-        (unless (typep channel connection-channel-class)
-          (change-class channel connection-channel-class)))
 
-      ;; next, share queues
+      ;; share queues
       (setf free-input-frames (device-free-input-frames connection)
             free-output-frames (device-free-output-frames connection)
             read-frames (device-read-frames connection)
             encoded-frames (device-encoded-frames connection))
       ;; and initialize buffers
       (device-initialize-buffers channel)
-
-      ;; finalle, unless it's the connection's own channel,
-      ;; open the channel w/ the broker and optionally declare/bind the initial exchange/queue.
-
-      (unless (zerop (channel-number channel))
-        ;; resolve the channel's identifer relative to the connection - with
-        ;; non-strict handling to allow a scheme.
-        (let* ((uri (merge-uris (channel-uri channel) (connection-uri connection) nil nil))
-               (host (uri-host uri)))
-
-          (unless (zerop (length host))
-            (setf-device-uri uri channel)
-            (amqp:open channel)
-            #+(or ) ; don't do this here - maybe in initialize instance
-                    ; an r8.0 channel need also to get a ticket first, which it would need to pass
-            (let ((exchange (uri-exchange uri))
-                  (queue (uri-queue uri))
-                  (object-path (uri-path uri))
-                  (cond (exchange
-                         (let ((queue (amqp:channel.queue channel :queue queue))
-                               (exchange (amqp:channel.exchange channel :exchange exchange :type "direct")))
-                           (amqp:declare queue)
-                           (amqp:declare exchange)
-                           (amqp:bind queue :exchange exchange :queue queue
-                                      :routing-key object-path)))
-                        (queue
-                         ;; if there is no exchange, allow input only
-                         (assert (eq (stream-direction channel) :input) ()
-                                 "An exchange must be provided for channel output.")
-                         (amqp:declare (amqp:channel.queue channel :queue queue)))))))
-          (setf (device-state channel) amqp.s:use-channel)))
-
       channel)))
 
 
