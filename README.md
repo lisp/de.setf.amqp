@@ -10,7 +10,7 @@ DE.SETF.AMQP: a Common Lisp client library for AMQP
 
  The library targets the revisions of the published AMQP protocol as of versions
  0.8, 0.9, and 0.10. This means that it should work with respective [RabbitMQ](http://www.rabbitmq.com/),
- Apache ActiveMQ, and [Qpid](http://qpid.apache.org/) implementations. The implementation architecture
+ OpenAMQ, and [Qpid](http://qpid.apache.org/) implementations. The implementation architecture
  should also accommodate a control structure appropriate for the prospective
  1.0 version - as least as described in preliminary drafts.
  For each version, a distinct package comprises the object and method
@@ -27,12 +27,12 @@ DE.SETF.AMQP: a Common Lisp client library for AMQP
 <tr><td>AMQP-1-1-0-10-0</td> <td>version 0.10</td>  <td>[amqp.0-10.xml, amqp.0-10.pdf (2008-02-20)]</tr>
 </table>
 
- In order to modify the translation and/or generate new codecs consult the `:de.setf.amqp.tools` component.
+ In order to modify the translation and/or generate new codecs consult the `:de.setf.amqp.tools` module.
 
  All protocol versions are expressed through a common interface[[3]] which is specialized for the common
  abstract classes. The initial connection phase determines the correct concrete connection implementation
  to be used to communicate with the broker. Given which the other concrete object and method classes are
- elected from the same package. One determines the version support directly by loading the respective
+ elected from the same package. One determines the version to be supported directly by loading the respective
  version's `.asd` file, which makes its connection class available for negotiation.
 
  [1]: tools/spec.lisp
