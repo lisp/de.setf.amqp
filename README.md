@@ -1,6 +1,4 @@
-<head>
- <title>DE.SETF.AMQP</title>
-</head>
+
 
 DE.SETF.AMQP: a Common Lisp client library for AMQP
 -------
