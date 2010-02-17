@@ -605,7 +605,7 @@
        )))
 
 #+mcl
-;;; 20100214: 1.0.35 decided today, that this passage shouldn't modify the "standard pprint dispatch table"
+;;; 20100214: sbcl-1.0.35 decided today, that this passage shouldn't modify the "standard pprint dispatch table"
 ;;; ok. hmmm. as the purpose of this is to print them reasonably for top-level debugging, which happens
 ;;; in mcl, that's the way it is.
 (progn
