@@ -119,7 +119,7 @@
                                    :requeue t)
                                   (amqp:recover
                                    :requeue t)
-                                  (amqp:recover-ok)))))
+                                  (amqp:recover-ok)) :verbose-p t)))
 
   (test:test amqp/codec/channel/9-1
     "channel method codec tests
@@ -383,7 +383,7 @@
                                            (map-into (make-list length)
                                                      #'(lambda () (format nil "~02,'0x" (incf i)))))
                                        lengths)
-                               :log-level :debug
+                               :log-level :error
                                :element-type 'list)
              lengths)))
   

@@ -75,16 +75,12 @@
      ,@body))
 
 (defmacro with-test-channels (bindings &rest body)
-  `(let ,(mapcar #'(lambda (binding)
-                     (destructuring-bind (name connection &rest initargs) binding
-                       `(,name (amqp:connection.channel ,connection
-                                                        ,@initargs
-                                                        :number t
-                                                        :uri #u"amqp:///"
-                                                        :input-handle *standard-input*
-                                                        :output-handle *binary-trace-output*))))
-                 bindings)
-     ,@body))
+  (labels ((wrap-with-binding (bindings)
+             (if bindings
+               `(with-test-channel ,(first bindings)
+                  ,(wrap-with-binding (rest bindings)))
+               `(progn ,@body))))
+    (wrap-with-binding bindings)))
 
 (defgeneric test-class-method-codecs (object arguments &key verbose-p)
   (:documentation "Test the codec operators for a given object/method combination.
@@ -113,11 +109,18 @@
                (apply #'test-class-method-codecs (apply #'amqp:ensure-object channel class initargs)
                       arguments options)))))))
 
-  (:method ((object amqp:object) arguments &rest options)
-    (every #'(lambda (method-name) 
-               (apply #'test-class-method-codecs (amqp:ensure-method object method-name)
-                      (rest (assoc method-name arguments))
-                      options))
+  (:method ((object amqp:object) arguments &rest options
+            &key (verbose-p (eq test:*test-unit-mode* :verbose)))
+    (every #'(lambda (method-name)
+               (let ((method-entry (assoc method-name arguments)))
+                 (cond (method-entry
+                        (apply #'test-class-method-codecs (amqp:ensure-method object method-name)
+                               (rest method-entry)
+                               options))
+                       (t
+                        (when verbose-p
+                          (format *trace-output* "No test entry for class method ~s." method-name))
+                        nil))))
            (class-method-names object)))
 
   (:method ((method amqp:method) arguments &key (verbose-p (eq test:*test-unit-mode* :verbose)))
@@ -125,9 +128,10 @@
     (apply 'call-with-encoded-arguments
            #'(lambda (frame object method)
                (call-with-decoded-arguments #'(lambda (object method &rest decoded-arguments)
-                                                (declare (ignore object method))
                                                 (when verbose-p
-                                                  (format *trace-output* "~&tcmc: original ~s~%~7tdecoded ~s"
+                                                  (format *trace-output* "~&tcmc: ~a.~a: original ~s~%~7tdecoded ~s"
+                                                          (type-of object)
+                                                          (type-of method)
                                                           arguments
                                                           decoded-arguments))
                                                 (equal (loop for (key value) on  decoded-arguments by #'cddr
@@ -152,7 +156,8 @@
    (loopback-enabled
     :initform t
     :accessor connection-loopback-enabled))
-  (:documentation "Each written frame just goes directly back onto the input queue."))
+  (:documentation "A Specialized connection class which simulates broker interaction by mirroring
+    each frames back into transformed input frames."))
 
 (defgeneric print-queues (connection stream)
   (:method ((connection amqp:connection) stream)
@@ -165,7 +170,7 @@
     (format stream "]")))
 
 (defgeneric loopback-frame (output-frame)
-  (:method ((output-frame amqp:output-frame))
+  (:method ((output-frame output-frame))
     (let* ((connection (frame-connection output-frame))
            (input-frame (claim-input-frame connection)))
       (rotatef (slot-value input-frame 'header) (slot-value output-frame 'header))
@@ -414,7 +419,7 @@
                    ;; there is no intrinsic response
                    (amqp:publish basic :exchange exchange)
                    ;; clear the respose: get-ok,header.body
-                   (setf (device-state channel) amqps:use-channel.body.input)
+                   (setf (device-state channel) amqp.s:use-channel.body.input)
                    (dotimes (i 3)       ; command, header, body
                      (command-case (channel)
                        (t ((class t) &rest args)
