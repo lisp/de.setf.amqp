@@ -95,6 +95,7 @@
     "Given a pathname source, given a directory, iterate over the xml
  specification files and generate the source for each. If it is an xml file,
  parse it accordingly, and generate the source from that model."
+
     (cond  ((directory-pathname-p source)
             (when verbose-p
               (format *trace-output* "~&; generate AMQP definitions~%;;;~:[ from ~a to ~a~; in ~a~]"
@@ -171,7 +172,7 @@
             (format destination "~%~%(eval-when (:compile-toplevel :load-toplevel :execute)~%  (macrolet ((ensure-export (x) `(export (intern ,(string x) :~a) :~a))) ~{~%    (ensure-export #:~a)~}))"
                     package package
                     (sort version-exports #'string-lessp :key #'string)))
-          (format destination "~%~%(pushnew ~s *supported-versions*)" version)
+
           #+(or )
           (progn ;; these are defined in abstract-classes.lisp to permit use of
                  ;; the object class as the mixin there, rather than requiring

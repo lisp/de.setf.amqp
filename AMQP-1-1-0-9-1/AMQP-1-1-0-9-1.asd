@@ -29,17 +29,17 @@
   :components ((:file "package")
                (:file "data-wire-coding")
                (:file "abstract-classes")
-               (:file "classes"))
-
+               (:file "classes")
+               (:file "device-level"))
   :description
   "This is the sub-library for AMQP/TCP 0.9r1.
 
- For notes abot 0.9r1, see the protocol spec[1] and various posts[2]
+ For notes about 0.9r1, see the protocol spec[1] and various posts[2]
 
  -------
- [1] https://www.amqp.org/confluence/display/AMQP/AMQP+Specification
+ [1]: https://www.amqp.org/confluence/display/AMQP/AMQP+Specification
 
- [2] http://dev.rabbitmq.com/wiki/Amqp08To091")
+ [2]: http://dev.rabbitmq.com/wiki/Amqp08To091")
 
 
 

@@ -196,7 +196,6 @@
     (ensure-export #:tx.select)
     (ensure-export #:tx.select-ok)))
 
-(pushnew :amqp-1-1-0-8-0 *supported-versions*)
 
 ;;; class: connection [id method-names]
 ;;;   connection.start [version-major version-minor server-properties mechanisms locales]
@@ -211,7 +210,7 @@
 ;;;   connection.close [reply-code reply-text class-id method-id]
 ;;;   connection.close-ok
 
-(def-amqp-class amqp-1-1-0-8-0:connection (amqp-1-1-0-8-0:class amqp:connection)
+(def-amqp-class amqp-1-1-0-8-0:connection (amqp-1-1-0-8-0:object amqp:connection)
   ((id :initform 10 :allocation :class)
    (method-names :initform
     '(amqp:start amqp:start-ok amqp:secure amqp:secure-ok amqp:tune amqp:tune-ok amqp:open amqp:open-ok amqp:redirect
@@ -643,7 +642,7 @@
 ;;;   channel.close [reply-code reply-text class-id method-id]
 ;;;   channel.close-ok
 
-(def-amqp-class amqp-1-1-0-8-0:channel (amqp-1-1-0-8-0:class amqp:channel)
+(def-amqp-class amqp-1-1-0-8-0:channel (amqp-1-1-0-8-0:object amqp:channel)
   ((id :initform 20 :allocation :class)
    (method-names :initform '(amqp:open amqp:open-ok amqp:flow amqp:flow-ok amqp:alert amqp:close amqp:close-ok)
     :allocation :class))
@@ -784,7 +783,7 @@
 ;;;   access.request [realm exclusive passive active write read]
 ;;;   access.request-ok [ticket]
 
-(def-amqp-class amqp-1-1-0-8-0:access (amqp-1-1-0-8-0:class amqp:access)
+(def-amqp-class amqp-1-1-0-8-0:access (amqp-1-1-0-8-0:object amqp:access)
   ((id :initform 30 :allocation :class) (method-names :initform '(amqp:request amqp::request-ok) :allocation :class))
   ()
   ((realm :initform (field-type-initform realm amqp-1-1-0-8-0::path) :type amqp-1-1-0-8-0::path :documentation
@@ -904,7 +903,7 @@
 ;;;   exchange.delete [ticket exchange if-unused no-wait]
 ;;;   exchange.delete-ok
 
-(def-amqp-class amqp-1-1-0-8-0:exchange (amqp-1-1-0-8-0:class amqp:exchange)
+(def-amqp-class amqp-1-1-0-8-0:exchange (amqp-1-1-0-8-0:object amqp:exchange)
   ((id :initform 40 :allocation :class)
    (method-names :initform '(amqp:declare amqp:declare-ok amqp:delete amqp:delete-ok) :allocation :class))
   ()
@@ -1178,7 +1177,7 @@
 ;;;   queue.delete [ticket queue if-unused if-empty no-wait]
 ;;;   queue.delete-ok [message-count]
 
-(def-amqp-class amqp-1-1-0-8-0:queue (amqp-1-1-0-8-0:class amqp:queue)
+(def-amqp-class amqp-1-1-0-8-0:queue (amqp-1-1-0-8-0:object amqp:queue)
   ((id :initform 50 :allocation :class)
    (method-names :initform
     '(amqp:declare amqp:declare-ok amqp:bind amqp:bind-ok amqp:purge amqp:purge-ok amqp:delete amqp:delete-ok)
@@ -1652,7 +1651,7 @@
 ;;;   basic.reject [delivery-tag requeue]
 ;;;   basic.recover [requeue]
 
-(def-amqp-class amqp-1-1-0-8-0:basic (amqp-1-1-0-8-0:class amqp:basic)
+(def-amqp-class amqp-1-1-0-8-0:basic (amqp-1-1-0-8-0:object amqp:basic)
   ((id :initform 60 :allocation :class)
    (method-names :initform
     '(amqp:qos amqp:qos-ok amqp:consume amqp:consume-ok amqp:cancel amqp:cancel-ok amqp:publish amqp:return
@@ -2235,7 +2234,7 @@
 ;;;   file.ack [delivery-tag multiple]
 ;;;   file.reject [delivery-tag requeue]
 
-(def-amqp-class amqp-1-1-0-8-0:file (amqp-1-1-0-8-0:class amqp:file)
+(def-amqp-class amqp-1-1-0-8-0:file (amqp-1-1-0-8-0:object amqp:file)
   ((id :initform 70 :allocation :class)
    (method-names :initform
     '(amqp:qos amqp:qos-ok amqp:consume amqp:consume-ok amqp:cancel amqp:cancel-ok amqp:open amqp:open-ok amqp::stage
@@ -2802,7 +2801,7 @@
 ;;;   stream.return [reply-code reply-text exchange routing-key]
 ;;;   stream.deliver [consumer-tag delivery-tag exchange queue]
 
-(def-amqp-class amqp-1-1-0-8-0:stream (amqp-1-1-0-8-0:class amqp:stream)
+(def-amqp-class amqp-1-1-0-8-0:stream (amqp-1-1-0-8-0:object amqp:stream)
   ((id :initform 80 :allocation :class)
    (method-names :initform
     '(amqp:qos amqp:qos-ok amqp:consume amqp:consume-ok amqp:cancel amqp:cancel-ok amqp:publish amqp:return
@@ -3185,7 +3184,7 @@
 ;;;   tx.rollback
 ;;;   tx.rollback-ok
 
-(def-amqp-class amqp-1-1-0-8-0:tx (amqp-1-1-0-8-0:class amqp:tx)
+(def-amqp-class amqp-1-1-0-8-0:tx (amqp-1-1-0-8-0:object amqp:tx)
   ((id :initform 90 :allocation :class)
    (method-names :initform '(amqp:select amqp:select-ok amqp:commit amqp:commit-ok amqp:rollback amqp:rollback-ok)
     :allocation :class))
@@ -3241,7 +3240,7 @@
 ;;;   dtx.start [dtx-identifier]
 ;;;   dtx.start-ok
 
-(def-amqp-class amqp-1-1-0-8-0:dtx (amqp-1-1-0-8-0:class amqp:dtx)
+(def-amqp-class amqp-1-1-0-8-0:dtx (amqp-1-1-0-8-0:object amqp:dtx)
   ((id :initform 100 :allocation :class)
    (method-names :initform '(amqp:select amqp:select-ok amqp:start amqp:start-ok) :allocation :class))
   ()
@@ -3294,21 +3293,21 @@
 ;;; class: tunnel [id method-names headers proxy-name data-name durable broadcast]
 ;;;   tunnel.request [meta-data]
 
-(def-amqp-class amqp-1-1-0-8-0:tunnel (amqp-1-1-0-8-0:class amqp:tunnel)
+(def-amqp-class amqp-1-1-0-8-0:tunnel (amqp-1-1-0-8-0:object amqp:tunnel)
   ((id :initform 110 :allocation :class) (method-names :initform '(amqp:request) :allocation :class))
   ()
   ((headers :initform (field-type-initform headers amqp-1-1-0-8-0::table) :type amqp-1-1-0-8-0::table :documentation
-    "Message header field table")
+            "Message header field table")
    (proxy-name :initform (field-type-initform proxy-name amqp-1-1-0-8-0::shortstr) :type amqp-1-1-0-8-0::shortstr
-    :documentation "The identity of the tunnelling proxy")
+               :documentation "The identity of the tunnelling proxy")
    (data-name :initform (field-type-initform data-name amqp-1-1-0-8-0::shortstr) :type amqp-1-1-0-8-0::shortstr
-    :documentation "The name or type of the message being tunnelled")
+              :documentation "The name or type of the message being tunnelled")
    (durable :initform (field-type-initform durable amqp-1-1-0-8-0::octet) :type amqp-1-1-0-8-0::octet :documentation
-    "The message durability indicator")
+            "The message durability indicator")
    (broadcast :initform (field-type-initform broadcast amqp-1-1-0-8-0::octet) :type amqp-1-1-0-8-0::octet
-    :documentation "The message broadcast mode"))
-  ((meta-data :initform (field-type-initform meta-data amqp-1-1-0-8-0::table) :type amqp-1-1-0-8-0::table
-    :documentation "meta data for the tunnelled block
+              :documentation "The message broadcast mode")
+   (meta-data :initform (field-type-initform meta-data amqp-1-1-0-8-0::table) :type amqp-1-1-0-8-0::table
+              :documentation "meta data for the tunnelled block
 
  This field table holds arbitrary meta-data that the sender needs
  to pass to the recipient."))
@@ -3344,10 +3343,10 @@
 ;;;   test.content
 ;;;   test.content-ok [content-checksum]
 
-(def-amqp-class amqp-1-1-0-8-0:test (amqp-1-1-0-8-0:class amqp:test)
+(def-amqp-class amqp-1-1-0-8-0:test (amqp-1-1-0-8-0:object amqp:test)
   ((id :initform 120 :allocation :class)
    (method-names :initform
-    '(amqp::integer amqp::integer-ok amqp:string amqp::string-ok amqp:table amqp::table-ok amqp:content
+    '(amqp::integer amqp::integer-ok amqp:string amqp::string-ok amqp:table amqp::table-ok amqp::content
       amqp::content-ok)
     :allocation :class))
   ()
@@ -3577,7 +3576,7 @@
  The result of the tested string operation."))
   (:documentation "roles: client MUST; server MUST."))
 
-(def-amqp-method (amqp-1-1-0-8-0:test amqp:content) (amqp::test-content amqp-1-1-0-8-0:method)
+(def-amqp-method (amqp-1-1-0-8-0:test amqp::content) (amqp::test-content amqp-1-1-0-8-0:method)
   ((id :initform 40))
   ()
   (:documentation "roles: client MUST; server MUST."))

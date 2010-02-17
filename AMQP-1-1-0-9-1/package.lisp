@@ -20,8 +20,9 @@
   If not, see the GNU [site](http://www.gnu.org/licenses/)."))
 
 (defpackage :amqp-1-1-0-9-1
-  (:documentation "Comprises the names for entities particular to version
- AMQP-TCP-0.9.1 of the protocol")
+  (:documentation "Comprises the core names for entities particular to version
+ AMQP-TCP-0.9.1 of the protocol. The names for generated object and method classes are
+ added to the package by the version-specific `classes.lisp` file.")
   (:use)
   (:export
    :channel

@@ -307,25 +307,32 @@
   (:nicknames :amqp.u)
   (:import-from :de.setf.amqp :*log-level*)
   (:export
-   *log-level*
+   :*log-level*
+   :*version-headers*
+   :12-byte-header-input-frame
+   :12-byte-header-output-frame
+   :7-byte-header-input-frame
+   :7-byte-header-output-frame
+   :8-byte-header-input-frame
+   :8-byte-header-output-frame
    :channel-condition
    :channel-error
    :channel-flow-condition
    :channel-flow-start-condition
    :channel-flow-stop-condition
    :connection-error
-   :queue
-   :dequeue
-   :enqueue
    :collection-empty-p
    :collection-size
    :class-mime-type
    :class-properties
    :channel-ticket
    :channel-realm
+   :dequeue
+   :enqueue
    :invalid-state-error
    :method-arguments
-))
+   :queue
+   ))
 
 (defpackage :de.setf.amqp.implementation
   (:nicknames :amqp.i)

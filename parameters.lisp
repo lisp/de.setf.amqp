@@ -31,6 +31,11 @@
 
 (defvar amqp:*default-version* :amqp-1-1-0-9-1)
 
+(defvar amqp.u:*version-headers* ()
+  "An a-list which maps version inticator keywords to protocol version header buffers.
+ The initial value is nil. Each loaded version sets its own header.")
+
+
 (defvar amqp:*timestamp-epoch* (date:|yyyyMMddTHHmmssZZ| "19700101T00000000"))
 
 (defconstant +string-element-type+ 'character)
@@ -56,8 +61,6 @@
 
 (defparameter *max-channels* 256
   "The upper bounds on the channel count per connection.")
-
-(defvar *supported-versions* ())
 
 (defparameter *connection-classes* ()
   "Set by amqp:initialize to a list of defined amqp:connection specializations,

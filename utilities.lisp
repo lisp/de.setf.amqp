@@ -112,6 +112,27 @@
 ;;; header. The symbol name comprises the initial 4-byte protocol identifier 
 ;;; and the class, instance, and major/minor version numbers, each separated
 ;;; by a '-'
+;;; nb. the structural relation between the parsed version id and the keyword
+;;; does not, in practice correspond to the relation between version keywords
+;;; and the connection protocol headers. (see )
+;;; this relation is recorded in amqp.u:*version-headers*
+
+(defun version-protocol-header (version-keyword)
+  (rest (assoc version-keyword amqp.u:*supported-versions* :test #'string-equal)))
+
+(defun protocol-header-version (protocol-header)
+  (first (rassoc protocol-header amqp.u:*supported-versions* :test #'equalp)))
+
+(defun (setf version-protocol-header) (header version-keyword)
+  (assert (typep header '(vector t 8)) ()
+          "Invalid version header: ~s." header)
+  (let ((entry (assoc version-keyword amqp.u:*supported-versions* :test #'string-equal)))
+    (cond (entry
+           (setf (rest entry) header))
+          (t
+           (setq amqp.u:*supported-versions*
+                 (acons version-keyword header amqp.u:*supported-versions*))
+           header))))
 
 (defun make-version-keyword (&key (name :amqp)
                                   (class 1) (instance 1)
@@ -138,15 +159,29 @@
       (cons (intern name :keyword) (mapcar #'parse-integer numbers)))))
 
 
-(defun version-lessp (version1 version2)
-  "Return TRUE iff VERSION1 is less than VERSION2"
-  (map nil #'(lambda (e1 e2)
-               (when (and (numberp e1) (numberp e2))
+(defgeneric version-lessp (version1 version2)
+  (:documentation "Return TRUE iff VERSION1 is less than VERSION2.
+ Accepts version indicators as keywords and as parsed lists.
+ Requres the scheme to agree and ignores the protocol class and instance,
+ to compare just major, minor, and revision numbers.")
+
+  (:method ((version1 symbol) (version2 t))
+    (version-lessp (parse-version-keyword version1) version2))
+
+  (:method ((version1 t) (version2 symbol))
+    (version-lessp version1 (parse-version-keyword version2)))
+
+  (:method ((version1 cons) (version2 cons))
+    (assert (and (symbolp (first version1)) (eq (first version1) (first version2))) ()
+            "Invalid version comparison: ~s ~s" version1 version2)
+    (map nil #'(lambda (e1 e2)
+                 (assert (and (numberp e1) (numberp e2)) ()
+                         "Invalid version comparison: ~s ~s" version1 version2)
                  (cond ((< e1 e2)
                         (return-from version-lessp t))
                        ((> e1 e2)
-                        (return-from version-lessp nil)))))
-       version1 version2))
+                        (return-from version-lessp nil))))
+         (cdddr version1) (cdddr version2))))
 
 
 
@@ -170,44 +205,6 @@
       (collect-subclasses (find-class 'amqp:object))
       (setq *connection-classes* (sort *connection-classes* #'version-lessp
                                        :key #'class-protocol-version)))))
-
-        
-
-#+ignore
-(defgeneric amqp:find-protocol-class (abstract-class version &key if-does-not-exist)
-  (:documentation "GIven an abstract protocol class and a version,
- return the most specialized class with the highest matching version.")
-
-  (:method ((abstract-class symbol) version &rest args)
-    (apply #'amqp:find-protocol-class (find-class abstract-class) version args))
-
-  (:method ((instance amqp:object) version &rest args)
-    (apply #'amqp:find-protocol-class (class-of instance) version args))
-
-  (:method ((abstract-class class) version &key (if-does-not-exist :error))
-    (let ((found nil))
-      (labels ((walk-subclasses (class)
-                 (when (and (typep class 'amqp:class-class)
-                            (null (closer-mop:class-direct-subclasses class)))
-                   (unless (version-lessp version (class-protocol-version class))
-                     (cond ((null found)
-                            (setf found class))
-                           ((equalp (class-protocol-version found)
-                                    (class-protocol-version class))
-                            ;; replace the more abstract with the more specific
-                            (unless (subtypep (class-name class) (class-name found))
-                              (warn "duplicate protocol implementations for version: ~s"
-                                    (class-protocol-version found)))
-                            (setf found class))
-                           ((version-lessp (class-protocol-version found)
-                                           (class-protocol-version class))
-                            (setf found class)))))
-                 (map nil #'walk-subclasses (closer-mop:class-direct-subclasses class))))
-        (walk-subclasses abstract-class)
-        (or found
-            (ecase if-does-not-exist
-              ((nil) nil)
-              (:error (error "no protocol implementation for version: ~s" version))))))))
 
 
 

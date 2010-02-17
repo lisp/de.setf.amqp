@@ -64,9 +64,8 @@
 
 
 
+(defun amqp-version-p (x) (assoc x amqp.u:*supported-versions*))
 
-
-(defun amqp-version-p (x) (member x *supported-versions*))
 (deftype amqp:version () '(satisfies amqp-version-p))
 
 
@@ -135,7 +134,7 @@
    (protocol-version
     :initform *default-version* :allocation :class
     :reader class-protocol-version)
-   #+(or )                              ; supplanted by spcific slots
+   #+(or )                              ; supplanted by specific slots
    (protocol-instances
     :initform (make-hash-table :test 'equal)
     :reader class-protocol-instances
@@ -293,12 +292,12 @@
    (realm
     :initform nil :initarg :realm
     :reader amqp.u:channel-realm
-    :documentation "SHould the protocol support/reauire realms, the channel negotiates access
+    :documentation "Should the protocol support/reauire realms, the channel negotiates access
  as a late step in the device-open procedure and bind both the realm and the tick for future use.
  The channel's realm comprises the realm proper +value exclusive passive active write read")
    (ticket
     :initform nil :initarg :ticket
-    :reader amqp.u:channel-ticket
+    :accessor amqp.u:channel-ticket
     :documentation "Should the protocol support/reauire realms, the channel negotiates access
  as a late step in the device-open procedure and bind both the realm and the tick for future use.")   
    (content-object
@@ -391,6 +390,20 @@
     :reader connection-protocol-version
     :documentation "Provide a connection- accessor and also a default version for the
  abstract class, for use to start the negotiation process.")
+   (input-frame-class
+    :initarg :input-frame-class
+    :reader connection-input-frame-class
+    :type symbol
+    :documentation "Specifies the class to use to decode wire-level frames.
+     The default value is specific per protocol version. each is wrapped around
+     an input data buffer and header to control the decoding process.")
+   (output-frame-class
+    :initarg :output-frame-class
+    :reader connection-output-frame-class
+    :type symbol
+    :documentation "Specifies the class to use to encode wire-level frames.
+     The default value is specific per protocol version. These are wrapped around
+     and output data buffer and header to control the encoding process.")
    (amqp::server-properties
     :initform nil
     :accessor amqp:connection-server-properties)
@@ -490,11 +503,23 @@
 (defgeneric connection-class-name-class-code (connection class-name)
   )
 
+(defgeneric class-method-code-method-name (class method-code)
+  )
+
 (defgeneric class-method-name-method-code (class method-name)
   )
 
-(defgeneric class-method-code-method-name (class method-code)
-  )
+(defgeneric connection-method-code-method-name (connection class method-code)
+  (:method ((connection amqp:connection) (class-code integer) (method-name t))
+    (connection-method-code-method-name connection
+                                        (connection-class-code-class-name connection class-code)
+                                        method-name)))
+
+(defgeneric connection-method-name-method-code (connection class method-name)
+  (:method ((connection amqp:connection) (class-code integer) method)
+    (connection-method-name-method-code connection
+                                        (connection-class-code-class-name connection class-code)
+                                        method)))
 
 
 (defgeneric class-find-object-class (class class-class-designator)
@@ -855,8 +880,6 @@
   (assert-argument-type initilialize-instance connection amqp:connection)
                         
   (apply #'call-next-method instance
-         :input-channel connection
-         :output-channel connection
          :channel instance
          :context connection
          :connection connection
@@ -1105,7 +1128,8 @@
           (unless (zerop (length host))
             (setf-device-uri uri channel)
             (amqp:open channel)
-            #+(or )                       ; don't do this automatically. maybe in initialize instance
+            #+(or ) ; don't do this here - maybe in initialize instance
+                    ; an r8.0 channel need also to get a ticket first, which it would need to pass
             (let ((exchange (uri-exchange uri))
                   (queue (uri-queue uri))
                   (object-path (uri-path uri))
@@ -1301,12 +1325,12 @@
  This is specialized for input, respective output frames to return the
  frame back to the respective free pool.")
 
-  (:method ((frame amqp:input-frame))
+  (:method ((frame input-frame))
     (when (frame-connection frame)
       (setf-frame-channel-number 0 frame))
     (enqueue frame (device-free-input-frames (frame-connection frame))))
 
-  (:method ((frame amqp:output-frame))
+  (:method ((frame output-frame))
     (when (frame-connection frame)
       (setf-frame-channel-number 0 frame)
     (enqueue frame (device-free-output-frames (frame-connection frame))))))
@@ -1328,7 +1352,13 @@
 
   (:method ((channel amqp:channel) &rest args)
     (declare (dynamic-extent args))
-    (apply #'make-input-frame (channel-connection channel) args)))
+    (apply #'make-input-frame (channel-connection channel) args))
+
+  (:method ((connection amqp:connection) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-instance (connection-input-frame-class connection)
+         :connection connection
+         args)))
 
 
 (defgeneric claim-input-frame (device)
@@ -1385,10 +1415,10 @@
 (defgeneric put-read-frame (connection frame)
   (:documentation "Add the frame to the read frame queue.")
   
-  (:method ((connection amqp:connection) (frame amqp:input-frame))
+  (:method ((connection amqp:connection) (frame input-frame))
     (enqueue frame (device-read-frames connection)))
   
-  (:method ((connection amqp:channel) (frame amqp:input-frame))
+  (:method ((connection amqp:channel) (frame input-frame))
     (enqueue frame (device-read-frames connection))))
 
 
@@ -1402,7 +1432,13 @@
 
   (:method ((channel amqp:channel) &rest args)
     (declare (dynamic-extent args))
-    (apply #'make-output-frame (channel-connection channel) args)))
+    (apply #'make-output-frame (channel-connection channel) args))
+
+  (:method ((connection amqp:connection) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-instance (connection-output-frame-class connection)
+         :connection connection
+         args)))
 
 
 (defgeneric claim-output-frame (connection)
@@ -1434,10 +1470,10 @@
   (:documentation "Place an encoded frame in the output queue. If the queue is empty.
  write through. If the frame is written, release it.")
 
-  (:method ((channel amqp:channel) (frame amqp:output-frame))
+  (:method ((channel amqp:channel) (frame output-frame))
     (put-encoded-frame (channel-connection channel) frame))
   
-  (:method ((connection amqp:connection) (frame amqp:output-frame))
+  (:method ((connection amqp:connection) (frame output-frame))
     (flet ((write-encoded-frames ()
              (do ((frame (dequeue (device-encoded-frames connection) :if-empty nil)
                          (dequeue (device-encoded-frames connection) :if-empty nil)))
@@ -1518,3 +1554,41 @@
         (assert (find 'amqp:object (closer-mop:class-precedence-list found) :key #'class-name) ()
                 "Class is not a protocol class: ~s." class-name)
         found))))
+
+
+#+(or )  ;; a version which worked by searching class specializations...
+(defgeneric amqp:find-protocol-class (abstract-class version &key if-does-not-exist)
+  (:documentation "GIven an abstract protocol class and a version,
+ return the most specialized class with the highest matching version.")
+
+  (:method ((abstract-class symbol) version &rest args)
+    (apply #'amqp:find-protocol-class (find-class abstract-class) version args))
+
+  (:method ((instance amqp:object) version &rest args)
+    (apply #'amqp:find-protocol-class (class-of instance) version args))
+
+  (:method ((abstract-class class) version &key (if-does-not-exist :error))
+    (let ((found nil))
+      (labels ((walk-subclasses (class)
+                 (when (and (typep class 'amqp:class-class)
+                            (null (closer-mop:class-direct-subclasses class)))
+                   (unless (version-lessp version (class-protocol-version class))
+                     (cond ((null found)
+                            (setf found class))
+                           ((equalp (class-protocol-version found)
+                                    (class-protocol-version class))
+                            ;; replace the more abstract with the more specific
+                            (unless (subtypep (class-name class) (class-name found))
+                              (warn "duplicate protocol implementations for version: ~s"
+                                    (class-protocol-version found)))
+                            (setf found class))
+                           ((version-lessp (class-protocol-version found)
+                                           (class-protocol-version class))
+                            (setf found class)))))
+                 (map nil #'walk-subclasses (closer-mop:class-direct-subclasses class))))
+        (walk-subclasses abstract-class)
+        (or found
+            (ecase if-does-not-exist
+              ((nil) nil)
+              (:error (error "no protocol implementation for version: ~s" version))))))))
+

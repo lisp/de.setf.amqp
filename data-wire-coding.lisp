@@ -1280,8 +1280,12 @@ In addition compound buffer accessors are defined for the types
   (def-vbinary-accessors 16)
   (def-vbinary-accessors 32))
 
+;;; these two manifest an unrealistic structural relation between the version elements and
+;;; the protocol headers. in fact, the relation is conventional and is recorded in
+;;; amqp.u:*supported-versions* by each version as it loads.
 
-
+#(or )
+(progn
 (defgeneric buffer-protocol-header (buffer)
   (:documentation "Extract a protocol header from a buffer.
  Return it as as keyword. (see make-version-keyword)")
@@ -1292,7 +1296,6 @@ In addition compound buffer accessors are defined for the types
                           :instance (aref buffer 5)
                           :major (aref buffer 6)
                           :minor (aref buffer 7))))
-
 (defgeneric (setf buffer-protocol-header) (header buffer)
   (:documentation "Store a protocol header into a buffer.")
 
@@ -1305,6 +1308,23 @@ In addition compound buffer accessors are defined for the types
     (map-into buffer #'char-code (string (first header)))
     (replace buffer (rest header) :start1 4 :end2 4)
     header))
+)
 
 
+(defun (setf buffer-protocol-header-version) (version buffer)
+  "Store a protocol header into a buffer.
+ Accept a version keyword and set the version header as registered in the list of supported versions."
 
+  (replace buffer (or (version-protocol-header version) (error "Invalid version : ~s." version)) :start1 0 :end1 8)
+  version)
+
+
+(defun buffer-protocol-header-version (buffer &optional (error-p t))
+  "Extract a protocol header from a buffer.
+ Return the respective version keyword as registered in the list of supported versions."
+
+  (cond ((protocol-header-version (if (= (length buffer) 8) buffer (setf buffer (subseq buffer 0 8)))))
+        (error-p
+         (error "Invalid version : ~s." buffer))
+        (t
+         nil)))

@@ -139,7 +139,6 @@
     (ensure-export #:tx.select)
     (ensure-export #:tx.select-ok)))
 
-(pushnew :amqp-1-1-0-9-1 *supported-versions*)
 
 ;;; class: connection [id method-names]
 ;;;   connection.start [version-major version-minor server-properties mechanisms locales]

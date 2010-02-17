@@ -107,8 +107,7 @@
 (defclass amqp-socket-device (amqp-device)
   ((socket
     :initform nil
-    :accessor device-socket)))
-
+    :reader device-socket)))
 
 
 
@@ -122,6 +121,7 @@
            :content-type (setf (device-content-type instance) content-type)
            initargs)
     (call-next-method)))
+
 
 (defgeneric (setf device-content-type) (type device)
   (:method ((type mime:*/*) (device amqp-device))
@@ -218,6 +218,8 @@
   (setf (stream-output-handle device) nil))
 
 
+
+
 (defmethod device-open ((device amqp-socket-device) #-sbcl (slots t) options)
   (if (or (stream-input-handle device)
           (stream-output-handle device))
@@ -230,18 +232,14 @@
                                 (direction :io)
                                 &allow-other-keys)
                           options
-        (assert (member direction '(:input :output :io)) ()
+        (assert (member direction '(:probe :io)) ()
                 "Invalid diection: ~s." direction)
         (when (call-next-method)
           (let ((opened-socket (usocket:socket-connect remote-host
                                                        remote-port
                                                        :element-type 'unsigned-byte)))
               (ecase direction
-                ((:input :output :io)
-                 (when (member direction '(:input :io))
-                   (setf (stream-input-handle device) (usocket:socket-stream opened-socket)))
-                 (when (member direction '(:output :io))
-                   (setf (stream-output-handle device) (usocket:socket-stream opened-socket)))
+                (:io
                  (setf (device-socket device) opened-socket)
                  #+mcl
                  (ccl:terminate-when-unreachable device))
@@ -252,16 +250,22 @@
 
 (defmethod device-close ((device amqp-socket-device) (abort t))
   (call-next-method)
-  (let ((in (stream-input-handle device))
-        (out (stream-output-handle device)))
-    (when (and in (open-stream-p in))
-      (usocket:socket-close in))
-    (when (and (not (eq in out)) out (open-stream-p out))
-      (usocket:socket-close out))
-    (setf (stream-input-handle device) nil)
-    (setf (stream-output-handle device) nil))
+  (when (device-socket device)
+    (usocket:socket-close (device-socket device))
+    (setf (device-socket device) nil))
   #+mcl
     (ccl:cancel-terminate-when-unreachable device))
+
+
+(defmethod (setf device-socket) ((socket null) (device amqp-socket-device))
+  (setf (slot-value device 'socket) nil)
+  (setf (stream-input-handle device) nil)
+  (setf (stream-output-handle device) nil))
+
+(defmethod (setf device-socket) ((socket usocket:stream-usocket) (device amqp-socket-device))
+  (setf (slot-value device 'socket) socket)
+  (setf (stream-input-handle device) (usocket:socket-stream socket))
+  (setf (stream-output-handle device) (usocket:socket-stream socket)))
 
 
 #+mcl

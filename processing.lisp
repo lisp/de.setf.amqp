@@ -162,7 +162,7 @@ processing. On the other hand, it impedes streaming.
  which the process owns, are processed in the standard pipeline, while those for for other processes, are
  queued for later processing, for the respective channel's thread to process on its own.")
   
-  (:method ((connection amqp:connection) (frame amqp:input-frame))
+  (:method ((connection amqp:connection) (frame input-frame))
     "Determine the channel - which must exist for read framed, and
  the frame class, the dispatch for those as well as the connection."
     
@@ -175,7 +175,7 @@ processing. On the other hand, it impedes streaming.
            (decoder (frame-decoder frame)))
       (process-typed-frame channel decoder frame)))
   
-  (:method ((channel amqp:channel) (frame amqp:input-frame))
+  (:method ((channel amqp:channel) (frame input-frame))
     ;; use an autonomous decoder to specialize initial processing
     (let* ((decoder (frame-decoder frame)))
       (process-typed-frame channel decoder frame))))
@@ -369,7 +369,9 @@ processing. On the other hand, it impedes streaming.
 (defmethod send-method ((method t) (class amqp:object) &rest args)
   (declare (dynamic-extent args))
   (flet ((write-encoded-method (frame class method)
-           (amqp:log :debug class "send-method: ~a  ~a" method frame) 
+           (amqp:log :debug class "send-method: ~a  ~a" method frame)
+           ;; nb. this places the constraint on connections, that they have their channel-0 bound
+           ;; before they send any command to the broker.
            (put-encoded-frame (object-channel class) frame)))
     (declare (dynamic-extent #'write-encoded-method))
     (amqp:log :debug class "send-method: ~a . ~s" method args)

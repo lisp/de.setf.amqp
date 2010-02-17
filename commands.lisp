@@ -523,7 +523,10 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
              "The required virtual-host must be a string: ~s" virtual-host)
      (apply #'amqp::send-open class args)
      (command-loop (class)
-       (amqp:open-ok (class) (return-from command-loop)))
+       (amqp:open-ok (class &rest args)
+         (declare (dynamic-extent args))
+         (apply #'amqp:respond-to-open-ok class args)
+         (return-from command-loop)))
      class)
 
    (:method ((class amqp:channel) &rest args)

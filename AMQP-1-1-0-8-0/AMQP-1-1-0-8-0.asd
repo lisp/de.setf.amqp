@@ -29,8 +29,8 @@
   :components ((:file "package")
                (:file "data-wire-coding")
                (:file "abstract-classes")
-               (:file "classes"))
-
+               (:file "classes")
+               (:file "device-level"))
   :description
   "This is the sub-library for AMQP/TCP 0.8r0.")
 

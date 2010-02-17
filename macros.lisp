@@ -199,7 +199,7 @@
          (abstract-version-class (first supers))
          (abstract-protocol-class (second supers))
          (version-package (symbol-package name))
-         (frame-class (cons-symbol version-package :frame))
+         (connection-class (cons-symbol version-package :connection))
          (method-names (second (getf (rest (assoc 'method-names slots)) :initform)))
          (length-var '_::length)
          (buffer-var '_::buffer)
@@ -253,15 +253,9 @@
          (defclass ,name ,supers ,slots ,@options))
        ,@(nreverse exports)
 
-       #+(or )
        (defmethod connection-class-code-class-name ((connection ,connection-class) (class-code (eql ,class-code)))
-         ',name)
+         ',abstract-protocol-class)
 
-       #+(or )
-       (defmethod connection-class-name-class-code ((connection ,connection-class) (class-code (eql ',name)))
-         ,class-code)
-
-       #+(or )
        (defmethod connection-class-name-class-code ((connection ,connection-class) (class-code (eql ',abstract-protocol-class)))
          ,class-code)
 
@@ -273,12 +267,6 @@
        (defmethod amqp:ensure-object ((class ,abstract-version-class) (class-code (eql ,class-code)) &rest args)
          (declare (dynamic-extent args))
          (apply #'amqp:ensure-object class ',abstract-protocol-class args))
-
-       (defmethod frame-class-code-class-name ((frame ,frame-class) (code (eql ,class-code)))
-         ',abstract-protocol-class)
-
-       (defmethod frame-class-name-class-code ((frame ,frame-class) (code (eql ',name)))
-         ,class-code)
 
        #+(or )
        (defmethod class-initialize-class ((_::context-class amqp:object) (_::context ,name) &key
@@ -376,7 +364,7 @@
          (buffer-var (gensym "buffer"))
          (frame-var (gensym "frame"))
          (version-package (symbol-package class))
-         (frame-class (cons-symbol version-package :frame))
+         (connection-class (cons-symbol version-package :connection))
          (class.method-name (cons-symbol version-package class "." method-name))
          (amqp::class (cons-symbol :amqp class))
          (amqp::class.method-name (cons-symbol :amqp class.method-name))
@@ -443,10 +431,14 @@
        (defmethod class-method-name-method-code ((class ,class) (method-name (eql ',amqp:method-name)))
          ,method-code)
        
-       (defmethod frame-method-code-method-name ((frame ,frame-class) (class-name (eql ',amqp::class)) (method-code (eql ,method-code)))
+       (defmethod connection-method-code-method-name ((connection ,connection-class)
+                                                      (class-name (eql ',amqp::class))
+                                                      (method-code (eql ,method-code)))
          ',amqp:method-name)
        
-       (defmethod frame-method-name-method-code ((frame ,frame-class) (class-name (eql ',amqp::class)) (method-code (eql ',amqp:method-name)))
+       (defmethod connection-method-name-method-code ((connection ,connection-class)
+                                                 (class-name (eql ',amqp::class))
+                                                 (method-code (eql ',amqp:method-name)))
          ',method-code)
        
        ;; designators map to the generic name, but return the concrete class

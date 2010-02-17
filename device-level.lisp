@@ -608,7 +608,11 @@ as well as the discussions of the the alternative fu interface.[5]
 (defmethod device-buffer-length ((device amqp:connection))
   "Until the connection has been specialized for the protocol, propose the full frame
  as the buffer size."
-  (connection-frame-size device))
+  (let ((frame-class (connection-input-frame-class device)))
+    (- (connection-frame-size device)
+       (if frame-class
+         (frame-overhead (allocate-instance (find-class frame-class)))
+         0))))
 
 (defmethod device-file-position ((device amqp:connection))
   (device-body-position device))
@@ -648,7 +652,7 @@ as well as the discussions of the the alternative fu interface.[5]
         (version-received nil)
         (byte-zero 0))
     (labels ((negotiation-failed (&optional reason)
-               (error "Connection negotiation failed~@[ (~a)~]: ~s, ~s, ~s"
+               (error "Connection negotiation failed~@[ (~a)~]: requested ~s, class ~s, received ~s"
                       reason
                       version (class-protocol-version connection) version-received))
              (update-connection-class (version-received)
@@ -657,11 +661,22 @@ as well as the discussions of the the alternative fu interface.[5]
                    (negotiation-failed "Unsupported protocol version"))
                  (cond ((eq new-class (class-of connection)))
                        ((eql attempt 1)
-                        (change-class connection new-class))
+                        (change-class connection new-class)
+                        (amqp:log :debug connection "open-connection: updated class to ~s."
+                                  (type-of connection)))
                        (t
-                        (negotiation-failed "Re-negotiation failed to match"))))))
-               
-      (setf (buffer-protocol-header buffer-out) version)
+                        (negotiation-failed "Re-negotiation failed to match")))))
+             (cycle-socket ()
+               (let* ((uri (device-uri connection))
+                      (remote-host (uri-host uri))
+                      (remote-port (or (uri-port uri) *standard-port*)))
+                 (setf (device-socket connection)
+                       (usocket:socket-connect remote-host remote-port 
+                                               :element-type 'unsigned-byte)))))
+      
+      (setf (buffer-protocol-header-version buffer-out) version)
+      (amqp:log :debug connection "open-connection: requesting version: ~s/~s."
+                buffer-out version)
       (write-sequence buffer-out (stream-output-handle connection))
       (force-output (stream-output-handle connection))
       (case (setf byte-zero (read-byte (stream-input-handle connection)))
@@ -672,27 +687,28 @@ as well as the discussions of the the alternative fu interface.[5]
          ;; otherwise close the connection and return the version
          (setf (aref buffer-in 0) #.(char-code #\A))
          (cond ((= 8 (read-sequence buffer-in (stream-input-handle connection) :start 1))
-                ;; (print (list :header (subseq buffer-in 0 8)))
-                (setf version-received (buffer-protocol-header buffer-in))
+                (setf version-received (buffer-protocol-header-version buffer-in nil))
+                (amqp:log :debug connection "open-connection: parsed version: ~s / ~s."
+                          buffer-in version-received)
                 ;; negotiate the protocol
                 (cond (version-received
                        ;; use received versions to specialize the given instance
-                       (unless (eq version-received (class-protocol-version connection))
-                         (negotiation-failed "Changed connection does not support negotiated version"))
-                       ;; if the version matched, connection is open,
-                       ;; otherwise try again
-                       (if (eq version-received version)
-                         version
-                         (open-connection connection :attempt (1+ attempt) :version version-received)))
+                       (update-connection-class version-received)
+                       ;; cycle the socket and retry to connect
+                       (cycle-socket)
+                       (open-connection connection :attempt (1+ attempt) :version version-received))
                       (t
-                       (negotiation-failed "Incomplete protocol header"))))
+                       (negotiation-failed (format nil "Unsupported protocol header: ~a." buffer-in)))))
                (t
                 (negotiation-failed "Incomplete protocol header"))))
         (t
          ;; version accepted w/ immediate connection-open
          ;; still, update to change from abstract to concrete class
+         (amqp:log :debug connection "open-connection: byte-zero: ~s, connection class ~s."
+                   byte-zero (type-of connection))
          (setf version-received version)
          (update-connection-class version)
+
          ;; this had to wait until the connection had been transformed in to a  concrete class
          (let ((frame (claim-input-frame connection)))
            (setf (aref (frame-header frame) 0) byte-zero)
