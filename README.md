@@ -70,7 +70,7 @@ The present tests are limited to
 The library has been built and [probed](file:///examples/examples.lisp) in the following combinations
 
 <table>
-<tr><td>AMQP broker<br/>lisp implementation</td><th>RabbittMQ</th><th>QPID</th></tr>
+<tr><td style='text-align: right;'>AMQP broker<br/>lisp implementation</td><th>RabbittMQ</th><th>QPID</th></tr>
 <tr><th>MCL</th><td>MCL-5.2, RabbitMQ 1.7.1, AMQP-0.8r0</td><td>MCL-5.2, QPID-0.5, AMQP-0.9r1</td></tr>
 <tr><th>CCL</th><td/><td>CCL-1.3, QPID-0.5, AMQP-0.9r1</td></tr>
 <tr><th>SBCL</th><td/><td>SBCL-1.0.35, QPID-0.5, AMQP-0.9r1</td></tr>
