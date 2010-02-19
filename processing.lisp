@@ -651,7 +651,7 @@ processing. On the other hand, it impedes streaming.
                                (dynamic-extent args))
                       ;; the default method returns nil
                       nil)
-                   :specializers #-sbcl '(amqp:channel t t) #+sbcl (mapcar #'find-class '(amqp:channel t t)))
+                   :specializers (mapcar #'find-class '(amqp:channel t t)))
     function))
 
 (defmethod channel-command-handler ((channel amqp:channel))
