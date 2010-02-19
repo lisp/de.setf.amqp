@@ -14,7 +14,8 @@ The system can be built and saved from the command line
 
 Start it with the core
 
-    $ sbcl --core sbcl-amqp.coreThis is SBCL 1.0.35, an implementation of ANSI Common Lisp.
+    $ sbcl --core sbcl-amqp.core
+    This is SBCL 1.0.35, an implementation of ANSI Common Lisp.
     More information about SBCL is available at <http://www.sbcl.org/>.
     
     SBCL is free software, provided as is, with absolutely no warranty.
