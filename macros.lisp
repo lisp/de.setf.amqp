@@ -469,7 +469,7 @@
          (apply #',decoded-operator op class (amqp:ensure-method class ',amqp::class.method-name) buffer
                 args))
        
-       (defmethod call-with-decoded-arguments (op (class ,class) (method ,amqp:method-name) buffer &rest args)
+       (defmethod call-with-decoded-arguments (op (class ,class) (method ,class.method-name) buffer &rest args)
          (declare (dynamic-extent args))
          (apply #',decoded-operator op class method buffer
                 args))
@@ -539,7 +539,7 @@
          (declare (dynamic-extent args))
          (apply #',encoded-operator op class (amqp:ensure-method class ',amqp::method-name) args))
        
-       (defmethod call-with-encoded-arguments (op (class ,class) (method ,amqp:method-name) &rest args)
+       (defmethod call-with-encoded-arguments (op (class ,class) (method ,class.method-name) &rest args)
          (declare (dynamic-extent args))
          (apply #',encoded-operator op class method args))
        
@@ -665,12 +665,12 @@
           (:request
            (setf request option-value
                  request-op (cons-symbol :amqp :request- name)
-                 qualified-request-op (cons-symbol :amqp :channel- request-op)
+                 qualified-request-op (cons-symbol :amqp.i :channel- request-op)
                  send-op (or send-op (cons-symbol :amqp :send- name))))
           (:response
            (setf response option-value
                  response-op (cons-symbol :amqp :respond-to- name)
-                 qualified-response-op (cons-symbol :amqp :channel- response-op)))
+                 qualified-response-op (cons-symbol :amqp.i :channel- response-op)))
           (t
            (error "Option not permitted in command definition: ~s, ~s."
                   keyword name)))))
@@ -695,9 +695,9 @@
                              (declare (dynamic-extent args))
                              (amqp:log* ,request-op class args))
                    (mapcar #'(lambda (method)
-                               (push `(,(cons-symbol nil :channel) amqp:channel)
-                                     (second method))
-                               method)
+                               (destructuring-bind (keyword parameters &rest body) method
+                                 `(,keyword ((amqp:channel amqp:channel) ,@parameters)
+                                   ,@body)))
                            (rest request)))))
 
     (when response-op
@@ -711,12 +711,12 @@
                              (declare (dynamic-extent args))
                              (amqp:log* ,response-op class args))
                     (mapcar #'(lambda (method)
-                               (push `(,(cons-symbol nil :channel) amqp:channel)
-                                     (second method))
-                               method)
+                               (destructuring-bind (keyword parameters &rest body) method
+                                 `(,keyword ((amqp:channel amqp:channel) ,@parameters)
+                                   ,@body)))
                             (rest response)))))
 
-    (setf exports (remove nil (list name send-op response-op request-op qualified-response-op qualified-request-op)))
+    (setf exports (remove nil (list name send-op response-op request-op)))
     (export exports :amqp)
     `(progn (defclass ,name (amqp:method)
               ((name :initform ',name :allocation :class)
