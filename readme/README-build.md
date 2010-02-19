@@ -45,7 +45,8 @@ On OS X, I have observed symbolic registry _finder_ links to fail to work from c
 
 ### Clozure Common Lisp
 
-  * Further instructions are in [README-build-ccl.md](./README-build-ccl.md)
+Further instructions are in [README-build-ccl.md](./README-build-ccl.md)
+
 
 ### hierarchical system names
 
@@ -71,6 +72,7 @@ A nickname is added to each loaded system to augment an unqualified name with a 
 Where the dependencies in a system definition use unqualified cross-references, this fails.
 Thus `alexandria` requires a registry addition to permit the cross-reference from `usocket`.
 
+
 ### logical pathnames
 
 The source and binary file names are expressed as logical pathnames in order that they can be
@@ -88,12 +90,15 @@ In order to update the host translations for a relocaed image
     (asdf:find-system :de.setf.utility)
     (asdf:find-system :de.setf.amqp)
 
+
 ### Macintosh Common Lisp
 
-  * If the `asdf` version includes mandatory output translations, either disable that or
-     otherwise ensure that it does not choke on the default binding for `user-homedir-pathname`.
-  * Further instructions are in [README-build-mcl.md](./README-build-mcl.md)
+If the `asdf` version includes mandatory output translations, either disable that or
+otherwise ensure that it does not choke on the default binding for `user-homedir-pathname`.
+
+Further instructions are in [README-build-mcl.md](./README-build-mcl.md)
+
 
 ### Steel Bank Common Lisp
 
-  * Further instructions are in [README-build-sbcl.md](./README-build-sbcl.md)
+Further instructions are in [README-build-sbcl.md](./README-build-sbcl.md)
