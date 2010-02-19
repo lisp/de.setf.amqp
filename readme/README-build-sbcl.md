@@ -37,4 +37,5 @@ Start it with the core
     
     "SBCL, 1.0.35, de.setf.amqp-20100219T020947Z00"
     * 
-    
+
+A snap-shot core is present in the downloads section.
