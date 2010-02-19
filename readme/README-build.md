@@ -33,7 +33,7 @@ system names:
      The `bordeaux-threads` -> `alexandria` reference is unqualified, and as such, requires additional registration. 
   5. Compile and load as: `(asdf:operate 'asdf:load-op :de.setf.amqp._version_)`
 
-The example initialization [file](./examples/init.lisp) was used for MCL. Contact [me](mailto:james.anderson@setf.de) should any questions arise.
+The example initialization [file](./examples/build-init.lisp) was used for CCL and SBCL. Contact [me](mailto:james.anderson@setf.de) should any questions arise.
 
 ## Notes
 
