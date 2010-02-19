@@ -29,3 +29,4 @@ Start it with the core
     "Clozure Common Lisp, Version 1.4-r13119  (DarwinPPC32), de.setf.amqp-20100218T233140Z00"
     ? 
 
+A snap-shot image is present in the downloads section.
