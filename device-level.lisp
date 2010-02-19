@@ -110,7 +110,7 @@ as well as the discussions of the the alternative fu interface.[5]
         (device-state-var (gensym)))
     `(let ((,device-state-var (device-state ,device)))
        (assert (typep ,device-state-var ',state) ()
-               "~@[~a: ]Required device state ~a is not satisfied by ~a."
+               "~@[~a: ~]Required device state ~a is not satisfied by ~a."
                ',op ',state ,device-state-var))))
 
 
@@ -179,22 +179,19 @@ as well as the discussions of the the alternative fu interface.[5]
                          (assert (eq (stream-direction device) :input) ()
                                  "An exchange must be provided for channel output.")
                          (amqp:declare (amqp:channel.queue device :queue queue)))))))))
-          (setf (device-state device) amqp.s:use-channel)))
-
-         device)))
+          (setf (device-state device) amqp.s:use-channel)
+          device)))
     (amqp.s:use-channel
      (call-next-method))))
 
 
 (defmethod device-close ((device amqp:channel) (abort t))
   "remove the channel from the connection."
-
+  (amqp:log :debug device "Close in state: ~s" (channel-state device))
   (when (open-stream-p device)
     (cond (abort
-           (when (connected-channel-p device)
-             (setf (connection.channel (channel-connection device) :number (channel-number device)) nil))
            (call-next-method))
-          (t
+          (t 
            (let ((initial-state (shiftf (channel-state device) amqp.s:close-channel)))
              (typecase initial-state
                ;; if in use, send the close request, the flush it
@@ -202,11 +199,9 @@ as well as the discussions of the the alternative fu interface.[5]
                 (amqp:request-close device)
                 ;; complete and flush the content.
                 (device-flush device t)))
-             ;; in any case, disassociate
-             (setf (connection.channel (channel-connection device) :number (channel-number device)) nil)
-             (setf-channel-number 0 device)
-             (setf (object-context device) nil)
-             (call-next-method))))))
+             (call-next-method))))
+    ;; in any case disconnect
+    (disconnect-channel (channel-connection device) device)))
 
 
 (defmethod device-read ((device amqp:channel) buffer-arg start end blocking)
@@ -214,7 +209,6 @@ as well as the discussions of the the alternative fu interface.[5]
  the connection manages the actual stream and makes frames available as
  they appear. the specified 'blocking' mode determines whether to
  wait if there is nothing present."
-  
   (assert-device-state device use-channel.body.input device-read)
   (with-slots (buffer buffpos buffer-ptr buf-len body-position body-length) device
     (cond ((< buffer-ptr 0)
@@ -283,7 +277,7 @@ as well as the discussions of the the alternative fu interface.[5]
            (let* ((frame nil))
              (loop (setf frame (get-read-frame device :wait blocking))
                    ;; if non-blocking, maybe no frame
-                   (if frame
+                   (if frame 
                      (cond ((plusp (frame-size frame))
                             (let* ((data (frame-data frame))
                                    (length (frame-size frame)))
@@ -404,7 +398,8 @@ as well as the discussions of the the alternative fu interface.[5]
                   (typecase (device-state device)
                     (amqp.s:use-channel.body.output.chunked
                      ;; if the content was chunked, send a zero-length frame and refert to .output
-                     (amqp:log :debug device "Ending chunking. padding ...")
+                     (amqp:log :debug device "Ending chunking. padding ~d bytes..."
+                               (- body-length body-position))
                      (flush-frame)
                      (setf (device-state device) amqp.s:use-channel.body.output)))
                   ;; now send frames to fill the difference between content-position and
@@ -442,14 +437,19 @@ as well as the discussions of the the alternative fu interface.[5]
   ;;; the end of the body is reached
   (with-slots (decoder buffer buffpos buffer-ptr body-position body-length) device
     (funcall decoder #'(lambda (s) (declare (ignore s)) 0) device)
+    ;; skip over anything already in the buffer
     (setf body-position (+ body-position (- buffer-ptr buffpos)))
     (setf buffpos buffer-ptr)
+    ;; optionally drain pending input
     (unless buffer-only
       ;; flush input
+      (amqp:log :debug device "device-clear-input: drain expected frames: state: ~a, at ~s of ~s"
+                (device-state device) body-position body-length)
       (loop (when (>= body-position body-length)
               (return))
             (unless (plusp (device-read device nil 0 nil t))
-              (return))))
+              (return))
+            (incf body-position buffer-ptr)))
     nil))
 
 
@@ -755,6 +755,8 @@ as well as the discussions of the the alternative fu interface.[5]
            (setf (aref (frame-header frame) 0) byte-zero)
            ;; (print :no-header)
            (read-frame connection frame :start 1)
+           ;; make channel-zero and prime it with the first frame
+           (amqp:connection.channel connection :number 0)
            (put-read-frame connection frame)
            (values version frame)))))))
 
@@ -783,7 +785,7 @@ returned.")
     (command-case (channel)
       (amqp:start ((class amqp:connection) &rest args)
        (setf (connection-state device) amqp.s:open-connection.start)
-       (apply #'amqp:channel-respond-to-start channel device args)
+       (apply #'channel-respond-to-start channel device args)
        t)
       (t ((class t) &rest args)
          (error "Invalid negotiation command: ~s~{ ~s~}." class args)))
@@ -792,15 +794,15 @@ returned.")
       (command-case (channel)
         (amqp:secure ((class amqp:connection) &rest args)
                      (setf (connection-state device) amqp.s:open-connection.secure)
-                     (apply #'amqp:channel-respond-to-secure channel class args)
+                     (apply #'channel-respond-to-secure channel class args)
                      t)
         (amqp:tune ((class amqp:connection) &rest args)
                    (setf (connection-state device) amqp.s:open-connection.tune)
-                   (apply #'amqp:channel-respond-to-tune channel class args)
+                   (apply #'channel-respond-to-tune channel class args)
                    (return))))
 
     (setf (connection-state device) amqp.s:open-connection.host)
-    (amqp:channel-request-open channel device :virtual-host (connection-virtual-host device))
+    (channel-request-open channel device :virtual-host (connection-virtual-host device))
     (setf (connection-state device) amqp.s:use-connection)
     
     device))
@@ -844,31 +846,22 @@ returned.")
  according to the combined channel data type and content type. Combine the header's possibly
  incomplete content type with the channel's to specify the effective decoding.")
 
-  (:method ((channel amqp:channel) &key delivery-tag redelivered exchange routing-key message-count consumer-tag)
+  (:method ((channel amqp:channel) &key body delivery-tag redelivered exchange routing-key message-count consumer-tag)
     (declare (ignore delivery-tag redelivered exchange routing-key message-count consumer-tag))
     (setf (channel-state channel) amqp.s:use-channel.body.input)
+    (assert-argument-type device-read-content body (or null function))
     (let* ((basic (device-read-content-header channel))
            (headers (amqp:basic-headers basic))
            (element-type (getf headers :element-type))
            (package (getf headers :package))
            (mime-type (class-mime-type basic)))
-      (cond (element-type
-             (setf element-type (or (find-symbol element-type package)
-                                    (error "Invalid type x package combination: ~s, ~s."
-                                           element-type package)))
-             (multiple-value-bind (concrete effective-type match-p)
-                                  (canonical-element-type channel element-type
-                                                          (device-element-type channel))
-               (declare (ignore concrete))
-               (assert match-p ()
-                       "Supplied body type is invalid for channel: ~s, ~s"
-                       (getf headers :element-type) (device-element-type channel))
-               (setf element-type effective-type)))
-            (t
-             (setf element-type (device-element-type channel))))
+      ;; element-type in the basic header combines the read values with the channel's content-type
+      (setf element-type (or (find-symbol element-type package)
+                             (error "Invalid type x package combination: ~s, ~s."
+                                    element-type package)))
       (amqp:log :debug channel "device-read-content: in (~s ~s) in state ~s x~s"
                 element-type mime-type (channel-state channel) (device-body-length channel))
-      (device-read-content-body channel element-type mime-type))))
+      (device-read-content-body channel (or body element-type) mime-type))))
 
 
 (defgeneric device-read-content-header (channel )
@@ -907,7 +900,8 @@ returned.")
 
   (:method ((channel amqp:channel) (body-op function) (content-type mime:*/*))
     "Given a the null type, just return the channel as a stream to be read."
-    (funcall body-op channel content-type))
+    (prog1 (funcall body-op channel content-type)
+      (device-clear-input channel nil)))
 
   (:method ((channel amqp:channel) (type (eql 'vector)) (content-type mime:application/octet-stream))
     "Given a the type 'vector, create one and copy the stream content into it."
@@ -994,9 +988,8 @@ returned.")
     ;; transfer element type
     (let* ((basic (apply #'device-write-content-header channel body args)))
 
-      (apply #'device-write-content-body channel body (mime-type basic) args)
-      (device-flush channel t)
-      body)))
+      (prog1 (apply #'device-write-content-body channel body (mime-type basic) args)
+        (device-flush channel t)))))
 
 
 (defgeneric device-write-content-header (channel body
