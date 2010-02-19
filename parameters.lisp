@@ -35,6 +35,8 @@
   "An a-list which maps version inticator keywords to protocol version header buffers.
  The initial value is nil. Each loaded version sets its own header.")
 
+(defvar amqp.u:*version*
+  (load-time-value (format nil "de.setf.amqp-~a" (date:|yyyyMMddTHHmmssZZ| (get-universal-time)))))
 
 (defvar amqp:*timestamp-epoch* (date:|yyyyMMddTHHmmssZZ| "19700101T00000000"))
 
