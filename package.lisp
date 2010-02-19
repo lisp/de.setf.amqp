@@ -79,6 +79,8 @@
    :channel-limit-reached
    :channel-p
    :channel.connection
+   :channel.exchange
+   :channel.queue
    :class-class
    :class-exchange
    :class-headers
@@ -103,6 +105,7 @@
    :connection-forced-error
    :connection-p
    :connection-server-properties
+   :connection.channel
    :connection.exchange
    :connection.queue
    :consume
@@ -205,7 +208,9 @@
    :reject
    :request
    :request
+   :request-get
    :request-ok
+   :request-publish
    :resource-error 
    :response
    :return
@@ -256,6 +261,7 @@
    :wire-length
    :wire-level-type
    :with-commands
+   :with-open-channel
    :CONTENT-TOO-LARGE-ERROR
    :NO-CONSUMERS-ERROR
    :CONNECTION-FORCED-ERROR
@@ -309,6 +315,7 @@
   (:export
    :*log-level*
    :*version-headers*
+   :*version*
    :12-byte-header-input-frame
    :12-byte-header-output-frame
    :7-byte-header-input-frame
@@ -377,13 +384,14 @@
                 :frame-buffer
                 :command-loop
                 :command-case)
-  #+(or mcl ccl)
+  #+ccl
   (:import-from :ccl
                 #:open-stream-p
                 #:stream-clear-input
                 #:stream-clear-output
                 #:stream-direction
                 #:stream-element-type
+                #:stream-eofp
                 #:stream-finish-output
                 #:stream-force-output
                 #:stream-fresh-line
@@ -398,6 +406,7 @@
                 #:stream-unread-char
                 #:stream-read-char
                 #:stream-read-char-no-hang
+                #:stream-read-line
                 #:stream-terpri
                 )
   #+mcl
