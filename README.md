@@ -172,7 +172,7 @@ Once one has the sources and the `asdf` configuration in place, evaluate
     (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-0)
     (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-1)
 
-to load the respective version. The versions intended to be compatible and connections should
+to load the respective version. The versions intend to be compatible and connections should
 negotiate automatically to use the correct implementation.
 Please consult the detailed instructions for the respective [runtime](./readme/README-build.md) for more information.
 
