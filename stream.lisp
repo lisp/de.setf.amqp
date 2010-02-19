@@ -119,38 +119,49 @@
 
 (defmethod stream-peek-char ((stream amqp-device))
   (with-slots (decoder) stream
+    ;; cannot do this manipulating buffer position, as a multi-byte encoding
+    ;; might cross a frame boundary
     (flet ((buffer-extract-byte (stream)
-             (with-slots (buffer buffpos buffer-ptr) stream
+             (with-slots (buffer buffpos buffer-ptr body-position body-length) stream
                (when (or (< buffpos buffer-ptr)
                          (and (not (minusp buffer-ptr))
                               ; resets buff-pos / renews buffer content unless eof
                               (plusp (device-read stream nil 0 nil t))))
-                 (aref buffer buffpos)))))
-      (let ((code (funcall decoder #'buffer-extract-byte stream)))
-        (if code (code-char code) (stream-eof-marker stream))))))
+                 (incf body-position)
+                 (prog1 (aref buffer buffpos)
+                   (incf buffpos))))))
+      (let ((char (funcall decoder #'buffer-extract-byte stream)))
+        (cond (char
+               (stream-unread-char stream char)
+               char)
+              (t
+               (stream-eof-marker stream)))))))
 
 
 (defmethod stream-listen ((stream amqp-device))
-  (stream-listen (stream-input-handle stream)))
+  ;; sbcl has no stream-listen for the input stream
+  (device-listen stream))
 
 
 (defmethod stream-read-line ((stream amqp-device))
   (with-slots (decoder) stream
-    (let ((eol-code (char-code (stream-eol-marker stream)))
+    (let ((eol-char (stream-eol-marker stream))
           (line (stream-line-buffer stream)))
       (setf (fill-pointer line) 0)
       (flet ((buffer-extract-byte (stream)
-               (with-slots (buffer buffpos buffer-ptr) stream
-                 (when (or (< buffpos buffer-ptr)
-                           (and (not (minusp buffer-ptr))
-                                ; resets buff-pos / renews buffer content unless eof
-                                (plusp (device-read stream nil 0 nil t))))
-                   (aref buffer buffpos)))))
-        (loop (let ((code (funcall decoder #'buffer-extract-byte stream)))
-                (cond ((eql code eol-code)
+             (with-slots (buffer buffpos buffer-ptr body-position body-length) stream
+               (when (or (< buffpos buffer-ptr)
+                         (and (not (minusp buffer-ptr))
+                              ; resets buff-pos / renews buffer content unless eof
+                              (plusp (device-read stream nil 0 nil t))))
+                 (incf body-position)
+                 (prog1 (aref buffer buffpos)
+                   (incf buffpos))))))
+        (loop (let ((char (funcall decoder #'buffer-extract-byte stream)))
+                (cond ((eql char eol-char)
                        (return (copy-seq line)))
-                      (code
-                       (vector-push-extend (code-char code) line))
+                      (char
+                       (vector-push-extend char line))
                       (t
                        (return (values (copy-seq line) (stream-eof-marker stream)))))))))))
 
@@ -257,6 +268,11 @@
       :output
       :closed)))
 
+
+#+ccl
+(defmethod stream-eofp ((stream amqp-device))
+  (with-slots (body-length body-position) stream
+    (>= body-position body-length)))
 
 ;; input-stream-p :
 ;; mcl version is not generic, it is based on direction, which suffices
@@ -444,3 +460,5 @@
 (defmethod device-read-buffers ((stream amqp-device) &rest buffer-specs)
   (loop for (buffer start end) in buffer-specs by #'cddr
         do (device-read stream buffer start end t)))
+
+

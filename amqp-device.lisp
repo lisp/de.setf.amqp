@@ -191,6 +191,8 @@
           out-buffer nil
           outpos 0)))
 
+
+
 (defmethod device-open ((device amqp-device) #-sbcl (slots t) (options t))
   
   (device-reset-buffers device)
@@ -199,8 +201,6 @@
     (add-stream-instance-flags device :dual :simple :input :output)
     (install-amqp-device-strategy device))
   t)
-
-
 
 
 (defmethod device-close ((device amqp-device) (abort t))
@@ -218,7 +218,14 @@
   (setf (stream-output-handle device) nil))
 
 
+(defgeneric device-listen (device)
+  (:method ((device amqp-connection-device))
+    (when (stream-input-handle device)
+      (device-listen (stream-input-handle device))))
 
+  (:method ((device amqp-socket-device))
+    (when (stream-input-handle device)
+      (listen (stream-input-handle device)))))
 
 (defmethod device-open ((device amqp-socket-device) #-sbcl (slots t) options)
   (if (or (stream-input-handle device)
@@ -275,7 +282,7 @@
 (when (fboundp 'stream-close)
   (defmethod stream-close ((stream amqp-device))
     (when (next-method-p) (call-next-method))
-    (device-close stream t)))
+    (device-close stream nil)))
 
 
 ;;;
