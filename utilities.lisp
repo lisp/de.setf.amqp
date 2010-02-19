@@ -118,20 +118,20 @@
 ;;; this relation is recorded in amqp.u:*version-headers*
 
 (defun version-protocol-header (version-keyword)
-  (rest (assoc version-keyword amqp.u:*supported-versions* :test #'string-equal)))
+  (rest (assoc version-keyword amqp.u:*version-headers* :test #'string-equal)))
 
 (defun protocol-header-version (protocol-header)
-  (first (rassoc protocol-header amqp.u:*supported-versions* :test #'equalp)))
+  (first (rassoc protocol-header amqp.u:*version-headers* :test #'equalp)))
 
 (defun (setf version-protocol-header) (header version-keyword)
   (assert (typep header '(vector t 8)) ()
           "Invalid version header: ~s." header)
-  (let ((entry (assoc version-keyword amqp.u:*supported-versions* :test #'string-equal)))
+  (let ((entry (assoc version-keyword amqp.u:*version-headers* :test #'string-equal)))
     (cond (entry
            (setf (rest entry) header))
           (t
-           (setq amqp.u:*supported-versions*
-                 (acons version-keyword header amqp.u:*supported-versions*))
+           (setq amqp.u:*version-headers*
+                 (acons version-keyword header amqp.u:*version-headers*))
            header))))
 
 (defun make-version-keyword (&key (name :amqp)
