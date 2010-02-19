@@ -1282,7 +1282,7 @@ In addition compound buffer accessors are defined for the types
 
 ;;; these two manifest an unrealistic structural relation between the version elements and
 ;;; the protocol headers. in fact, the relation is conventional and is recorded in
-;;; amqp.u:*supported-versions* by each version as it loads.
+;;; amqp.u:*version-headers* by each version as it loads.
 
 #(or )
 (progn
