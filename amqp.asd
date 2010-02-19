@@ -39,8 +39,7 @@
                          *load-pathname*)))
 
 
-(unless (ignore-errors (logical-pathname-translations "AMQP"))
-  (de.setf.utility:set-relative-logical-pathname-translations "AMQP"))
+(de.setf.utility:set-relative-logical-pathname-translations "AMQP")
 
 ;;; for sbcl simple streams should be here:
 ;;; "SYS:CONTRIB;SB-SIMPLE-STREAMS;SB-SIMPLE-STREAMS.ASD"
@@ -69,14 +68,15 @@
                (:file "amqp-device")
                (:file "stream")
                (:file "data-wire-coding")
-               (:file "frames")
                (:file "states")
                (:file "macros")
                (:file "classes")
+               (:file "frames")
                (:file "conditions")
                (:file "processing")
                (:file "commands")
-               (:file "device-level"))
+               (:file "device-level")
+               (:file "device-stream"))
 
   :long-description
   "`de.setf.amqp` implements a native Common Lisp client library for the 'Advanced Message Queueing
