@@ -168,9 +168,9 @@ Building
 In principle, `de.setf.amqp` is built with [`asdf`](http://www.common-lisp.net/projects/asdf).
 Once one has the sources and the `asdf` configuration in place, evaluate
 
-  (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-8-0)
-  (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-0)
-  (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-1)
+    (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-8-0)
+    (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-0)
+    (asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-1)
 
 to load the respective version. The versions intended to be compatible and connections should
 negotiate automatically use the correct implementation.
