@@ -45,7 +45,7 @@ On OS X, I have observed symbolic registry _finder_ links to fail to work from c
 
 ### Clozure Common Lisp
 
-  * Further instructions are in [README-build-clozure.md](./README-build-clozure.md)
+  * Further instructions are in [README-build-ccl.md](./README-build-ccl.md)
 
 ### hierarchical system names
 
