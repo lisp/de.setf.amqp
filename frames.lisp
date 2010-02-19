@@ -43,6 +43,15 @@
  received or sent while the latter distinguish header format."))
 
 
+(defmethod amqp:ensure-method ((class amqp:object) (frame amqp:frame) &rest initargs)
+  (declare (dynamic-extent initargs))
+  (apply #'amqp:ensure-method class (frame-method-code frame) initargs))
+
+(defmethod amqp:ensure-object ((context t) (frame amqp:frame) &rest initargs)
+    (declare (dynamic-extent initargs))
+    (apply #'amqp:ensure-object context (frame-class-name frame) initargs))
+
+
 (defclass output-frame (amqp:frame)
   ())
 
@@ -129,7 +138,137 @@
     (format-frame object stream)))
 
 
+;;;
+;;;
 
+(defgeneric release-frame (frame)
+  (:documentation "Release the frame.
+ This is specialized for input, respective output frames to return the
+ frame back to the respective free pool.")
+
+  (:method ((frame input-frame))
+    (when (frame-connection frame)
+      (setf-frame-channel-number 0 frame))
+    (enqueue frame (device-free-input-frames (frame-connection frame))))
+
+  (:method ((frame output-frame))
+    (when (frame-connection frame)
+      (setf-frame-channel-number 0 frame)
+    (enqueue frame (device-free-output-frames (frame-connection frame))))))
+
+
+(defmacro with-input-frame ((frame device) &body body)
+  `(let* ((,frame (claim-input-frame ,device)))
+     (unwind-protect (progn ,@body)
+       (release-frame ,frame))))
+
+
+(defgeneric make-input-frame (connection &rest args)
+  (:documentation "Allocate a new output frame and bind it to the
+ connection. The concrete frame class will depend on the connection version.
+ Given a channel, delegate to the respective connection.")
+  (declare (dynamic-extent args))
+
+  (:method ((channel amqp:channel) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-input-frame (channel-connection channel) args))
+
+  (:method ((connection amqp:connection) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-instance (connection-input-frame-class connection)
+         :connection connection
+         args)))
+
+
+(defgeneric make-output-frame (connection &rest args)
+  (:documentation "Allocate a new input frame and bind it to the
+ connection. The concrete frame class will depend on the connection version.
+ Given a channel, delegate to the respective connection.")
+  (declare (dynamic-extent args))
+
+  (:method ((channel amqp:channel) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-output-frame (channel-connection channel) args))
+
+  (:method ((connection amqp:connection) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'make-instance (connection-output-frame-class connection)
+         :connection connection
+         args)))
+
+
+(defgeneric put-encoded-frame (connection frame)
+  (:documentation "Place an encoded frame in the output queue. If the queue is empty.
+ write through. If the frame is written, release it.")
+
+  (:method ((channel amqp:channel) (frame output-frame))
+    (put-encoded-frame (channel-connection channel) frame))
+  
+  (:method ((connection amqp:connection) (frame output-frame))
+    (flet ((write-encoded-frames ()
+             (do ((frame (dequeue (device-encoded-frames connection) :if-empty nil)
+                         (dequeue (device-encoded-frames connection) :if-empty nil)))
+                 ((or (null frame) (not (open-stream-p connection))))
+               (write-frame connection frame)
+               (release-frame frame))))
+      (declare (dynamic-extent #'write-encoded-frames))
+      (enqueue frame (device-encoded-frames connection)
+               :if-empty #'write-encoded-frames))))
+
+
+(defgeneric get-encoded-frame (connection )
+  (:documentation "Get an encoded frame from the output queue. If the queue is empty.
+ return nil.")
+
+  (:method ((connection amqp:connection) )
+    (dequeue (device-encoded-frames connection) :if-empty nil)))
+
+
+(defgeneric put-read-frame (connection frame)
+  (:documentation "Add the frame to the read frame queue.")
+  
+  (:method ((connection amqp:connection) (frame input-frame))
+    (enqueue frame (device-read-frames connection)))
+  
+  (:method ((connection amqp:channel) (frame input-frame))
+    (enqueue frame (device-read-frames connection))))
+
+
+(defgeneric get-read-frame (connection &key wait)
+  (:documentation "Return the next read input frame for the given context.
+ A connection dequeues or reads.  A channel dequeues or delegates to the
+ connection.")
+
+  (:method ((channel amqp:channel) &key (wait t))
+    (labels ((read-channel-frame ()
+               (let ((connection (channel-connection channel)))
+                 (loop (if (open-stream-p connection)
+                         (let ((frame (read-frame connection (claim-input-frame channel))))
+                           (if (frame-matches-channel-p frame)
+                             (return frame)
+                             (put-read-frame channel frame)))   ; this is the same as the connection queue
+                         (return)))))
+             (frame-matches-channel-p (frame)
+               (eql (frame-channel-number frame) (channel-number channel))))
+      (declare (dynamic-extent #'frame-matches-channel-p #'read-channel-frame))
+      (dequeue (device-read-frames channel)
+               :test #'frame-matches-channel-p
+               :if-empty (when (or wait (stream-listen channel))
+                           #'read-channel-frame))))
+
+  (:method ((connection amqp:connection) &key (wait t))
+    (labels ((read-connection-frame ()
+               (loop (let ((frame (read-frame connection (claim-input-frame connection))))
+                       (if (frame-matches-connection-p frame)
+                         (return frame)
+                         (put-read-frame connection frame)))))
+             (frame-matches-connection-p (frame)
+               (eql (frame-channel-number frame) 0)))
+      (declare (dynamic-extent #'frame-matches-connection-p #'read-connection-frame))
+      (dequeue (device-read-frames connection)
+               :test #'frame-matches-connection-p
+               :if-empty (when (or wait (stream-listen connection))
+                           #'read-connection-frame)))))
 ;;;
 ;;; frame accessors
 
@@ -439,6 +578,42 @@
 
 ;;;
 ;;; frame input operators
+
+              
+(defgeneric read-frame (connection frame &key start end)
+  (:documentation "Read from the connection socket into the given frame.
+ This varies per protocol as the header layout varies.")
+
+  #+amqp.log-frames
+  (:method :around ((connection amqp:connection) (frame t) &key start end)
+    (multiple-value-prog1 (call-next-method)
+      (amqp:log :debug connection "read-frame: (~a,~a) ~s" start end frame)))
+
+  (:method :before ((connection amqp:connection) (frame t) &key start end)
+           (declare (ignore start end))
+           (unless (open-stream-p connection)
+             (error 'end-of-file :stream connection)))
+               
+  (:method :after ((connection amqp:connection) (frame t) &key start end)
+     (declare (ignore start end))
+     (setf (connection-read-frame-timestamp connection) (get-universal-time))))
+
+(defgeneric write-frame (connection frame &key start end)
+  (:documentation "Write from the given frame to the connection socket.
+ This varies per protocol as the header layout varies.")
+
+   #+amqp.log-frames
+  (:method :around ((connection amqp:connection) (frame t) &key start end)
+    (amqp:log :debug connection "write-frame: (~a,~a) ~s" start end frame)
+    (call-next-method))
+
+  (:method ((channel amqp:channel) (frame amqp:frame) &rest args)
+    (declare (dynamic-extent args))
+    (apply #'write-frame (channel-connection channel) frame args))
+
+  (:method :after ((connection amqp:connection) (frame t) &key start end)
+     (declare (ignore start end))
+     (setf (connection-write-frame-timestamp connection) (get-universal-time))))
 
 
 (defmethod read-frame ((connection amqp:connection) (frame amqp.u:7-byte-header-input-frame) &rest args)
