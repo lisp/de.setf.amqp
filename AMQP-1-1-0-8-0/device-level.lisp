@@ -28,7 +28,7 @@
     (conditionally-set 'input-frame-class '7-byte-header-input-frame)
     (conditionally-set 'output-frame-class '7-byte-header-output-frame)))
 
-(defmethod device-open ((device amqp-1-1-0-8-0:channel) (slot-names t) initargs)
+(defmethod device-open ((device amqp-1-1-0-8-0:channel) #-sbcl (slot-names t) initargs)
   (etypecase (device-state device)
     (amqp.s:open-channel
      (if (or (stream-input-handle device)
@@ -37,7 +37,7 @@
        (when (call-next-method)
          (if (zerop (channel-number device))
            device
-           (destructuring-bind (&key realm ticket &allow-other-keys) initargs
+           (destructuring-bind (&key realm &allow-other-keys) initargs
              (cond (realm
                     (assert (member realm '("/admin" "/data") :test #'string-equal) ()
                             "Invalid channel realm: ~s, ~s" device realm)
@@ -58,10 +58,10 @@
     (amqp.s:use-channel
      (call-next-method))))
 
-
-(defmethod amqp:channel-respond-to-open-ok ((channel amqp-1-1-0-8-0:channel)
-                                            (connection amqp-1-1-0-8-0:connection)
-                                            &key (known-hosts nil kh-s))
+#+(or ) ; happens in generated code
+(defmethod channel-respond-to-open-ok ((channel amqp-1-1-0-8-0:channel)
+                                       (connection amqp-1-1-0-8-0:connection)
+                                       &key (known-hosts nil kh-s))
   (when kh-s
     (setf (amqp:connection-known-hosts connection) known-hosts)))
 
