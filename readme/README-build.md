@@ -62,9 +62,9 @@ the pathname for the `de.setf.amqp` system definition is
 This convention is supported by the `asdf`
 [`hierarchical names`](http://github.com/lisp/de.setf.utility/blob/master/asdf/hierarchical-names.lisp)
 extension.
-It adds a system search method which uses parses the system identifier and uses its elements to
+It adds a system search method which parses the system identifier and uses its elements to
 prospectively augment locations from the `*central-registry*` with directory paths.
-Versions are supported by probing with wild in the name of the final directory, and by
+Versions are supported by probing with a wild suffix added to the name of the final directory, and by
 electing the most recently modified system file if several versions are found.
 A nickname is added to each loaded system to augment an unqualified name with a qualified one.
 
@@ -80,7 +80,8 @@ remapped to new locations for delivered images.
 - AMPQ    : locates the root of the specific AMQP source
 
 If asdf output location mapping is disabled, the binary files are stored in `LIBRARY:bin;` and `AMPQ:bin;`.
-In order to update the host translations
+Once can change this, but changing the logical pathname transaltions.
+In order to update the host translations for a relocaed image
 
     (setf (logical-pathname-translations "AMQP") nil
           (logical-pathname-translations "LIBRARY") nil)
@@ -95,4 +96,4 @@ In order to update the host translations
 
 ### Steel Bank Common Lisp
 
-    * Further instructions are in [README-build-sbcl.md](./README-build-sbcl.md)
+  * Further instructions are in [README-build-sbcl.md](./README-build-sbcl.md)
