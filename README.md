@@ -161,6 +161,8 @@ Downloading
 -----------
 
 A [.dmg](http://github.com/downloads/lisp/de.setf.amqp/amqp-20100214-0.3.dmg) is available for MCL-5.2.
+Saved images are available for [ccl](http://github.com/downloads/lisp/de.setf.amqp/ccl-amqp.image.zip)
+and [sbcl](http://github.com/downloads/lisp/de.setf.amqp/sbcl-amqp.core.zip).
 
 Building
 ---------
