@@ -3,7 +3,7 @@
 DE.SETF.AMQP: a Common Lisp client library for AMQP
 -------
 
-`de.setf.amqp` implements a native Common Lisp client library for the 'Advanced Message Queueing
+`de.setf.amqp` implements a native Common Lisp client library for the 'Advanced Message Queuing
  Protocol' ([AMQP](http://en.wikipedia.org/wiki/AMQP)). The implementation comprises wire-level codecs, implementations
  for the standard protocol objects and methods, a functional interface for message-,
  stream- and object-based i/o, and a device-level simple-stream implementation.
