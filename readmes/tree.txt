@@ -1,0 +1,70 @@
+.
+|-- dev
+|   |-- Library
+|   |   |-- asdf-registry
+|   |   |   `-- alexandria.asd -> /Development/Source/dev/Library/net/common-lisp/alexandria/alexandria.asd
+|   |   |-- bin
+|   |   |   |-- ccl-1-2
+|   |   |   |-- ccl-1-3-ppc
+|   |   |   |-- dfsl
+|   |   |   |-- digi-5-2
+|   |   |   `-- sbcl-osx
+|   |   |-- com
+|   |   |   |-- b9
+|   |   |   |   `-- puri
+|   |   |   |       |-- debian
+|   |   |   |       |-- ppcre
+|   |   |   |       |   `-- ppcre.asd
+|   |   |   |       `-- puri.asd
+|   |   |-- de
+|   |   |   |-- setf
+|   |   |   |   |-- amqp
+|   |   |   |   |   |-- AMQP-1-1-0-10-0
+|   |   |   |   |   |   `-- AMQP-1-1-0-10-0.asd
+|   |   |   |   |   |-- AMQP-1-1-0-8-0
+|   |   |   |   |   |   `-- AMQP-1-1-0-8-0.asd
+|   |   |   |   |   |-- AMQP-1-1-0-9-0
+|   |   |   |   |   |   `-- AMQP-1-1-0-9-0.asd
+|   |   |   |   |   |-- AMQP-1-1-0-9-1
+|   |   |   |   |   |   `-- AMQP-1-1-0-9-1.asd
+|   |   |   |   |   |-- amqp.asd
+|   |   |   |   |   |-- bin
+|   |   |   |   |   |   |-- digi-5-2
+|   |   |   |   |   |   |   |-- AMQP-1-1-0-8-0
+|   |   |   |   |   |   |   |-- AMQP-1-1-0-9-0
+|   |   |   |   |   |   |   `-- AMQP-1-1-0-9-1
+|   |   |   |   |   |   `-- sbcl-osx
+|   |   |   |   |   |       |-- amqp-1-1-0-8-0
+|   |   |   |   |   |       `-- amqp-1-1-0-9-0
+|   |   |   |   |   |-- test
+|   |   |   |   |   |   `-- test.asd
+|   |   |   |   |   `-- tools
+|   |   |   |   |       `-- tools.asd
+|   |   |   |   `-- utility
+|   |   |   |       |   `-- asdf.asd
+|   |   |   |       |-- clos
+|   |   |   |       |   `-- clos.asd
+|   |   |   |       |-- mime
+|   |   |   |       |   `-- mime.asd
+|   |   |   |       |-- test
+|   |   |   |       |   |-- test
+|   |   |   |       |   |   `-- test.asd
+|   |   |   |       |   `-- test.asd
+|   |   |   |       `-- utility.asd
+|   |   |   `-- weitz
+|   |   |       |-- cl-ppcre
+|   |   |           `-- cl-ppcre.asd
+|   |   |-- net
+|   |   |   |-- common-lisp
+|   |   |   |   |-- alexandria
+|   |   |   |   |   `-- alexandria.asd
+|   |   |   |   |-- asdf
+|   |   |   |   |   `-- asdf.asd
+|   |   |   |   |-- bordeaux-threads
+|   |   |   |   |   `-- bordeaux-threads.asd
+|   |   |   |   |-- closer-mop-0-61
+|   |   |   |   |   `-- closer-mop.asd
+|   |   |   |   `-- usocket
+|   |   |   |       `-- usocket.asd
+|   |   |   |      
+...
