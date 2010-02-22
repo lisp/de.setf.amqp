@@ -6,7 +6,7 @@ In order to use asdf with sbcl,
 
 The system can be built and saved from the command line
 
-    $ sbcl --userinit readme/build-init.lisp \
+    $ sbcl --userinit readmes/build-init.lisp \
       --eval "(asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-8-0)" \
       --eval "(asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-0)" \
       --eval "(asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-1)" \

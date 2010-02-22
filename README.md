@@ -70,7 +70,7 @@ The library has been built and [probed](file:///examples/examples.lisp) in the f
 <table>
 <tr><td style='text-align: right;'>AMQP broker<br/>lisp implementation</td><th>RabbittMQ</th><th>QPID</th></tr>
 <tr><th>MCL</th><td>MCL-5.2, RabbitMQ 1.7.1, AMQP-0.8r0</td><td>MCL-5.2, QPID-0.5, AMQP-0.9r1</td></tr>
-<tr><th>CCL</th><td/><td>CCL-1.3, QPID-0.5, AMQP-0.9r1</td></tr>
+<tr><th>CCL</th><td/><td>CCL-1.4, QPID-0.5, AMQP-0.9r1</td></tr>
 <tr><th>SBCL</th><td/><td>SBCL-1.0.35, QPID-0.5, AMQP-0.9r1</td></tr>
 </table>
 
@@ -176,7 +176,7 @@ Once one has the sources and the `asdf` configuration in place, evaluate
 
 to load the respective version. The versions intend to be compatible and connections should
 negotiate automatically to use the correct implementation.
-Please consult the detailed instructions for the respective [runtime](./readme/README-build.md) for more information.
+Please consult the detailed instructions for the respective [runtime](./readmes/README-build.md) for more information.
 
  
 Licensing
