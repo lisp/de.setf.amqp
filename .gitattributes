@@ -1,0 +1,11 @@
+*.html    -crlf
+*.htm     -crlf
+*.dot     -crlf
+*.svg     -crlf
+*.ent     -crlf
+*.css     -crlf
+*.dtd     -crlf
+*.xs      -crlf
+*.xsl     -crlf
+*.xml     -crlf
+*.xmlq     -crlf

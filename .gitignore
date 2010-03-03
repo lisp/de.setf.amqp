@@ -1,0 +1,16 @@
+tmp/
+*.dribble
+*.fasl
+*.dfsl
+*.cfsl
+*.fas
+*.lib
+*.o
+*.*fsl
+*.bak
+*~
+bin/
+
+#Mac stuff
+Icon?
+.DS_Store
