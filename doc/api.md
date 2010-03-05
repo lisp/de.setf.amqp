@@ -296,17 +296,17 @@ immeidate request as well is any immediate synchronus interaction.
     
 #### Discussions
 
-   Matt Heitzenroder argues [txAMQP] the client libraries should necessarily be event-based in order to support multi-threaded applications.
-     His particular example is queueing messages. His argument fails to mention two issues. First, the socket imposes a complete order
-     on connection frames. Second, the protocol imposes a complete order on channel frames. In this situation, a channel user should
-     block for any synchronous commands. For asynchrounous output, it is only important that operations queue rather than block.
-     For asynchronous input, it is only important that it be routed to the channel's process. It is not clear whether this needs to
-     happen as an asynchronous event, or in the course of successive input processing, since the input in the channel is ordered.
-     Especially once links are supported, the latter will be the case.
+Matt Heitzenroder argues [txAMQP] the client libraries should necessarily be event-based in order to support multi-threaded applications.
+His particular example is queueing messages. His argument fails to mention two issues. First, the socket imposes a complete order
+on connection frames. Second, the protocol imposes a complete order on channel frames. In this situation, a channel user should
+block for any synchronous commands. For asynchrounous output, it is only important that operations queue rather than block.
+For asynchronous input, it is only important that it be routed to the channel's process. It is not clear whether this needs to
+happen as an asynchronous event, or in the course of successive input processing, since the input in the channel is ordered.
+Especially once links are supported, the latter will be the case.
 
-   Ben Hood's [describes](http://hopper.squarespace.com/blog/2008/6/21/build-your-own-amqp-client.html)
-     the basic structure of an AMPQ client. He suggests two organizational aspects:
-    functional components and interface layers. The suggested functional components
+Ben Hood's [describes](http://hopper.squarespace.com/blog/2008/6/21/build-your-own-amqp-client.html)
+the basic structure of an AMPQ client. He suggests two organizational aspects:
+functional components and interface layers. The suggested functional components
     
     - data-type stream codecs
     - command parsing and generation
@@ -315,7 +315,7 @@ immeidate request as well is any immediate synchronus interaction.
     - command socket input, decoding, and handler dispatch
     - workflow functionality which effect the protocol state progressions
    
-    actually combine distinct functional aspects. The interface layers:
+actually combine distinct functional aspects. The interface layers:
     
     - AMQP method codecs, most of which should be generated from the specifications.
     - Mid-layer operations which provide for method ordering
@@ -325,7 +325,7 @@ immeidate request as well is any immediate synchronus interaction.
     - templates for application patterns, like consumers or asynchronous RPC
     - Sensible defaults for method attributes
    
-    are also indistinct, and there is no argument to expose the asynchronous operations
-    on commands which require responses in an external interface. The correct implementation
-    of declaration and binding operations overrides any possible concern for high-throughput
-    execution.
+are also indistinct, and there is no argument to expose the asynchronous operations
+on commands which require responses in an external interface. The correct implementation
+of declaration and binding operations overrides any possible concern for high-throughput
+execution.
