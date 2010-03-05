@@ -191,7 +191,7 @@ callback mechanism does not always suited benefit the application structure.
 #### [RabbitMQ Java](http://www.jarvana.com/jarvana/view/com/rabbitmq/amqp-client/1.3.0/amqp-client-javadoc-1.3.0.jar!/com/rabbitmq/client/impl/package-tree.html)
 
 
-
+---
 
 ### Library Interface
 
@@ -267,6 +267,7 @@ immeidate request as well is any immediate synchronus interaction.
     device-read-content (device &rest content-arguments)
     device-write-content (device body &rest content-arguments)
     
+---
 
 ### References
 
