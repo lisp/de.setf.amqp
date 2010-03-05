@@ -156,7 +156,7 @@ Which, as an aside, illustrates that brokered messages persist between connectio
 Of which a default QPID broker with no persistence support was observed to cache only about 500k bytes
 (ca. 25,000 messages of 20 bytes each).
 
-An introduction to the API is taking shape. [Slowly](./doc/api.md]. In the meantime, there are a few [examples](./readmes/).
+An introduction to the API is taking shape. [Slowly](./doc/api.md]). In the meantime, there are a few [examples](./readmes/).
 
 Downloading
 -----------
