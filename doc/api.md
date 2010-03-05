@@ -72,104 +72,133 @@ basic stream and message operations.
 
 === Library Architecture : functional components and interface layers
 
-Discuss the choice of processing architecture : asynchronous, synchronous; explicit call-back registration.
-Several documents exist to describe AMQP client library features, arrchitecture
-and implementation[<a href='#hood-2008'>hood-2008</a>], ...
-Some of them even name an "AMQP client API", (eg [qpid-2010-amqp]) but none references a description of one.
-Neither do the specification documents.
+An AMQP library realizes or dismisses options in response to two issues
 
-Two dimensions emerge from the various alternative implementations.
-<ul>
- <li>The processing models : asynchronous or synchronous<br />
-  </li>
- <li>The protocol entity model : affinitive or literal<br />
- </li>
-<ul>
- <li>AMQP R/EventMachine: asyncronous literal</li>
- <li>AS3 AMQP : asynchronous literal
-  <code>
-public function onOpenOk(event:ProtocolEvent):void {
-    sessionHandler = sessionManager.create();
+ - What is the process model? Does the client respond to commands from a broker synchronously or asynchronously?
+ - What is the entity model? Are commands autonomous messages exchanged between peers or are message exchanges as
+ affintive side-effect of commands applied to local proxies for remote entities?
 
-    var open:Open = new Open();
+Various librariy implementation demonstrate alternative responses to these questions.
 
-    var accessRequest:Request = new Request();
-    accessRequest._realm = realm;
-    accessRequest._passive = true;
-    accessRequest._active = true;
-    accessRequest._read = true;
-    accessRequest._write = true;
+==== [AS3 AMQP](http://hopper.squarespace.com/blog/category/as3)
 
-    var exchange:org.amqp.methods.exchange.Declare 
-    = new org.amqp.methods.exchange.Declare();
-    exchange._exchange = x;
-    exchange._type = x_type;            
+The AS3 AMQP library implements the asynchronous / autonomous approach.
+For example, in order to declare and bind an exchange and a queue once a connection is established,
+the program creates the respective autonomus commands, sends them to the broker, and registers a listener
+to process the expected `BindOk` response.
 
-    var queue:org.amqp.methods.queue.Declare 
-    = new org.amqp.methods.queue.Declare();
-    queue._queue = q;
+    public function onOpenOk(event:ProtocolEvent):void {
+        sessionHandler = sessionManager.create();
 
-    var bind:Bind = new Bind();
-    bind._exchange = x;
-    bind._queue = q;
-    bind._routingkey = bind_key;
+        var open:Open = new Open();
 
-    var onBindOk:Function = function(event:ProtocolEvent):void{
-        trace("onBindOk called");
-    };
+        var accessRequest:Request = new Request();
+        accessRequest._realm = realm;
+        accessRequest._passive = true;
+        accessRequest._active = true;
+        accessRequest._read = true;
+        accessRequest._write = true;
 
-    sessionHandler.dispatch(new Command(open));         
-    sessionHandler.dispatch(new Command(accessRequest));
-    sessionHandler.dispatch(new Command(exchange));
-    sessionHandler.dispatch(new Command(queue));            
-    sessionHandler.dispatch(new Command(bind));
+        var exchange:org.amqp.methods.exchange.Declare 
+        = new org.amqp.methods.exchange.Declare();
+        exchange._exchange = x;
+        exchange._type = x_type;
 
-    sessionHandler.addEventListener(new BindOk(), onBindOk);
-}
+        var queue:org.amqp.methods.queue.Declare 
+        = new org.amqp.methods.queue.Declare();
+        queue._queue = q;
 
-public function publish():void {
-    var data:ByteArray = new ByteArray();
-    data.writeUTF("hello, world");
-    var publish:Publish = new Publish();
-    publish._exchange = x;
-    publish._routingkey = routing_key;
-    var props:BasicProperties = Properties.getBasicProperties();
-    var cmd:Command = new Command(publish, props, data);             
-    sessionHandler.dispatch(cmd);       
-}
-  </code>
- </li>
- <li>QPid Ruby : synchronous affinitive : channel implements basic_publish and basic_consume operators.
-  <code>
- c = Qpid::Content.new({:headers=>h}, line)
- ch.basic_publish(:routing_key=>rkey, :content=>c,
-                  :exchange=>'amq.topic')
-  </code>
- </li>
- <li>Qpid Java: asynchronous affinitive : 
-  <p>The 0.5 model is simple. It depends on javax.jms classes and defines five primary API classes
-   <ul>
-    <li>Connection</li>
-    <li>Message</li>
-    <li>MessageConsumer</li>
-    <li>MessageProducer</li>
-    <li>Session</li>
-   </ul>
-   The use pattern is to open a Connection, use it to create a Session, then create MessageConsumer and
- MessageProducer instances within the Session and then create Message instances to send through the
- producer to consumers. The content type and encoding are specified for the producers, and the adressing
- is handled by inherited javax.jms behavior.</p>
-   <p>The dev version, which intend to implement version-specific support for 0-8 through 0-10,
- are much more elaborate. They not only
- differentiate entities by version, they also 
-  </p>
- <li>RabbitMQ : <a href='http://www.jarvana.com/jarvana/view/com/rabbitmq/amqp-client/1.3.0/amqp-client-javadoc-1.3.0.jar!/com/rabbitmq/client/impl/package-tree.html>class tree</a>
+        var bind:Bind = new Bind();
+        bind._exchange = x;
+        bind._queue = q;
+        bind._routingkey = bind_key;
 
-<ul>
+        var onBindOk:Function = function(event:ProtocolEvent):void{
+            trace("onBindOk called");
+        };
+
+        sessionHandler.dispatch(new Command(open));                 
+        sessionHandler.dispatch(new Command(accessRequest));
+        sessionHandler.dispatch(new Command(exchange));
+        sessionHandler.dispatch(new Command(queue));
+        sessionHandler.dispatch(new Command(bind));
+
+        sessionHandler.addEventListener(new BindOk(), onBindOk);
+    }
+
+The library projects the asynchronous messaging protocol directly through the interface.
+The examples  express the process to declare and bind a queue with an exchange as declaring a handler for incoming comamnds,
+instantiating the respective command instances, and sending them in the correct sequence to the broker: open, accessRequest, exchange, queue, bind.
+Followed by registering an event handler of the subsequence bindOk.
+The approach imposes a continuation passing model where none is necessary.
+It requires that the application must either correctly register and then remove handlers, or suffice with a single static control pattern.
+The connection establishment process demostrates that there are alternative, as connection establishment is performed through a synchrous recursive control flow.
+
+==== [Qpid Ruby](http://qpid.apache.org/amqp-ruby-messaging-client.html)
+
+The Qpid Ruby library demonstrates the opposite approach, in that commands are expressed
+as combinations of entity and method and are performed synchronously.
+The channel implements basic_publish and basic_consume operators.
+The example, [ehllo-world.rb](https://svn.apache.org/repos/asf/qpid/trunk/qpid/ruby/examples/hello-world.rb)
+and the [excerpt](http://somic.org/2008/06/24/ruby-amqp-rabbitmq-example/) below indicate the proxied
+consume request and the subsequent synchronous processing loop.
+
+    def consumer(client, ch)
+        myqueue = ch.queue_declare()
+        ch.queue_bind(:queue=>myqueue.queue, :exchange=>'amq.topic',
+                        :routing_key=>'disttailf.#')
+        cons = ch.basic_consume(:queue=>myqueue.queue, :no_ack => true)
+        ruby_queue = client.queue(cons.consumer_tag)
  
-</ul>
+        while true
+            raise "Rabbitmq broker disconnected" if client.closed?
+            begin
+              msg = ruby_queue.pop(non_block=true)
+              puts "== #{msg.content.headers[:headers]} " \
+                    "#{msg.routing_key.split('.')[-1]}"
+              puts msg.content.body
+            rescue
+              sleep(0.5)
+            end
+        end
+    end
+
+==== [Qpid Jaa](http://qpid.apache.org/amqp-java-jms-messaging-client.html)
+
+ The Qpid Java is based on the javax.jms classes, which it uses to implement asynchronous affinitive processing.
+ The use pattern is to open a Connection, use it to create a Session, then create MessageConsumer and
+ MessageProducer instances within the Session. Message instances are sent through the
+ producer to consumers.
+
+==== [py-amqplib](http://code.google.com/p/py-amqplib/)
+
+The python AMQP library is semi-synchronous / affintive.
+The [example](http://blogs.digitar.com/jjww/2009/01/rabbits-and-warrens/) illustrates the
+proxy operations and the polled callback processing.
+
+    def recv_callback(msg):
+         print 'Received: ' + msg.body
+    chan.basic_consume(queue='po_box', no_ack=True,
+                    callback=recv_callback, consumer_tag="testtag")
+    while True:
+         chan.wait()
+    chan.basic_cancel("testtag")
+
+As demonstrated by the feature [request](http://code.google.com/p/py-amqplib/issues/detail?id=10), the
+callback mechanism does not always suited benefit the application structure.
+
+
+==== [RabbitMQ Java](http://www.jarvana.com/jarvana/view/com/rabbitmq/amqp-client/1.3.0/amqp-client-javadoc-1.3.0.jar!/com/rabbitmq/client/impl/package-tree.html)
+
+
+
 
 === Library Interface
+
+The de.setf.amqp implementation supports all four possible combinations.
+The AS3 example demonstrates that the protocol event sequences for entity creation and configuration
+would be much better realized with a synchronous process model as there is no real use case to justify
+pipelined queue creation.
 
 de.setf.amqp presents interfaces for stream, message, and framed data input/output
 in both synchronous and asynchronous modes. 
@@ -240,99 +269,63 @@ immeidate request as well is any immediate synchronus interaction.
     
 
 === References
- <h4>AMQP: specifications</h4>
- <h4>AMQP: implementations</h4>
-  <ul>
-   <li>AMQP Ruby/EventMachine driver:<br />
-    <a href='http://amqp.rubyforge.org/'>doc</a></li>
-   <li>QPid
-    <ul>
-     <li> Ruby :</li>
-     <hr />
-     <li>[<a href='http://qpid.apache.org/qpid-java-client-refactoring.data/java_amqp_client_design.pdf' id='qpid-2010-amqp'>qpid-2010-amqp</a>]
-    
-    </ul>
-   <li>py-amqplib : AMPQ client for python<br />
-     <a href='http://barryp.org/software/py-amqplib/' id='pederson-amqplib'>pederson-amqplib</a> :
-     Barry Pederson's AMQP library for python.</li> <br />
-      <a href='http://blogs.digitar.com/jjww/2009/01/rabbits-and-warrens/' id='jason-2009'>jason-2009</a> :
-Jason@DigiTag's discussion of py-amqplinb</li>
-   <li>txAMQP : AMQP client for python; multi-threaded :<br />
-    See [<a href='#heitzenroder-2009-performance'>heitzenroder-2009-performance</a>].
-    </li>
-   <li>AS3-AMQP : AMQP client for Adobe's S3-FLEX environment :<br />
-     Ben Hood's library projects the asynchronous messaging protocol directly through the interface.
-     His examples [<a href='#hood-2009-as3'>hood-2009-as3</a>] express the process to declare and bind a queue with an exchange
-     as declaring a handler for incoming comamnds, instantiating the respective command instances, and sending them in the correct sequence to the broker, in the
-     correct order : open, accessRequest, exchange, queue, bind. Followed by registering an event handler of the subsequence bindOk.
-     It exhibits several deficiencies.
-     It imposes a continuation passing model where none is necessary.
-     It implies that the apllication must either correctly register and then remove handlers, or suffice with a single static control pattern.
-     This is not even completely uniform, as connection establishment is performed through a synchrous recursive control flow.
-     <verbatim>
-      
-      </verbatim>
 
-     <hr>
-     [<a href='http://hopper.squarespace.com/blog/2008/3/24/as3-amqp-client-first-cut.html' id='hood-2009-as3'>hood-2009-as3</a>] : 'AS3 AMQP Client: First Cut'
+ - [Wikipedia](http://en.wikipedia.org/wiki/Software_portability) on software portability
+ - [Wikipedia](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) on AMQP
+ - [InfoQ](http://www.infoq.com/articles/AMQP-RabbitMQ) articles on RabbitMQ; includes examples and references.
+ - [Get Started](http://www.rabbitmq.com/how.html) at RabbitMQ; links to implementations and documentation
+ - [Ruby](http://amqp.rubyforge.org/)
+ - [openamq.org](http://www.openamq.org/) : tutorials
+   - [ESB](http://www.openamq.org/tutorial:soa)
+   - [chatroom](http://www.openamq.org/tutorial:chatroom-exmaple)
+   - [file transfer](http://www.openamq.org/tutorial:simple-file-transfer)
+   - [load balancing](http://www.openamq.org/tutorial:load-balancing)
+ - [Vinsoky IEEE](http://steve.vinoski.net/pdf/IEEE-Advanced_Message_Queuing_Protocol.pdf) :
+   Steve Vinsoky's IEEE Towards Interation article about AMQP's launch.
 
-   </li>
-  </ul>
+==== Implementations
+
+  - [AMQP Ruby/EventMachine driver]('http://amqp.rubyforge.org/)
+  - [Qpid Ruby](http://qpid.apache.org/qpid-java-client-refactoring.data/java_amqp_client_design.pdf)
+  - [py-amqp](http://barryp.org/software/py-amqplib/' id='pederson-amqplib) :
+     Barry Pederson's AMQP library for python. 
+     Jason@DigiTag's [discussion](http://blogs.digitar.com/jjww/2009/01/rabbits-and-warrens/' id='jason-2009) of py-amqplinb
+  - [txAMQP](http://www.apparatusproject.org/blog/2009/04/creating-a-simple-amqp-client-using-txamqp/) :
+     a multi-threaded AMQP client for python
+  - [AS3-AMQP](http://hopper.squarespace.com/blog/2008/3/24/as3-amqp-client-first-cut.html) : AMQP client for Adobe's S3-FLEX environment 
     
- <h4>AMQP: discussions</h4>
-  <ul>
-   <li><a href='http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol'>Wikipedia</a></li>
-   <li><a href='http://www.infoq.com/articles/AMQP-RabbitMQ'>InfoQ</a> article includes examples and references.</li>
-   <li><a href='http://www.rabbitmq.com/how.html'>rabbitmq-how</a> : RabbitMQ "Get Started" page with links
- to implementations and documentation</li>
-   <li><a href='http://amqp.rubyforge.org/'>Ruby</a><li>
-   <li><a href='http://hopper.squarespace.com/blog/2008/6/21/build-your-own-amqp-client.html' id='hood-2008'>hood-2008</a> :
-    Ben Hood's description
-    of the structure of an AMPQ client. This suggests two organizational aspects:
-    functional components and interface layers. The functional components
-    <ul><li>data-type stream codecs</li>
-     <li>command parsing and generation</li>
-     <li>command frame composition/decomposition</li>
-     <li>command socket output</li>
-     <li>command socket input, decoding, and handler dispatch</li>
-     <li>workflow functionality which effect the protocol state progressions</li>
-    </ul>
-    actually combine distinct functional aspects.
-    The interface layers:
-    <ul>
-     <li>AMQP method codecs, mos of which should be generated from the specifications.</li>
-     <li>Mid-layer operations which provide for method ordering</li>
-     <li>Convenience application operations with defaults and functional abstraction
-      (his terms: dependency injection and inversion of control) to minimze
-      application code.</li>
-     <li>templates fro application patterns, like consumers or asynchronous RPC.</li>
-     <li>Sensible defaults for method attributes</li>
-    </ul>
-    are also indistinct, and there is no argument to expose the asynchronous operations
-    on commands which require responses in an external interface. The correct implementation
-    of declaration and binding operations overrides any possible concern for high-throughput
-    execution.
-    </li>
-    <li>[<a href='http://www.apparatusproject.org/blog/2009/04/creating-a-simple-amqp-client-using-txamqp/' id='heitzenroder-2009-performance'>heitzenroder-2009-performance</a>] :
-     Matt Heitzenroder argues the client libraries whould necessarily be event-based in order to support multi-threaded applications.
+==== Discussions
+
+   Matt Heitzenroder argues [txAMQP] the client libraries should necessarily be event-based in order to support multi-threaded applications.
      His particular example is queueing messages. His argument fails to mention two issues. First, the socket imposes a complete order
      on connection frames. Second, the protocol imposes a complete order on channel frames. In this situation, a channel user should
      block for any synchronous commands. For asynchrounous output, it is only important that operations queue rather than block.
      For asynchronous input, it is only important that it be routed to the channel's process. It is not clear whether this needs to
      happen as an asynchronous event, or in the course of successive input processing, since the input in the channel is ordered.
-     Especially once links are supported, the latter will be the case.</li>
-   <li>[<a href='http://steve.vinoski.net/pdf/IEEE-Advanced_Message_Queuing_Protocol.pdf' id='vinoski-2007-amqp'>vinoski-2007-amqp</a>] :
-    Steve Vinsoky's IEEE Towards Interation article about AMQP's launch.</li>
-   <li><a href='http://www.openamq.org/'>openamq.org</a> tutorials :
-    <ul>
-     <li><a href='http://www.openamq.org/tutorial:soa'>ESB</a></li>
-     <li><a href='http://www.openamq.org/tutorial:chatroom-exmaple'>chatroom</a></li>
-     <li><a href='http://www.openamq.org/tutorial:simple-file-transfer'>file transfer</a></li>
-     <li><a href='http://www.openamq.org/tutorial:load-balancing'>load balancing</a></li>
-    </ul>
-   </li>
-  </ul>
- <h4>General</h4>
- <ul>
-  <li><a href='http://en.wikipedia.org/wiki/Software_portability'>Wikipedia</a></li>
- </ul>
+     Especially once links are supported, the latter will be the case.
+
+   Ben Hood's [describes](http://hopper.squarespace.com/blog/2008/6/21/build-your-own-amqp-client.html)
+     the basic structure of an AMPQ client. He suggests two organizational aspects:
+    functional components and interface layers. The suggested functional components
+    
+    - data-type stream codecs
+    - command parsing and generation
+    - command frame composition/decomposition
+    - command socket output
+    - command socket input, decoding, and handler dispatch
+    - workflow functionality which effect the protocol state progressions
+   
+    actually combine distinct functional aspects. The interface layers:
+    
+    - AMQP method codecs, most of which should be generated from the specifications.
+    - Mid-layer operations which provide for method ordering
+    - Convenience application operations with defaults and functional abstraction
+      (his terms: dependency injection and inversion of control) to minimze
+      application code.
+    - templates for application patterns, like consumers or asynchronous RPC
+    - Sensible defaults for method attributes
+   
+    are also indistinct, and there is no argument to expose the asynchronous operations
+    on commands which require responses in an external interface. The correct implementation
+    of declaration and binding operations overrides any possible concern for high-throughput
+    execution.
