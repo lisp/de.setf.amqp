@@ -308,22 +308,22 @@ Ben Hood's [describes](http://hopper.squarespace.com/blog/2008/6/21/build-your-o
 the basic structure of an AMPQ client. He suggests two organizational aspects:
 functional components and interface layers. The suggested functional components
     
-    - data-type stream codecs
-    - command parsing and generation
-    - command frame composition/decomposition
-    - command socket output
-    - command socket input, decoding, and handler dispatch
-    - workflow functionality which effect the protocol state progressions
+ - data-type stream codecs
+ - command parsing and generation
+ - command frame composition/decomposition
+ - command socket output
+ - command socket input, decoding, and handler dispatch
+ - workflow functionality which effect the protocol state progressions
    
 actually combine distinct functional aspects. The interface layers:
     
-    - AMQP method codecs, most of which should be generated from the specifications.
-    - Mid-layer operations which provide for method ordering
-    - Convenience application operations with defaults and functional abstraction
-      (his terms: dependency injection and inversion of control) to minimze
-      application code.
-    - templates for application patterns, like consumers or asynchronous RPC
-    - Sensible defaults for method attributes
+ - AMQP method codecs, most of which should be generated from the specifications.
+ - Mid-layer operations which provide for method ordering
+ - Convenience application operations with defaults and functional abstraction
+   (his terms: dependency injection and inversion of control) to minimze
+   application code.
+ - templates for application patterns, like consumers or asynchronous RPC
+ - Sensible defaults for method attributes
    
 are also indistinct, and there is no argument to expose the asynchronous operations
 on commands which require responses in an external interface. The correct implementation
