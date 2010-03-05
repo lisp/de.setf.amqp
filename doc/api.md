@@ -3,7 +3,7 @@ DE.SETF.AMQP : the API
 ------------
 
 
-=== Introduction : On Portability and COmpatibility
+### Introduction : On Portability and COmpatibility
 
 The de.set.amqp library offers three views into the [AMQP](http://www.amq.org) world:
 
@@ -70,7 +70,7 @@ a section to decribe each level's operators. Finally two simple examples are ann
 basic stream and message operations.
 
 
-=== Library Architecture : functional components and interface layers
+### Library Architecture : functional components and interface layers
 
 An AMQP library realizes or dismisses options in response to two issues
 
@@ -80,7 +80,7 @@ An AMQP library realizes or dismisses options in response to two issues
 
 Various librariy implementation demonstrate alternative responses to these questions.
 
-==== [AS3 AMQP](http://hopper.squarespace.com/blog/category/as3)
+#### [AS3 AMQP](http://hopper.squarespace.com/blog/category/as3)
 
 The AS3 AMQP library implements the asynchronous / autonomous approach.
 For example, in order to declare and bind an exchange and a queue once a connection is established,
@@ -134,7 +134,7 @@ The approach imposes a continuation passing model where none is necessary.
 It requires that the application must either correctly register and then remove handlers, or suffice with a single static control pattern.
 The connection establishment process demostrates that there are alternative, as connection establishment is performed through a synchrous recursive control flow.
 
-==== [Qpid Ruby](http://qpid.apache.org/amqp-ruby-messaging-client.html)
+#### [Qpid Ruby](http://qpid.apache.org/amqp-ruby-messaging-client.html)
 
 The Qpid Ruby library demonstrates the opposite approach, in that commands are expressed
 as combinations of entity and method and are performed synchronously.
@@ -163,14 +163,14 @@ consume request and the subsequent synchronous processing loop.
         end
     end
 
-==== [Qpid Jaa](http://qpid.apache.org/amqp-java-jms-messaging-client.html)
+#### [Qpid Jaa](http://qpid.apache.org/amqp-java-jms-messaging-client.html)
 
  The Qpid Java is based on the javax.jms classes, which it uses to implement asynchronous affinitive processing.
  The use pattern is to open a Connection, use it to create a Session, then create MessageConsumer and
  MessageProducer instances within the Session. Message instances are sent through the
  producer to consumers.
 
-==== [py-amqplib](http://code.google.com/p/py-amqplib/)
+#### [py-amqplib](http://code.google.com/p/py-amqplib/)
 
 The python AMQP library is semi-synchronous / affintive.
 The [example](http://blogs.digitar.com/jjww/2009/01/rabbits-and-warrens/) illustrates the
@@ -188,12 +188,12 @@ As demonstrated by the feature [request](http://code.google.com/p/py-amqplib/iss
 callback mechanism does not always suited benefit the application structure.
 
 
-==== [RabbitMQ Java](http://www.jarvana.com/jarvana/view/com/rabbitmq/amqp-client/1.3.0/amqp-client-javadoc-1.3.0.jar!/com/rabbitmq/client/impl/package-tree.html)
+#### [RabbitMQ Java](http://www.jarvana.com/jarvana/view/com/rabbitmq/amqp-client/1.3.0/amqp-client-javadoc-1.3.0.jar!/com/rabbitmq/client/impl/package-tree.html)
 
 
 
 
-=== Library Interface
+### Library Interface
 
 The de.setf.amqp implementation supports all four possible combinations.
 The AS3 example demonstrates that the protocol event sequences for entity creation and configuration
@@ -213,7 +213,7 @@ The stream and framed operations are all synchronous, by definition.
 Message operations can be performed asynchronously to the extent that the broker initiates them as such
 in response to eaarlier client commands.
 
-==== Frame Data
+#### Frame Data
 
     send-method
     call-with-encoded-arguments
@@ -222,7 +222,7 @@ in response to eaarlier client commands.
     get-read-frame
     process-frame
 
-==== Message
+#### Message
 
 rather than a single control model, it supports both asynchronous an synchronous forms
 
@@ -244,7 +244,7 @@ register handler or allow the channel to process read frames with the static ope
 For those which the server must implement, the client side operator, `request-` implements the
 immeidate request as well is any immediate synchronus interaction.
 
-==== Streams
+#### Streams
 
     with-open-stream
     read
@@ -268,7 +268,7 @@ immeidate request as well is any immediate synchronus interaction.
     device-write-content (device body &rest content-arguments)
     
 
-=== References
+### References
 
  - [Wikipedia](http://en.wikipedia.org/wiki/Software_portability) on software portability
  - [Wikipedia](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) on AMQP
@@ -283,7 +283,7 @@ immeidate request as well is any immediate synchronus interaction.
  - [Vinsoky IEEE](http://steve.vinoski.net/pdf/IEEE-Advanced_Message_Queuing_Protocol.pdf) :
    Steve Vinsoky's IEEE Towards Interation article about AMQP's launch.
 
-==== Implementations
+#### Implementations
 
   - [AMQP Ruby/EventMachine driver]('http://amqp.rubyforge.org/)
   - [Qpid Ruby](http://qpid.apache.org/qpid-java-client-refactoring.data/java_amqp_client_design.pdf)
@@ -294,7 +294,7 @@ immeidate request as well is any immediate synchronus interaction.
      a multi-threaded AMQP client for python
   - [AS3-AMQP](http://hopper.squarespace.com/blog/2008/3/24/as3-amqp-client-first-cut.html) : AMQP client for Adobe's S3-FLEX environment 
     
-==== Discussions
+#### Discussions
 
    Matt Heitzenroder argues [txAMQP] the client libraries should necessarily be event-based in order to support multi-threaded applications.
      His particular example is queueing messages. His argument fails to mention two issues. First, the socket imposes a complete order
