@@ -1,0 +1,145 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101602Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: data-wire-coding</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>data-wire-coding.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'><span ><a  href='#index_A'>A</a> </span><span ><a  href='#index_B'>B</a> </span><span ><a  href='#index_D'>D</a> </span><span ><a  href='#index_F'>F</a> </span><span ><a  href='#index_I'>I</a> </span><span ><a  href='#index_L'>L</a> </span><span ><a  href='#index_S'>S</a> </span><span ><a  href='#index_T'>T</a> </span><span ><a  href='#index_U'>U</a> </span><span ><a  href='#index_W'>W</a> </span></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines buffer accessors for AMQP data as part of the &apos;de.setf.amqp&apos; library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines the general data buffer accessors for AMQP.[1]
+ These encode/decode data between Lisp values and byte sequence buffers. All types required by the AMQP
+ versions 0.8 through 0.10 are supported. Where the AMQP type corresponds directly to a designatable Lisp
+ type, the general accessors reflect that name. Each type corresponds to an operator reader/writer pair of
+ the form
+
+    BUFFER-_type_ (buffer position)
+    (SETF BUFFER-_type_) (value buffer position)
+ Both expect a `(SIMPLE-ARRAY (UNSIGNED-BYTE 8))` typed buffer and an integer position within the buffer.
+ Many of the AMQP typed operators map directly to atomic buffer operators with self-evident names.
+ Sequence types require sized iterative coding. In some such cases, the AMQP type designation&apos;s size
+ does not agree with the lisp type (eg str8 from 0.10 indicates the the length itself is an
+ `(unsigned-byte 8)` value. In these cases an intermediate type serves to mediate terms.
+
+ The self-describing encodings present a special case for each version, as the encoding structure and the
+ type codes vary. As a consequence, those are not defined here. Instead a macro is defined to generate them
+ for each version given the respective type codes.
+
+ Each protocol specification includes a type table. The respective `data-encoding.lisp` file includes a
+ transliterated version of this table to specify implementations for version-specific operators in terms of
+ the general, and to inform the generation of the codecs for self-defining encodings.
+
+
+ ----
+ [1]: &apos;Advanced Message Queueing Protocol&apos;, amqp0-9-1.pdf, Section 4</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(with-argument-decoders with-property-decoders)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The wire-level representation presents three patterns:
+
+ - a fixed record structure for fields universally present - eg, <a  href='frames.html#frame' class='reference class'>frame</a> type, channel, and size
+ in this case the record fields are en/decoded with operations which reflect a fixed position/size/type
+ map between lisp objects and the buffered data.
+
+ - a fixed sequence of variable length fields for method arguments
+ in this case macros are provided to en/decode a fixed sequence of values between lisp and buffered
+ representations. varying sized data (eg sized strings) and self describing composite types are
+ supported. As fields which are always present in the same order in the buffer the process is statically
+ expressed in the source. The only variation is that of the length of sized elements. the macros establish
+ an environment with a buffer and a position indicator which is maintained  through interaction with the
+ primitive codecs for each field.
+
+ - a fixed sequence of optional, variable length fields for class content <a  href='classes.html#header' class='reference class'>header</a> properties
+ the encoded representation of a porperty set includes prefix flags to specify which fields are present.
+ these are consulted/computed by macros to decode to a property list and encode from variables.
+ the former mode is required in roder to construct keyword arguments based on presence. the latter
+ relies on a null/not-null distinction, which will need to be revisited should bit property fields appear.
+ The Property buffer codecs operate on a sequence of fields under control of an, initial bit flag
+ sequence. Where the flag indicates presence value is decoded. otherwise, the field is skipped. The encoding
+ performs the opposite projection, and skips null values. The property order and types are fixed, so use of
+ the respective buffer accessors can be expressed in static code  in sequence to step through the fields.
+
+
+ The macro operators are paired for decode/encode and argument/property functions:
+  with-argument-decoders ((buffer &amp;key (start 0)) &amp;body body &amp;environment env)
+  with-argument-encoders ((buffer &amp;key (start 0)) &amp;body body &amp;environment env)
+  with-property-decoders ((buffer &amp;key (start 0)) &amp;body body &amp;environment env)
+  with-property-encoders ((buffer &amp;key (start 0)) &amp;body body &amp;environment env)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The individual AMQP field types all resolve to common lisp types. Some directly, but most in
+ terms of custom type definitions. This applies, for example, to types where the AMQP size specifies the bit
+ count of the respective size field rather than the length of the data. For example, string-8. These type
+ definitions for these base types follow below. All names are in the :amqp package.
+
+ Given these, the operator def-encodings (see below) defines version specific type predicates, elementary
+ buffer accessors and composite codecs.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(compute-type-initform field-type-initform)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Where class slots definitions and codec keyword arguments require default values, these
+ are imputed from the respective field type. This occurs as the specifications are translated into
+ class and method definitions, at which point any version specific types are generalized and yield
+ initial values, as below.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(def-encodings def-byte-accessors def-string-accessors)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The codecs implement transformations between lisp objects and byte sequences. The buffer type,
+frame-buffer, is defined as (vector (unsigned-byte 8) (*)). It serves as a declaration and an argument
+constraint. Each version&apos;s codecs are are expressed in terms of that version&apos;s types and its operators.
+Each version-specific field type resolves to a lisp type, and the version-specific buffer accessors
+are implemented, in turn, in terms of the lisp-type <a  href='data-wire-coding.html#frame-buffer' class='reference function'>frame-buffer</a> accessors. This permits
+type names in one fersion to designate a different base implementation type than some other version.
+
+The lisp-type accessors are defined in the def-byte-accessors, def-string-accessors, etc.
+
+Each version includes a `data-wire-coding` <a  href='classes.html#file' class='reference function'>file</a>, in which a `def-encodings` form declares the type relation.
+That declaration compiles into the several things for each entry:
+
+ - a type definition
+ - a method to compute an initform
+ - protocol-specific buffer-accessors; for which, if a line code is included, they are intended to be used
+ in self-describing data (tables)
+
+In addition compound buffer accessors are defined for the types
+
+ - list
+ - array
+ - table</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(encode-ieee-754-32 encode-ieee-754-64)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>codec operators
+
+ The protocol data domain names vary from version to version, but they
+ resolve to a limited number of lisp types, mostly
+
+    string
+    (unsigned-byte 8, 16, 32, 64)
+
+ for each an encoding and a decoding operator is defined to pack/unpack the
+ value from a byte buffer. The operators are not generic as the entity codecs
+ all operate on data which fits in a single frame buffer - and (at least
+ through 0.10) operations were defined to be communicated in single frame.
+
+ Each buffered type requires two operators, one to encode and one to decode.
+ they are paired as a reader operator and the respective setf. In the latter
+ case the operator accepts an addition optional argument to specify the
+ type code. Each protocol version reuqires its own frame codecs as the type
+ codes vary.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Timestamps are &apos;64-bit POSIX time_t format with an accuracy of one second[1].
+ The UNIX epoch is 1970-01-01T00:00:00Z. This is specified by the amqp:*timestamp-epoch*,
+ which the buffer accessors use to shift to/from universal time.
+ ---
+ [1] amqp0-9-1.pdf, 4.2.5.4
+ [2] http://en.wikipedia.org/wiki/Unix_time</div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_A' style='font-weight: bold;'>A</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='array-p'>array-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_B' style='font-weight: bold;'>B</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-1024-p'>binary-1024-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 128.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-128-p'>binary-128-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 16.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-16-p'>binary-16-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 2.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-256-p'>binary-256-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 32.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-32-p'>binary-32-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 4.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-40-p'>binary-40-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 5.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-48-p'>binary-48-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 6.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-512-p'>binary-512-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 64.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-64-p'>binary-64-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 8.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='binary-8-p'>binary-8-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type (vector (unsigned-byte 8)) with length less than 1.</div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_D' style='font-weight: bold;'>D</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='decimal-p'>decimal-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_F' style='font-weight: bold;'>F</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='frame-buffer'>frame-buffer</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_I' style='font-weight: bold;'>I</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='iso-8859-character-p'>iso-8859-character-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_L' style='font-weight: bold;'>L</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='list-p'>list-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_S' style='font-weight: bold;'>S</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='string-16-p'>string-16-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type STRING with length less than 16.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='string-32-p'>string-32-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type STRING with length less than 32.</div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='string-8-p'>string-8-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Return true iff the argument is of type STRING with length less than 8.</div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_T' style='font-weight: bold;'>T</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='table-p'>table-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_U' style='font-weight: bold;'>U</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='utf32-character-p'>utf32-character-p</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_W' style='font-weight: bold;'>W</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='wire-level-type'>wire-level-type</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>

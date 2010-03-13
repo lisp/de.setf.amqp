@@ -215,57 +215,76 @@ in response to eaarlier client commands.
 
 #### Frame Data
 
-    send-method
-    call-with-encoded-arguments
-    call-with-decoded-arguments
-    put-encoded-frame
-    get-read-frame
-    process-frame
+    [send-method]((documentation/processing.html#send-method)
+    [call-with-encoded-arguments](documentation/processing.html#call-with-encoded-arguments)
+    [call-with-decoded-arguments](documentation/processing.html#call-with-decoded-arguments)
+    [put-encoded-frame](documentation/processing.html#put-encoded-frame)
+    [get-read-frame](documentation/processing.html#get-read-frame)
+    [process-frame](documentation/processing.html#process-frame)
 
 #### Message
 
-rather than a single control model, it supports both asynchronous an synchronous forms
+de.setf.amqp supports both asynchronous an synchronous processing models.
 
-Read frames are handled as follows
-if read synchronously, an explicit handler is provided, which as the first opportunity to process.
-If it declines, then processing succeeds with the handlers registered for the channel.
-If all decline, then the status operator for that command is invoked.
-This process applies to all frames for the channel to be read.
+synchronous procesing is performed with operators which read, parse, and dispatch successive commands in an (object x method) typecase.
 
-In addition, one can initiate an event generator, which manages the input to all channels.
-Rather than permit any given channel to read-through to the input frame stream, This 
-process reads all input and dispatches it. If the respective channel has bound filters,
+  [command-case](documentation/processing.html#command-case)
+  [command-loop](documentation/processing.html#command-loop)
+
+The first form processes just the next command, the '-loop' form iterates over read commands indefinitely.
+Each successively read frame is first filtered through the command clauses and passed to the first matching
+clause for processing. If it declines, then processing succeeds with the handlers registered for the channel.
+If all decline, then the [static operator](documentation/commands.html) for that command is invoked.
+
+In addition to synchronous processing, an application can create a thread to manage a connection and
+run a processing loop
+
+  [connection-top-level](documentation/processing.html#connection-top-level)
+
+In this case, that process read the connection frames and dispatches input to each channel.
+If the respective channel has bound filters,
 then it is asynchronously interrupted to filter the frame. One it starts, it can elect
 to read further frames synchronously, or to retain the event-based processing.
+The application can register method handlers for each channel
 
-register handler or allow the channel to process read frames with the static operators.
+  [(setf channel-command)](documentation/processing.html#setf_channel-command)
 
- The library implements those commands which are required of the client as `respond-to-`.
-For those which the server must implement, the client side operator, `request-` implements the
-immeidate request as well is any immediate synchronus interaction.
+to bins a function to process specific methods. The default method processes commands with the static operators.
+
+The [static operators](documentation/commands.html) implements those commands which are required of the client as `respond-to-`.
+For broker operations, the client side operator, `request-` implements the
+immediate request as well is any immediate synchronous interaction.
 
 #### Streams
 
-    with-open-stream
-    read
-    write
-    stream-read- byte char string sequence vector
-    stream-write- byte char string sequence vector
-    finish-output
-    force-output
-    stream-listen
-    stream-peek-char
-    stream-clear-output
+The stream interface supports both the standard / gray stream interface and the simple-stream interface
 
-    device-open (stream #-sbcl slots initargs)
-    device-close (stream abort)
-    device-read (stream buffer start end blocking)
-    device-clear-input (stream buffer-only)
-    device-write (stream buffer start end blocking)
-    device-clear-output (stream)
-    device-flush (device)
-    device-read-content (device &rest content-arguments)
-    device-write-content (device body &rest content-arguments)
+    [with-open-stream]
+    [read]
+    [write]
+    [stream-clear-output](documentation/device-level.html#stream-clear-output)
+    [stream-finish-output](documentation/device-level.html#stream-finish-output)
+    [stream-force-output](documentation/device-level.html#stream-force-output)
+    [stream-listen](documentation/device-level.html#stream-listen)
+    [stream-peek-char](documentation/device-level.html#stream-peek-char)
+    [stream-read-byte](documentation/device-level.html#stream-read-byte)
+    [stream-read-char](documentation/device-level.html#stream-read-char)
+    [stream-read-line](documentation/device-level.html#stream-read-line)
+    [stream-read-sequence](documentation/device-level.html#stream-read-sequence)
+    [stream-write-byte](documentation/device-level.html#stream-write-byte)
+    [stream-write-char](documentation/device-level.html#stream-write-char)
+    [stream-write-sequence](documentation/device-level.html#stream-write-sequence)
+    [stream-write-string](documentation/device-level.html#stream-write-string)
+
+    [device-open](documentation/device-level.html#device-open) (stream #-sbcl slots initargs)
+    [device-close](documentation/device-level.html#device-close) (stream abort)
+    [device-read](documentation/device-level.html#device-read) (stream buffer start end blocking)
+    [device-clear-input](documentation/device-level.html#device-clear-input) (stream buffer-only)
+    [device-write](documentation/device-level.html#device-write) (stream buffer start end blocking)
+    [device-clear-output](documentation/device-level.html#device-clear-output) (stream)
+    [device-flush](documentation/device-level.html#device-flush) (device)
+    [device-read-content](documentation/device-level.html#device-read-content) (device &rest content-arguments)
+    [device-write-content](documentation/device-level.html#device-write-content) (device body &rest content-arguments)
     
 ---
 

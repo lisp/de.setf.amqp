@@ -1,0 +1,20 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101601Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: macros</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>macros.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines the macros to <a  href='commands.html#declare' class='reference function'>declare</a> protocol objects and methods for the
+ &apos;de.setf.amqp&apos; library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Several macros are used to define protocol entities
+
+ - `def-ensure-object` operates with a protocol object to retrieve or create the respective dependent
+ object, where the type is given abstractly while the instance is apways specific to the context&apos;s
+ version
+ - `def-ensure-method` operates with a protocol <a  href='classes.html#object' class='reference class'>object</a> similar to `def-ensure-object`, but with respect to
+ method instances.
+ - `def-amqp-abstract-class` defines a general protocol class. (see `classes.lisp`)
+ - `def-amqp-class` defines a version-specific <a  href='classes.html#object' class='reference class'>object</a> class. This includes the codecs and the constructors.
+ - `def-amqp-method` defines a version-specific method class. This includes the codecs and the constructors.
+ - `def-amqp-command` defines a combined request/response command suite.</div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>

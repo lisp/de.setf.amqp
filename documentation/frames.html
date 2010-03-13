@@ -1,0 +1,25 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101601Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: frames</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>frames.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'><span ><a  href='#index_F'>F</a> </span></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines the wire-level frame model for for the `de.setf.amqp` Connon Lisp library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Each protocol version packages the data on the wire in a slightly different form. The
+ `frame` is specialized for each version to implement operators which marshall/unmarshall frame data as
+ as per the version, and operators which map between abstract objcet and method class names and the
+ version-specific numeric identifiers.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(read-7-byte-header-frame read-8-byte-header-frame read-12-byte-header-frame)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The abstract frame structure (<a  href='classes.html#header' class='reference class'>header</a> . payload), is implemented variously in the respective versions.
+ The <a  href='classes.html#header' class='reference class'>header</a> size varies. The end marker is eliminated. The field sizes change. To allow for this, each
+ <a  href='classes.html#connection' class='reference class'>connection</a> uses a specialized <a  href='frames.html#frame' class='reference class'>frame</a> class and that class implements the general <a  href='frames.html#frame' class='reference class'>frame</a> format.
+ This includes the buffer <a  href='classes.html#access' class='reference class'>access</a> as well as mediating translation between protocol-specific wire codes
+ for operations and classes and the generic names. Each protocol implements its logic in its
+ &apos;abstract-classes&apos; and &apos;classes&apos; files.
+ nb. some <a  href='classes.html#stream' class='reference class'>stream</a> classes which appear as handles may not specialize the respective `stream-read-*`
+ operators.</div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_F' style='font-weight: bold;'>F</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>class</div><div  class='name' style='padding-right: .5in; width: 32em;'><a  name='frame'>frame</a></div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Comprises the header and payload for a single AMQP frame.
+ Specializations are defined for input and output and for the respective
+ protocol version. The former distinguish methods to treat the data as
+ received or sent while the latter distinguish header format.</div></div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>

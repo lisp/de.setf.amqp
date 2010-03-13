@@ -1,0 +1,112 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101600Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: processing</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>processing.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'><span ><a  href='#index_C'>C</a> </span><span ><a  href='#index_W'>W</a> </span></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines the AMQP input processing pipeline for the &apos;de.setf.amqp&apos; library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The reponse to connected input is computed through a sequence of function calls
+ to decode, dispatch, compute, encode and finally send the response. The default path devolves to the static
+ operators defined in `def-amqp-command` forms. (see `commands.lisp`.) The combination of stages supports
+ sufficient specialization, to permit an application to bind additional mechanisms into the process with both
+ static and dynamic extent, based on both lexical and dynamic definitions, and to achieve both synchronous and
+ asynchronous processing.
+
+ The principal distinction is between read- and event-mode processing. The
+ operators
+
+ - `amqp:command-case`
+ - `amqp:command-loop`
+ - `amqp:with-commands`
+
+ initiate explicit processing of read frames for a given <a  href='classes.html#channel' class='reference function'>channel</a>. Each frame
+ is tested against clauses and processed by the first which matches. If none
+ matches, the first form, by default, initiates standard processing for the
+ <a  href='classes.html#connection' class='reference function'>connection</a> - which has the effect of an event dispatch. Optionally, the
+ form can suppress processing, delegate to some other operator, or signal an
+ <a  href='conditions.html#error' class='reference function'>error</a>. The -ecase version signals an <a  href='conditions.html#error' class='reference function'>error</a>.
+
+ The alternative path initiates the standard processing for a <a  href='classes.html#connection' class='reference function'>connection</a>
+ based on read frames either as part of a thread&apos;s explicit input processing
+ loop, or when interrupted by a connection&apos;s event process in a
+ multi-threaded configuration.
+
+ -`process-frame (<a  href='classes.html#connection' class='reference function'>connection</a> frame)`
+    decodes the frame into frame class. delegates to process-typed-frame
+    with process-decoded-frame as the continuation.
+ - `process-typed-frame (<a  href='classes.html#connection' class='reference class'>connection</a> <a  href='classes.html#channel' class='reference class'>channel</a> type frame)`
+    if the frame is a method, applies process-command via call-with-decoded-arguments.
+    otherwise calls it directly with the class respective the <a  href='frames.html#frame' class='reference class'>frame</a> type and
+    the frame itself
+ -`respond-to-command (connection channel class method-or-frame &amp;rest args)`
+    computes the class.method function, and applies it in a dynamic context
+    augmented by the channel&apos;s response functions. If the command target is
+    a class, that is passed, otherwise - for headers and <a  href='classes.html#body' class='reference class'>body</a>, the <a  href='frames.html#frame' class='reference class'>frame</a>
+    itself is passed.
+
+ For an other takes on processing patterns see alternative implementations:
+ RabbitMQ&apos;s java library interposes the AMPCommand [1] class on the <a  href='classes.html#channel' class='reference class'>channel</a>, which
+ acts as a state machine to filter the incoming frames. It releases composed
+ commands which combine the operator/arguments, an envelope with content <a  href='classes.html#header' class='reference class'>header</a>
+ properties, and any content <a  href='classes.html#body' class='reference class'>body</a> in on entity or passes it through an event-invocation
+ interface. The filtreing means that the library can impose state constraints - eg,
+ that all <a  href='classes.html#message' class='reference class'>message</a> content is the correct length, w/o interleaving that with application
+processing. On the other hand, it impedes streaming.
+
+
+ [1]: http://www.rabbitmq.com/releases/rabbitmq-java-client/v1.7.0/rabbitmq-java-client-javadoc-1.7.0/com/rabbitmq/client/impl/AMQCommand.html</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(process-command dynamic-process-command)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Interface Operators :
+
+
+ static / dynamic / lexical / instantial command handler binding
+
+ Each read frame, once typed and decoded, must be </div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>. This
+ can occur in a dynamic context where a frame appears immediately
+ subsequent, and in response to a command on the same channel, or it can be
+ a frame which has appeared asynchronously on a channel for which
+ the most recent request was to subscribe to a queue, or it could be
+ autononomously sent from the broker - eg, to close a queue or
+ return a <a  href='classes.html#message' class='reference class'>message</a>.
+
+ The processing mechanism must permit both forms of processing. In
+ particular, because a given <a  href='classes.html#channel' class='reference class'>channel</a> may recieve a <a  href='frames.html#frame' class='reference class'>frame</a> in either
+ category at a given time. Rather than configure a <a  href='classes.html#channel' class='reference class'>channel</a> for this,
+ the mechanism should interpret respective context and operate accordingly.
+ To achieve this, it integrates the following definition forms:
+
+   with-commands (clauses . <a  href='classes.html#body' class='reference class'>body</a>)
+     defines a command processor in the current lexical context and
+     binds it dynamically, such that it takes first precedence.
+
+   (setf channel-command) (<a  href='classes.html#channel' class='reference function'>channel</a> method &amp;optional class) (function)
+     binds a handler function for that (method x class) for frames to be processed
+     in that <a  href='classes.html#channel' class='reference class'>channel</a>. any extant binding is returned.
+ 
+   dynamic-process-command (handler channel class type . args)
+     is implemented to apply the hander iff it is a function, otherwise to
+     apply a <a  href='classes.html#channel' class='reference function'>channel</a> handler iff it is a function, and otherwise to
+     apply the method&apos;s respective response function.
+
+   The standard definitions arrange that dynamic-process-command traces
+   back through dynamically bound handlers until either one handles the frame -
+   in that it returns true, or the binding is null - which is the global default.
+   At that point it tries the channel&apos;s handle. If there is none, or it declines,
+   then the method&apos;s own response function is used.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(compute-channel-command-handler channel-command-handler channel-command)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Instance-scoped Commands :
+
+ Instance-scoped commands are integrated into a channel&apos;s command-handler function.
+ Each is a implemented in a method, specialized on the method&apos;s class
+ the operator is defined on demand and the handlers are added/removed
+ with the (setf channel-command-handler) operator.</div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_C' style='font-weight: bold;'>C</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='command-case'>command-case</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='command-loop'>command-loop</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_W' style='font-weight: bold;'>W</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='with-commands'>with-commands</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'>Defines a lexically scoped command handler, which is to take precedence over any extand
+ dynamic handlers. Each clause has the form
+   (method-type (class . arguments) . <a  href='classes.html#body' class='reference class'>body</a>)
+ these are collected into an operator which is shadows the existing global
+ definition during the dynamic extend of the forms body. If no form matches a to-be-processed
+ frame, the next handler in the dynamic chain is invoked. (See dynamic-process-command)</div></div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>

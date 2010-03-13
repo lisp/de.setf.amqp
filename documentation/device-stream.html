@@ -1,0 +1,13 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101600Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: device-stream</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>device-stream.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'><span ><a  href='#index_W'>W</a> </span></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file defines a stream interface for AMQP channel and connection instances for the
+ &apos;de.setf.amqp&apos; library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Stream-based operations are available through the `device-read-content` and `device-write-content` operators
+ in the event that the size of the body datum is indeterminate. One specialization accepts a function object as
+ the body. This is used to implement `with-open-channel` by passing the form body as the continuation.</div>
+<hr /><div  style='background-color: #f0f0e0; border-top: inset 1px; border-bottom: inset 1px; margin-bottom: 1ex;'><a  name='index_W' style='font-weight: bold;'>W</a></div><div  style='class: documentation function' style='padding-top: 1ex;'><div  class='type' style='float: right'>function</div><div  class='name' style='float: left; padding-right: .5in; width: 8em;'><a  name='with-open-channel'>with-open-channel</a></div><div  class='parameters'>()</div><div  class='documentation' style='padding-left: 2em; padding-right: 2em;'></div></div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>

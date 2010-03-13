@@ -1,0 +1,129 @@
+<?xml version='1.0' charset='iso-8859-1'?><!DOCTYPE svg PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><xhtml:html  xmlns='http://www.w3.org/1999/xhtml'><head ><meta  name='date' content='20100313T101600Z00'/>
+<meta  http-equiv='Content-Type' content='text/xhtml;charset=iso-8859-1'/>
+<link  href='documentation.css' ref='stylesheet' type='text/css'/>
+<title >FILE: device-level</title>
+</head>
+<body ><div  class='documentation file'><div  class='type' style='float: right'>file</div><div  class='name'>device-level.lisp</div><hr /><div  style='text-align: center; background-color: #e0e0e0;'></div><hr /><div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>This file implements device-level support for streams based on AMQP connections as part of the
+ &apos;de.setf.amqp&apos; library.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>Device-level operations are managed by channel instances, which delegete in turn to
+connection-wrapped tcp sockets. The AMQP standards permit this combination to behave in either of (at
+least) two ways. On one hand, one can use all allowed protocoal variability and treat the socket
+<a  href='classes.html#connection' class='reference class'>connection</a> as a multiplexed multi-channel <a  href='classes.html#stream' class='reference class'>stream</a>. In this mode each thread would instantiate its own
+<a  href='classes.html#channel' class='reference class'>channel</a> on the shared <a  href='classes.html#connection' class='reference class'>connection</a>. On the other hand, is also possible to constrain the connection&apos;s use
+to dedicate it to a single <a  href='classes.html#channel' class='reference class'>channel</a> - and thereby to a single thread.
+
+ The multiplexed mechanism sets a much lower demand for system resources, but increases the processing
+for a single <a  href='classes.html#channel' class='reference class'>channel</a> and constrains the i/o operations to block mode. A dedicated mechanims requires
+more sockets, but can dedicate the buffering to a single thread, which permits more efficient i/o
+operations.
+
+ When the socket is multiplexed, then it is possible that content frames for one <a  href='classes.html#channel' class='reference class'>channel</a> will be
+interleaved with frames for another <a  href='classes.html#channel' class='reference class'>channel</a>, which means it is not possible to guarantee that a given
+socket read operation will contain an expected content <a  href='frames.html#frame' class='reference class'>frame</a>. The multiplexing requires per-channel
+queuing and processing upon delivery, whereby the actual buffer is not to be predicted. When the socket
+is dedicated, read operatation can target a given buffer, since the intra-channel ordering constraints
+require that content be delivered in-order and uninterrupted. The protocol meta-data can be read and
+processed in-line ro parameterize the read and recognize exceptions, while data i/o targets given
+buffers. The 1.0pr documentintroduces additional <a  href='classes.html#session' class='reference class'>session</a> and context for <a  href='frames.html#frame' class='reference class'>frame</a> processing, but those are
+not considered here. (see amqp0-8.pdf,p.56 amqp0-9.pdf,p.35)
+
+ In the implementation below, the two amqp classes - <a  href='classes.html#connection' class='reference class'>connection</a> and <a  href='classes.html#channel' class='reference class'>channel</a>, are each specialized from
+simple-stream and implement the standard interface. The required device operators are implemented for
+both amqp:<a  href='classes.html#channel' class='reference function'>channel</a> and amqp:<a  href='classes.html#connection' class='reference function'>connection</a>, despite that <a  href='classes.html#stream' class='reference function'>stream</a> operations are limited to channels while
+connections are to be used only to consolidate frame-based operations with the network <a  href='classes.html#stream' class='reference function'>stream</a>. The
+principle operators are
+
+    device-open (<a  href='classes.html#stream' class='reference function'>stream</a> #-sbcl slots initargs)
+    device-close (<a  href='classes.html#stream' class='reference function'>stream</a> abort)
+    device-read (<a  href='classes.html#stream' class='reference function'>stream</a> buffer start end blocking)
+    device-clear-input (<a  href='classes.html#stream' class='reference function'>stream</a> buffer-only)
+    device-write (<a  href='classes.html#stream' class='reference function'>stream</a> buffer start end blocking)
+    device-clear-output (<a  href='classes.html#stream' class='reference function'>stream</a>)
+    device-flush (device)
+    device-read-content (device &amp;rest content-arguments)
+    device-write-content (device body &amp;rest content-arguments)
+
+ The device-open operator returns an instance which can be used directly. In the case of a <a  href='classes.html#channel' class='reference class'>channel</a>, it
+connects to the respective <a  href='classes.html#connection' class='reference class'>connection</a> and prepares any exchange/queue specified in uri initialization
+argument.  In that state it can be supplied to <a  href='commands.html#publish' class='reference class'>publish</a>, <a  href='commands.html#consume' class='reference class'>consume</a>, or <a  href='commands.html#get' class='reference class'>get</a> operations to initiate <a  href='classes.html#stream' class='reference class'>stream</a>
+i/o, or to transfer isolated objects. In the case of a <a  href='classes.html#connection' class='reference class'>connection</a>, a socket <a  href='classes.html#stream' class='reference class'>stream</a> is opened to the
+designated server and the protocol handshake and open-connection phases are completed. (see
+open-connection and negotiate-client-connection) In that state, one can construct and use channels. In the
+case of a <a  href='classes.html#connection' class='reference class'>connection</a>, it should be used only to make channels. Note that the <a  href='classes.html#connection' class='reference class'>connection</a> class is adjusted to
+match that of the protocol version which it negotiates with the remote broker. That is, a
+
+    (make-instance &apos;amqp:<a  href='classes.html#connection' class='reference class'>connection</a>  :uri &quote;amqp://guest:guest@localhost/&quote;)
+
+will return a <a  href='classes.html#connection' class='reference class'>connection</a> sub-class. This places constraints on the effective methods for `device-open` and the
+various constituents of the standard instantiation protocol for `simple-stream`.
+The respective effective methods for the base implementation look something like
+
+    initialize-instance : (<a  href='classes.html#connection' class='reference function'>CONNECTION</a>) (STANDARD-OBJECT)
+    shared-initialize (in mcl) : (<a  href='classes.html#connection' class='reference function'>CONNECTION</a> T) (AMQP-DEVICE T) :AFTER (SIMPLE-STREAM T) (STANDARD-OBJECT T)
+    reinitialize-instance : (STANDARD-OBJECT)
+    device-open (in sbcl) : (<a  href='classes.html#connection' class='reference function'>CONNECTION</a> T) (AMQP-SOCKET-DEVICE T) (AMQP-DEVICE T) (SIMPLE-STREAM T) (SLOT-OBJECT T)
+
+The exact form depends on the run-time (cf. `standard-object` v/s `sloto-object`), but all share the topology,
+that no next method call follows the class change. Should protocol-specific specialization be necessary, any
+specialized operation subsequent to the change would need to be independent of these effective methods.
+
+ The device-read and device-write operators are defined at the respective levels to delegate a channel&apos;s
+operations to the respective <a  href='classes.html#connection' class='reference function'>connection</a> and to perform <a  href='classes.html#connection' class='reference function'>connection</a> i/o through the socket <a  href='classes.html#stream' class='reference function'>stream</a>. When
+<a  href='classes.html#channel' class='reference function'>channel</a> operations  with an explicit buffer, are intended to implement data stream-based data transfer
+for a <a  href='classes.html#channel' class='reference function'>channel</a> which has already initiated a message <a  href='classes.html#exchange' class='reference function'>exchange</a> and observe the body size constraints
+specified fro the message. Where the size is known at the outset, the body-size and body-position govern
+eof behaviour. Where the size was unkown, the <a  href='classes.html#channel' class='reference function'>channel</a> implemented chunked transfer in terms of maxmial
+sized messages, and relies on device-flush and device-clear-input to indicate and manage the effective
+eof.
+
+ The state operators for position and length return meaningful information for fixed content sizes only
+and have no effect to modify <a  href='classes.html#channel' class='reference class'>channel</a> state. 
+
+ For more information on simple streams, see Franz&apos;s documentation[3] and the sbcl implementation[4] of same,
+as well as the discussions of the the alternative fu interface.[5]
+
+ ---
+ [1]: https://jira.amqp.org/confluence/download/attachments/720900/amqp0-8.pdf?version=1
+ [2]: https://jira.amqp.org/confluence/download/attachments/720900/amqp0-9-1.pdf?version=1
+ [3]: http://www.franz.com/support/documentation/current/doc/streams.htm
+ [4]: http://sbcl.cvs.sourceforge.net/viewvc/sbcl/sbcl/contrib/sb-simple-streams/
+ [5]: http://paste.lisp.org/display/65229</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(negotiate-client-connection open-connection)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>AMQP connection negotiation occurs in two steps. First, the peers agree on a protocol version. Second
+they exchange  authentication and control information to set up the connection. The first step is
+implemented by open-connection. It negotiates with the broker to agree on a supported protocol version
+and changes the connection instance&apos;s class to that of the implementation class for that version. For
+some protocol versions, it is also confronted with the initial <a  href='frames.html#frame' class='reference class'>frame</a>, which it buffers for the
+configuration step.
+
+ The second step, authentication and configuration, is implemented in negotiate-client-connection. It
+exchanges <a  href='classes.html#connection' class='reference class'>connection</a> commands with the broker for authentication and tuning. The configured <a  href='classes.html#connection' class='reference class'>connection</a> is
+returned.</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>(device-read-content device-write-content)</div>
+<div  class='documentation' style='padding-left: 2em; padding-right: 2em;white-space: pre;'>The content processing interface comprises the two operators
+  * device-read-message (<a  href='classes.html#channel' class='reference function'>channel</a> &amp;rest)
+  * device-write-message (<a  href='classes.html#channel' class='reference function'>channel</a> body &amp;rest)
+
+ Each accepts the keywords which apply to the respctive protocol operation, that is, any method arguments and the class&apos;
+ <a  href='classes.html#header' class='reference class'>header</a> properties. for reading this means the arguments for <a  href='commands.html#get' class='reference class'>get</a> and <a  href='commands.html#deliver' class='reference class'>deliver</a>, while for writing those for <a  href='commands.html#publish' class='reference class'>publish</a>.
+ The interface supports two use patterns : <a  href='classes.html#body' class='reference class'>body</a> instances and continuation based. The decision is made by the writer
+ according to whether the <a  href='classes.html#body' class='reference class'>body</a> size is known at the outset. For fixed length vectors this is true. For aeverything else, it
+ is not. Where it is known, a single content-bearing command is sent. Where is it not known, A sequence of commands is
+ sent until the writer terminates the <a  href='classes.html#stream' class='reference class'>stream</a> by indicating completion in a call to device-flush.
+
+ Streams are broken into and reconstituted from the three <a  href='frames.html#frame' class='reference class'>frame</a> constituents for a command : method, header, and body.
+ * a method frame : is emitted by a <a  href='commands.html#request' class='reference function'>request</a> operator and parsed and processed by the respond-to- operator to cache the
+   arguments in the <a  href='classes.html#channel' class='reference class'>channel</a>. The protocol interface operator then invokes device-read/write-content.
+ * a content header : ion inpt, s parsed in device-read-content/content-header to extract the properties and cache them
+   in the channel&apos;s <a  href='classes.html#basic' class='reference function'>basic</a> class instance. On output, it is generated by device-write-content based on the channel&apos;s current
+   <a  href='classes.html#basic' class='reference class'>basic</a> instance
+ * the content <a  href='classes.html#body' class='reference class'>body</a> : is parsed based on the channel&apos;s internal type combined with the content type. It is generated
+   based on the bassed body instance in combination with the content type /encoding.
+
+  [ channel-request-publish channel-respond-to-get-ok channel-respond-to-deliver ]
+  --&gt; [ device-read-content  device-write-content]
+      --&gt; [ device-read-content-header device-write-content-header ]
+      --&gt; [ device-read-content-body device-write-content-body ]
+ </div>
+<hr /></div>
+<hr /><div  class='footer' style='float: right; font-size: small;'><img  src='http://www.digitool.com/img/mcl-made-1.gif'/> Copyright 2010 setf.de</div></body></html>
