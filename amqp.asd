@@ -14,7 +14,7 @@
 ;;; without even the ;;; implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ;;; See the Affero General Public License for more details.
 ;;;
-;;; A copy of the GNU Affero General Public License should be included with 'de.setf.amqp' as `AMQP:agpl.txt`.
+;;; A copy of the GNU Affero General Public License should be included with 'de.setf.amqp' as `agpl.txt`.
 ;;; If not, see the GNU [site](http://www.gnu.org/licenses/).
 ;;;
 ;;; This file should reside in the root directory of the `de.setf.amqp` source files.
@@ -50,6 +50,7 @@
   :nicknames (:setf.amqp)
   :description "An AMQP client library"
   :version "20100214-0.3"
+  :license :gal
   :serial t
   :depends-on (:net.common-lisp.usocket
                :net.common-lisp.closer-mop
