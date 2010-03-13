@@ -28,11 +28,11 @@
  their basic representation. All are 'classes' on an abstract level. The distinction
  is of a containment hierarchy.
 
- At the transport level, transported data is broken into various comstiteunts -
+ At the transport level, transported data is broken into various constituents -
  either 'content' and 'frames' or 'assemblies', 'segments' and 'frames', but
  this does not affect the respective representation either.
 
- This implementation reflects the follwoing general order.
+ This implementation reflects the following general order.
 
  1. The primary interface classes are amqp:object and amqp:method. These are specialized in terms
  of protocol version, and  according to the respetive protocol's functional model. In terms of the
