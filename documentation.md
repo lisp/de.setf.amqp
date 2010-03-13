@@ -215,12 +215,12 @@ in response to eaarlier client commands.
 
 #### Frame Data
 
-    [send-method]((documentation/processing.html#send-method)
-    [call-with-encoded-arguments](documentation/processing.html#call-with-encoded-arguments)
-    [call-with-decoded-arguments](documentation/processing.html#call-with-decoded-arguments)
-    [put-encoded-frame](documentation/processing.html#put-encoded-frame)
-    [get-read-frame](documentation/processing.html#get-read-frame)
-    [process-frame](documentation/processing.html#process-frame)
+ -  [send-method]((documentation/processing.html#send-method)
+ -  [call-with-encoded-arguments](documentation/processing.html#call-with-encoded-arguments)
+ -  [call-with-decoded-arguments](documentation/processing.html#call-with-decoded-arguments)
+ -  [put-encoded-frame](documentation/processing.html#put-encoded-frame)
+ -  [get-read-frame](documentation/processing.html#get-read-frame)
+ -  [process-frame](documentation/processing.html#process-frame)
 
 #### Message
 
@@ -259,32 +259,32 @@ immediate request as well is any immediate synchronous interaction.
 
 The stream interface supports both the standard / gray stream interface and the simple-stream interface
 
-    [with-open-stream]
-    [read]
-    [write]
-    [stream-clear-output](documentation/device-level.html#stream-clear-output)
-    [stream-finish-output](documentation/device-level.html#stream-finish-output)
-    [stream-force-output](documentation/device-level.html#stream-force-output)
-    [stream-listen](documentation/device-level.html#stream-listen)
-    [stream-peek-char](documentation/device-level.html#stream-peek-char)
-    [stream-read-byte](documentation/device-level.html#stream-read-byte)
-    [stream-read-char](documentation/device-level.html#stream-read-char)
-    [stream-read-line](documentation/device-level.html#stream-read-line)
-    [stream-read-sequence](documentation/device-level.html#stream-read-sequence)
-    [stream-write-byte](documentation/device-level.html#stream-write-byte)
-    [stream-write-char](documentation/device-level.html#stream-write-char)
-    [stream-write-sequence](documentation/device-level.html#stream-write-sequence)
-    [stream-write-string](documentation/device-level.html#stream-write-string)
+ -  [with-open-stream]
+ -  [read]
+ -  [write]
+ -  [stream-clear-output](documentation/device-level.html#stream-clear-output)
+ -  [stream-finish-output](documentation/device-level.html#stream-finish-output)
+ -  [stream-force-output](documentation/device-level.html#stream-force-output)
+ -  [stream-listen](documentation/device-level.html#stream-listen)
+ -  [stream-peek-char](documentation/device-level.html#stream-peek-char)
+ -  [stream-read-byte](documentation/device-level.html#stream-read-byte)
+ -  [stream-read-char](documentation/device-level.html#stream-read-char)
+ -  [stream-read-line](documentation/device-level.html#stream-read-line)
+ -  [stream-read-sequence](documentation/device-level.html#stream-read-sequence)
+ -  [stream-write-byte](documentation/device-level.html#stream-write-byte)
+ -  [stream-write-char](documentation/device-level.html#stream-write-char)
+ -  [stream-write-sequence](documentation/device-level.html#stream-write-sequence)
+ -  [stream-write-string](documentation/device-level.html#stream-write-string)
 
-    [device-open](documentation/device-level.html#device-open) (stream #-sbcl slots initargs)
-    [device-close](documentation/device-level.html#device-close) (stream abort)
-    [device-read](documentation/device-level.html#device-read) (stream buffer start end blocking)
-    [device-clear-input](documentation/device-level.html#device-clear-input) (stream buffer-only)
-    [device-write](documentation/device-level.html#device-write) (stream buffer start end blocking)
-    [device-clear-output](documentation/device-level.html#device-clear-output) (stream)
-    [device-flush](documentation/device-level.html#device-flush) (device)
-    [device-read-content](documentation/device-level.html#device-read-content) (device &rest content-arguments)
-    [device-write-content](documentation/device-level.html#device-write-content) (device body &rest content-arguments)
+ -  [device-open](documentation/device-level.html#device-open) (stream #-sbcl slots initargs)
+ -  [device-close](documentation/device-level.html#device-close) (stream abort)
+ -  [device-read](documentation/device-level.html#device-read) (stream buffer start end blocking)
+ -  [device-clear-input](documentation/device-level.html#device-clear-input) (stream buffer-only)
+ -  [device-write](documentation/device-level.html#device-write) (stream buffer start end blocking)
+ -  [device-clear-output](documentation/device-level.html#device-clear-output) (stream)
+ -  [device-flush](documentation/device-level.html#device-flush) (device)
+ -  [device-read-content](documentation/device-level.html#device-read-content) (device &rest content-arguments)
+ -  [device-write-content](documentation/device-level.html#device-write-content) (device body &rest content-arguments)
     
 ---
 
