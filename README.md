@@ -156,7 +156,8 @@ Which, as an aside, illustrates that brokered messages persist between connectio
 Of which a default QPID broker with no persistence support was observed to cache only about 500k bytes
 (ca. 25,000 messages of 20 bytes each).
 
-An introduction to the API is taking shape. [Slowly](./doc/api.md). In the meantime, there are a few [examples](./readmes/) for the
+An introduction to the [API](./documentation.md) is taking shape.
+In the meantime, there is a package [index](./documentation/package_AMQP.html), there are a few [examples](./readmes/) for the
 library proper and for the RabbitMQ library [emulation](./rabbitmq/examples.lisp).
 
 Downloading
