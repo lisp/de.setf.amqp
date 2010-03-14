@@ -34,7 +34,12 @@
 (modpackage :amqp
   (:use)
   (:nicknames :de.setf.amqp)
-  (:documentation "")
+  (:documentation "The :de.setf.amqp package is the 'AMQP standard' package. It comprises symbols which name
+    classes, conditions, methods, and data types which are declared in the AMQP specifications.
+    It is intended as an interface package only.
+    It uses no packages, and should not be used, as the specification contains numerous names which
+    would conflict with those from :common-lisp. as well as abbreviated terms which are likely to conflict
+    with an application's terms.")
   (:export
    :*connection-timeout*
    :*default-locale*
@@ -262,27 +267,28 @@
    :wire-level-type
    :with-commands
    :with-open-channel
-   :CONTENT-TOO-LARGE-ERROR
-   :NO-CONSUMERS-ERROR
-   :CONNECTION-FORCED-ERROR
-   :INVALID-PATH-ERROR
-   :ACCESS-REFUSED-ERROR
-   :NOT-FOUND-ERROR
-   :RESOURCE-LOCKED-ERROR
-   :PRECONDITION-FAILED-ERROR
-   :FRAME-ERROR
-   :SYNTAX-ERROR
-   :COMMAND-INVALID-ERROR
-   :UNEXPECTED-FRAME-ERROR
-   :RESOURCE-ERROR
-   :NOT-ALLOWED-ERROR
-   :NOT-IMPLEMENTED-ERROR
-   :INTERNAL-ERROR
+   :content-too-large-error
+   :no-consumers-error
+   :connection-forced-error
+   :invalid-path-error
+   :access-refused-error
+   :not-found-error
+   :resource-locked-error
+   :precondition-failed-error
+   :frame-error
+   :syntax-error
+   :command-invalid-error
+   :unexpected-frame-error
+   :resource-error
+   :not-allowed-error
+   :not-implemented-error
+   :internal-error
    ))
 
 
 (modpackage :amqp.s
-  (:documentation "The home package for state names")
+  (:documentation "The home package for state names. These device-level operators use these to constrain
+    operations on devices / connections / channels.")
   (:nicknames :de.setf.amqp-state)
   (:use )
   (:export
@@ -310,10 +316,40 @@
 
 (defpackage :de.setf.amqp.utility
   (:use )
+  (:documentation "The :de.setf.amqp.utility package exports names to make library components available to
+    applications. It uses no package, but is intended to be used - as is the case with the library implementation
+    itself. It corss-exports several terms from the AMQP standard package for this purpose.")
   (:nicknames :amqp.u)
-  (:import-from :de.setf.amqp :*log-level*)
+  (:import-from :de.setf.amqp
+                :*connection-timeout*
+                :*default-locale*
+                :*default-mechanism*
+                :*default-version*
+                :*frame-size-maximum*
+                :*log-level*
+                :*standard-port*
+                :*timestamp-epoch*
+                :+frame-end+
+                )
   (:export
-   :*log-level*
+   :*channel*                           ; variable
+   :*channel-command-handler*           ; variable
+   :*connection*                        ; variable
+   :*connection-timeout*                ; variable
+   :*decimal-scale*                     ; variable
+   :*decimal-scale-factor*              ; variable
+   :*default-locale*                    ; variable
+   :*default-mechanism*                 ; variable
+   :*default-version*                   ; variable
+   :*frame-size*                        ; variable
+   :*frame-size-maximum*                ; variable
+   :*log-level*                         ; variable
+   :*log-levels*                        ; variable
+   :*log-stream*                        ; variable
+   :*max-channels*                      ; variable
+   :*standard-port*
+   :*timestamp-epoch*
+   :+frame-end+
    :*version-headers*
    :*version*
    :12-byte-header-input-frame
@@ -322,27 +358,390 @@
    :7-byte-header-output-frame
    :8-byte-header-input-frame
    :8-byte-header-output-frame
+   :amqp-connection-device              ; class
+   :amqp-content-object                 ; class
+   :amqp-device                         ; class
+   :amqp-socket-device                  ; class
+   :basic-channel                       ; function
+   :basic-exchange                      ; function
+   :basic-headers                       ; function
+   :basic-no-ack                        ; function
+   :basic.ack                           ; function
+   :basic.cancel                        ; function
+   :basic.cancel-ok                     ; function
+   :basic.consume                       ; function
+   :basic.consume-ok                    ; function
+   :basic.deliver                       ; function
+   :basic.get                           ; function
+   :basic.get-empty                     ; function
+   :basic.get-ok                        ; function
+   :basic.publish                       ; function
+   :basic.qos                           ; function
+   :basic.qos-ok                        ; function
+   :basic.recover                       ; function
+   :basic.recover-async                 ; function
+   :basic.recover-ok                    ; function
+   :basic.reject                        ; function
+   :basic.return                        ; function
+   :binary-1024-p                       ; function
+   :binary-128-p                        ; function
+   :binary-16-p                         ; function
+   :binary-256-p                        ; function
+   :binary-32-p                         ; function
+   :binary-40-p                         ; function
+   :binary-48-p                         ; function
+   :binary-512-p                        ; function
+   :binary-64-p                         ; function
+   :binary-8-p                          ; function
+   :buffer-binary-1024                  ; function
+   :buffer-binary-128                   ; function
+   :buffer-binary-16                    ; function
+   :buffer-binary-256                   ; function
+   :buffer-binary-32                    ; function
+   :buffer-binary-40                    ; function
+   :buffer-binary-48                    ; function
+   :buffer-binary-512                   ; function
+   :buffer-binary-64                    ; function
+   :buffer-binary-72                    ; function
+   :buffer-binary-8                     ; function
+   :buffer-bit                          ; function
+   :buffer-boolean                      ; function
+   :buffer-character                    ; function
+   :buffer-decimal                      ; function
+   :buffer-double-float                 ; function
+   :buffer-integer                      ; function
+   :buffer-iso-8859-character           ; function
+   :buffer-offset                       ; function
+   :buffer-property-flags-16            ; function
+   :buffer-protocol-header              ; function
+   :buffer-protocol-header-version      ; function
+   :buffer-short-float                  ; function
+   :buffer-signed-byte-16               ; function
+   :buffer-signed-byte-32               ; function
+   :buffer-signed-byte-64               ; function
+   :buffer-signed-byte-8                ; function
+   :buffer-string-16                    ; function
+   :buffer-string-16-utf8               ; function
+   :buffer-string-32                    ; function
+   :buffer-string-32-utf8               ; function
+   :buffer-string-8                     ; function
+   :buffer-string-8-utf8                ; function
+   :buffer-timestamp                    ; function
+   :buffer-unsigned-byte-16             ; function
+   :buffer-unsigned-byte-32             ; function
+   :buffer-unsigned-byte-64             ; function
+   :buffer-unsigned-byte-8              ; function
+   :buffer-utf32-character              ; function
+   :buffer-vbinary-16                   ; function
+   :buffer-vbinary-32                   ; function
+   :buffer-vbinary-8                    ; function
+   :call-with-channel-input-stream      ; function
+   :call-with-channel-output-stream     ; function
+   :call-with-command-handlers          ; function
+   :call-with-consumer                  ; function
+   :call-with-decoded-arguments         ; function
+   :call-with-decoded-properties        ; function
+   :call-with-encoded-arguments         ; function
+   :call-with-encoded-properties        ; function
+   :call-with-open-channel-stream       ; function
+   :canonical-element-type              ; function
+   :channel-abort                       ; function
+   :channel-acknowledge-messages        ; function
+   :channel-command-handler             ; function
+   :channel-compute-body-size           ; function
    :channel-condition
+   :channel-conditions                  ; function
+   :channel-connection                  ; function
+   :channel-content-object              ; function
+   :channel-content-type                ; function
    :channel-error
    :channel-flow-condition
    :channel-flow-start-condition
    :channel-flow-stop-condition
-   :connection-error
-   :collection-empty-p
-   :collection-size
+   :channel-limit-reached               ; class
+   :channel-name                        ; function
+   :channel-number                      ; function
+   :channel-realm
+   :channel-request-ack                 ; function
+   :channel-request-bind                ; function
+   :channel-request-cancel              ; function
+   :channel-request-close               ; function
+   :channel-request-close-ok            ; function
+   :channel-request-commit              ; function
+   :channel-request-consume             ; function
+   :channel-request-declare             ; function
+   :channel-request-delete              ; function
+   :channel-request-flow                ; function
+   :channel-request-get                 ; function
+   :channel-request-open                ; function
+   :channel-request-publish             ; function
+   :channel-request-qos                 ; function
+   :channel-request-recover             ; function
+   :channel-request-recover-async       ; function
+   :channel-request-request             ; function
+   :channel-request-rollback            ; function
+   :channel-request-secure-ok           ; function
+   :channel-request-select              ; function
+   :channel-request-start-ok            ; function
+   :channel-request-tune-ok             ; function
+   :channel-request-unbind              ; function
+   :channel-request-unbind-ok           ; function
+   :channel-respond-to-alert            ; function
+   :channel-respond-to-bind-ok          ; function
+   :channel-respond-to-cancel-ok        ; function
+   :channel-respond-to-close            ; function
+   :channel-respond-to-close-ok         ; function
+   :channel-respond-to-commit-ok        ; function
+   :channel-respond-to-consume-ok       ; function
+   :channel-respond-to-declare-ok       ; function
+   :channel-respond-to-delete-ok        ; function
+   :channel-respond-to-deliver          ; function
+   :channel-respond-to-flow             ; function
+   :channel-respond-to-flow-ok          ; function
+   :channel-respond-to-get-empty        ; function
+   :channel-respond-to-get-ok           ; function
+   :channel-respond-to-open-ok          ; function
+   :channel-respond-to-qos-ok           ; function
+   :channel-respond-to-recover-ok       ; function
+   :channel-respond-to-request-ok       ; function
+   :channel-respond-to-rollback-ok      ; function
+   :channel-respond-to-secure           ; function
+   :channel-respond-to-select-ok        ; function
+   :channel-respond-to-start            ; function
+   :channel-respond-to-tune             ; function
+   :channel-respond-to-unbind           ; function
+   :channel-respond-to-unbind-ok        ; function
+   :channel-state                       ; function
+   :channel-thread                      ; function
+   :channel-ticket
+   :channel-toplevel-loop               ; function
+   :channel-track                       ; function
+   :channel-uri                         ; function
+   :channel.alert                       ; function
+   :channel.basic                       ; function
+   :channel.body                        ; function
+   :channel.close                       ; function
+   :channel.close-ok                    ; function
+   :channel.exchange                    ; function
+   :channel.file                        ; function
+   :channel.flow                        ; function
+   :channel.flow-ok                     ; function
+   :channel.header                      ; function
+   :channel.open                        ; function
+   :channel.open-ok                     ; function
+   :channel.queue                       ; function
+   :channel.stream                      ; function
+   :channel.tx                          ; function
    :class-mime-type
    :class-properties
-   :channel-ticket
-   :channel-realm
+   :collection                          ; class
+   :collection-content                  ; function
+   :collection-if-empty                 ; function
+   :collection-name                     ; function
+   :command-case                        ; function macro
+   :command-loop                        ; function macro
+   :condition-channel                   ; function
+   :condition-connection                ; function
+   :condition-frame                     ; function
+   :condition-message                   ; function
+   :condition-message-arguments         ; function
+   :condition-message-string            ; function
+   :connected-channel-p                 ; function
+   :connection-error
+   :connection-frame-max                ; function
+   :connection-frame-size               ; function
+   :connection-heartbeat                ; function
+   :connection-host                     ; function
+   :connection-locale                   ; function
+   :connection-mechanism                ; function
+   :connection-port                     ; function
+   :connection-protocol-version         ; function
+   :connection-toplevel-loop            ; function
+   :connection-uri                      ; function
+   :connection-virtual-host             ; function
+   :connection.channel                  ; function
+   :connection.close                    ; function
+   :connection.close-ok                 ; function
+   :connection.heartbeat                ; function
+   :connection.open                     ; function
+   :connection.open-ok                  ; function
+   :connection.redirect                 ; function
+   :connection.secure                   ; function
+   :connection.secure-ok                ; function
+   :connection.start                    ; function
+   :connection.start-ok                 ; function
+   :connection.tune                     ; function
+   :connection.tune-ok                  ; function
+   :content-body-size                   ; function
+   :decode-class-properties             ; function
+   :decode-method-arguments             ; function
    :dequeue
+   :device-close                        ; function
+   :device-flush                        ; function
+   :device-listen                       ; function
+   :device-open                         ; function
+   :device-read                         ; function
+   :device-socket                       ; function
+   :device-state                        ; function
+   :device-uri                          ; function
+   :device-write                        ; function
+   :double-float-nan                    ; variable
+   :double-float-negative-infinity      ; variable
+   :double-float-positive-infinity      ; variable
+   :dtx-channel                         ; function
+   :encode-ieee-754-32                  ; function
+   :encode-ieee-754-64                  ; function
+   :encode-method                       ; function
    :enqueue
+   :error-class-code                    ; function
+   :error-method-code                   ; function
+   :exchange-channel                    ; function
+   :exchange.declare                    ; function
+   :exchange.declare-ok                 ; function
+   :exchange.delete                     ; function
+   :exchange.delete-ok                  ; function
+   :file-channel                        ; function
+   :file.ack                            ; function
+   :file.cancel                         ; function
+   :file.cancel-ok                      ; function
+   :file.consume                        ; function
+   :file.consume-ok                     ; function
+   :file.deliver                        ; function
+   :file.open                           ; function
+   :file.open-ok                        ; function
+   :file.publish                        ; function
+   :file.qos                            ; function
+   :file.qos-ok                         ; function
+   :file.reject                         ; function
+   :file.return                         ; function
+   :file.stage                          ; function
+   :frame-buffer                        ; function
+   :frame-channel-number                ; function
+   :frame-class-code                    ; function
+   :frame-class-name                    ; function
+   :frame-connection                    ; function
+   :frame-cycle                         ; function
+   :frame-data                          ; function
+   :frame-header                        ; function
+   :frame-method-code                   ; function
+   :frame-method-name                   ; function
+   :frame-size                          ; function
+   :frame-track-number                  ; function
+   :frame-type                          ; function
+   :frame-type-class-name               ; function
+   :handling-channel-errors             ; function macro
+   :handling-connection-errors          ; function macro
    :invalid-state-error
    :method-arguments
+   :process-channel-command             ; function
+   :process-channel-loop                ; function
+   :process-command                     ; function
+   :process-connection-loop             ; function
+   :process-frame                       ; function
    :queue
+   :queue-channel                       ; function
+   :queue.bind                          ; function
+   :queue.bind-ok                       ; function
+   :queue.declare                       ; function
+   :queue.declare-ok                    ; function
+   :queue.delete                        ; function
+   :queue.delete-ok                     ; function
+   :queue.purge                         ; function
+   :queue.purge-ok                      ; function
+   :queue.unbind                        ; function
+   :queue.unbind-ok                     ; function
+   :send-header                         ; function
+   :send-heartbeat                      ; function
+   :send-method                         ; function
+   :session-channel                     ; function
+   :signed-byte-16                      ; function
+   :signed-byte-32                      ; function
+   :signed-byte-64                      ; function
+   :signed-byte-8                       ; function
+   :simple-stream                       ; class
+   :single-float-nan                    ; variable
+   :single-float-negative-infinity      ; variable
+   :single-float-positive-infinity      ; variable
+   :stream-advance-to-column            ; function
+   :stream-buffer                       ; function
+   :stream-channel                      ; function
+   :stream-clear-input                  ; function
+   :stream-clear-output                 ; function
+   :stream-close                        ; function
+   :stream-direction                    ; function
+   :stream-element-type                 ; function
+   :stream-eof-marker                   ; function
+   :stream-eofp                         ; function
+   :stream-eol-marker                   ; function
+   :stream-finish-output                ; function
+   :stream-force-output                 ; function
+   :stream-fresh-line                   ; function
+   :stream-input-handle                 ; function
+   :stream-line-buffer                  ; function
+   :stream-line-column                  ; function
+   :stream-listen                       ; function
+   :stream-output-handle                ; function
+   :stream-peek-char                    ; function
+   :stream-plist                        ; function
+   :stream-read-byte                    ; function
+   :stream-read-char                    ; function
+   :stream-read-char-no-hang            ; function
+   :stream-read-line                    ; function
+   :stream-read-sequence                ; function
+   :stream-start-line-p                 ; function
+   :stream-terpri                       ; function
+   :stream-tyi                          ; function
+   :stream-tyo                          ; function
+   :stream-unread-char                  ; function
+   :stream-untyi                        ; function
+   :stream-write-byte                   ; function
+   :stream-write-char                   ; function
+   :stream-write-sequence               ; function
+   :stream-write-string                 ; function
+   :stream.cancel                       ; function
+   :stream.cancel-ok                    ; function
+   :stream.consume                      ; function
+   :stream.consume-ok                   ; function
+   :stream.deliver                      ; function
+   :stream.publish                      ; function
+   :stream.qos                          ; function
+   :stream.qos-ok                       ; function
+   :stream.return                       ; function
+   :string-16-p                         ; function
+   :string-32-p                         ; function
+   :string-8-p                          ; function
+   :test-connection                     ; function
+   :tunnel-connection                   ; function
+   :tx-channel                          ; function
+   :tx.commit                           ; function
+   :tx.commit-ok                        ; function
+   :tx.rollback                         ; function
+   :tx.rollback-ok                      ; function
+   :tx.select                           ; function
+   :tx.select-ok                        ; function
+   :uri                                 ; function class
+   :uri-exchange                        ; function
+   :uri-fragment                        ; function
+   :uri-host                            ; function
+   :uri-password                        ; function
+   :uri-path                            ; function
+   :uri-plist                           ; function
+   :uri-port                            ; function
+   :uri-query                           ; function
+   :uri-query-parameter                 ; function
+   :uri-query-plist                     ; function
+   :uri-queue                           ; function
+   :uri-scheme                          ; function
+   :uri-user                            ; function
+   :uri-userinfo                        ; function
+   :uri-virtual-host                    ; function
    ))
+
 
 (defpackage :de.setf.amqp.implementation
   (:nicknames :amqp.i)
+  (:documentation "The :de.setf.amqp.implementation package is the de.setf.amqp source code package.
+    It uses general packages - :common-lisp and :de.setf.utility, as well as :de.setf.amqp.utility.")
   (:use :common-lisp
         :de.setf.utility
         :de.setf.amqp.utility)
@@ -433,10 +832,7 @@
                 #:stream-read-char-no-hang
                 #:stream-read-sequence
                 #:stream-terpri
-                ;; #:stream-tyi
-                ;; #:stream-tyo
                 #:stream-unread-char
-                ;; #:stream-untyi
                 #:stream-write-byte
                 #:stream-write-char
                 #:stream-write-sequence
@@ -446,9 +842,29 @@
 
 (defpackage :de.setf.amqp.user
   (:nicknames :amqp-user)
+  (:documentation "The :amqp-user package is the basic AMQP application development package.
+    It uses the necessary AMQP packages as well as thos customary for the respective lisp implementation.")
   (:use :common-lisp :puri :de.setf.amqp.utility)
   #+mcl (:use :ccl)
   #+mcl (:shadowing-import-from :de.setf.amqp.utility
                                 :connection-error)
   #+clozure (:use :ccl)
   #+sbcl (:use :sb-alien :sb-debug :sb-ext :sb-gray :sb-profile))
+
+
+#|
+(let ((stream (make-instance 'ccl:fred-window)))
+  (with-package-iterator (next :de.setf.amqp.implementation :internal)
+    (let ((symbols ())
+          (*print-case* :downcase))
+      (loop (multiple-value-bind (next-p symbol) (next)
+              (unless next-p (return))
+              (let ((status `(,@(when (fboundp symbol) '(function))
+                              ,@(when (macro-function symbol) '(macro))
+                              ,@(when (boundp symbol) '(variable))
+                              ,@(when (find-class symbol nil) '(class)))))
+                (when status (pushnew (cons symbol status) symbols :key #'first)))))
+      (loop for (symbol . bindings) in (sort symbols #'string-lessp :key #'first)
+            do (format stream "~&~3T:~a~40T;~{ ~a~}" symbol bindings)))
+    (finish-output stream)))
+|#
