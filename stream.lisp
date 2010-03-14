@@ -78,6 +78,8 @@
 ;;; input
 
 (defmethod stream-read-char ((stream amqp-device))
+  "Read a character from an open channel on an amqp-device according to the channel's current encoding.
+  At EOF return the stream-eof-marker."
   (with-slots (decoder) stream
     (flet ((buffer-extract-byte (stream)
              (with-slots (buffer buffpos buffer-ptr body-position body-length) stream
@@ -110,6 +112,8 @@
 
 
 (defmethod stream-read-char-no-hang ((stream amqp-device))
+  "If input is already available from an open channel on an amqp-device read the next character according
+ to the channel's current encoding. If none is available, return NIL. At EOF return the stream-eof-marker."
   (with-slots (body-position body-length) stream
     (if (< body-position body-length)
       (when (stream-listen (stream-input-handle stream))
@@ -144,6 +148,9 @@
 
 
 (defmethod stream-read-line ((stream amqp-device))
+   "Read a line of characters from an open channel on an amqp-device according to the channel's current encoding.
+ Returns those up to the next stream-eol-marker as a new string. Iff the line is terminated by EOF, returns
+ a second value, the stream-eof-marker."
   (with-slots (decoder) stream
     (let ((eol-char (stream-eol-marker stream))
           (line (stream-line-buffer stream)))
@@ -167,14 +174,17 @@
 
 
 (defmethod stream-clear-input ((stream amqp-device))
+  "Clear any pending buffered input from the stream's device."
   (device-clear-input stream t))
 
 
 (defmethod stream-line-column ((stream amqp-device))
+  "Constantly nil."
   nil)
 
 
 (defmethod stream-start-line-p ((stream amqp-device))
+  "Constantly nil."
   nil)
 
 
@@ -192,10 +202,11 @@
     character))
 
 (defmethod stream-write-char ((stream amqp-device) character)
+  "Write a character to an open channel on an amqp-device according to the channel's current encoding."
   (amqp-stream-write-char stream character))
 
 
-(defun amql-stream-write-string (stream string start end)
+(defun amqp-stream-write-string (stream string start end)
   (with-slots (encoder) stream
     (flet ((buffer-insert-byte (stream byte)
              (with-slots (out-buffer outpos max-out-pos body-position body-length) stream
@@ -212,11 +223,12 @@
     string))
 
 (defmethod stream-write-string ((stream amqp-device) string #-mcl &optional start end)
-  (amql-stream-write-string stream string start end))
+  "Write a string to an open channel on an amqp-device according to the channel's current encoding."
+  (amqp-stream-write-string stream string start end))
 
 
 (defmethod stream-terpri ((stream amqp-device))
-  (stream-write-char stream #\newline))
+  (stream-write-char stream (stream-eol-marker stream)))
 
 
 ;; stream-fresh-line :
@@ -224,7 +236,7 @@
 
 
 (defmethod stream-finish-output ((stream amqp-device))
-  "Force output and delegate the finsh to the output stream."
+  "Force output and delegate the finish to the output stream."
   (stream-force-output stream)
   (stream-finish-output (stream-output-handle stream)))
 
@@ -235,7 +247,7 @@
 
 
 (defmethod stream-clear-output ((stream amqp-device))
-  "Eliminate nything in the present buffer."
+  "Discard anything in the present output buffer."
   (with-slots (outpos body-position) stream
     (when (plusp outpos)
       ;; back up in the global stream
@@ -254,7 +266,8 @@
 
 #-mcl
 (defmethod open-stream-p ((stream amqp-device))
-  "This replicates the mcl definition, so that s single stream-direction suffices."
+  "Return true iff the stream's channel is open."
+  ;; This replicates the mcl definition, so that s single stream-direction suffices.
 
   (not (eql (stream-direction stream) :closed)))
 
@@ -291,6 +304,8 @@
 
 
 (defmethod stream-read-byte ((stream amqp-device))
+  "Read a byte from an open channel on an amqp-device. Manage buffer positions and refresh
+ buffers from read frames as required. AAt EOF return the stream-eof-marker."
   (with-slots (buffer buffpos buffer-ptr body-position) stream
     (if (or (< buffpos buffer-ptr)
             (and (not (minusp buffer-ptr))
@@ -303,8 +318,8 @@
 
 
 (defmethod stream-write-byte ((stream amqp-device) byte)
-  "Add the byte at the current buffer position. If either the buffer is
- full, or the stream length is reached, write the buffer."
+  "Write a byte to an open channel on an amqp-device. Add the byte at the current buffer position.
+ If either the buffer is full, or the stream length is reached, write the buffer."
   (with-slots (out-buffer outpos max-out-pos body-position body-length) stream
     (setf (aref out-buffer outpos) byte)
     (incf body-position)
@@ -318,6 +333,8 @@
 (defmethod stream-read-sequence ((stream amqp-device) (sequence vector)
                                  #+ccl &key #-ccl &optional
                                  (start 0) end)
+  "Read a byte sequence from an open channel on an amqp-device. Invokes device-read to read and transfer data 
+ directly via the device frame buffers."
   (setf end (or end (length sequence)))
   (let ((count (device-read stream sequence start end nil)))
     (when (plusp count) (+ start count))))
@@ -328,8 +345,8 @@
 (defmethod stream-read-sequence ((stream amqp-device) (sequence string)
                                  #+ccl &key #-ccl &optional
                                  (start 0) end)
-  "Arrange to read bytes from the stream buffer, construct characters, and
- return the the next position Iff the first byte read shows eof, return nil."
+  "Read a character sequence from an open channel on an amqp-device. Arrange to read bytes from the device buffer,
+ construct characters, and return the the next position. Iff the first byte read shows eof, return nil."
   (setf end (or end (length sequence)))
   (with-slots (decoder) stream
     (flet ((buffer-extract-byte (stream)
@@ -357,6 +374,8 @@
 (defmethod stream-write-sequence ((stream amqp-device) (sequence vector)
                                  #+ccl &key #-ccl &optional
                                  (start 0) end)
+  "Write a byte sequence to an open channel on an amqp-device. Invokes device-read to transfer data write
+ directly via the device frame buffers."
   (setf end (or end (length sequence)))
   (device-write stream sequence start end 0))
 
@@ -364,6 +383,8 @@
 (defmethod stream-write-sequence ((stream amqp-device) (sequence string)
                                  #+ccl &key #-ccl &optional
                                  (start 0) end)
+  "Write a character sequence from an open channel on an amqp-device. Arrange to read bytes from the device buffer,
+ construct characters, and return the the next position."
   (setf end (or end (length sequence)))
   (stream-write-string stream sequence start end))
 

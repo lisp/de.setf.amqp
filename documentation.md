@@ -228,8 +228,8 @@ de.setf.amqp supports both asynchronous an synchronous processing models.
 
 synchronous procesing is performed with operators which read, parse, and dispatch successive commands in an (object x method) typecase.
 
-  [command-case](documentation/processing.html#command-case)
-  [command-loop](documentation/processing.html#command-loop)
+ -  [command-case](documentation/processing.html#command-case)
+ -  [command-loop](documentation/processing.html#command-loop)
 
 The first form processes just the next command, the '-loop' form iterates over read commands indefinitely.
 Each successively read frame is first filtered through the command clauses and passed to the first matching
@@ -259,9 +259,9 @@ immediate request as well is any immediate synchronous interaction.
 
 The stream interface supports both the standard / gray stream interface and the simple-stream interface
 
- -  [with-open-stream]
- -  [read]
- -  [write]
+ -  with-open-stream
+ -  read
+ -  write
  -  [stream-clear-output](documentation/device-level.html#stream-clear-output)
  -  [stream-finish-output](documentation/device-level.html#stream-finish-output)
  -  [stream-force-output](documentation/device-level.html#stream-force-output)

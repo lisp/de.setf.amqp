@@ -31,7 +31,7 @@
          (get-queue (amqp:queue get-channel :queue queue)))
     
     (amqp:request-declare publish-queue)
-    (amqp:request-declare get-queue)
+    (amqp:request-declare exchange)
     (amqp:request-bind publish-queue :exchange exchange :queue publish-queue :routing-key routing-key)
     
     (dotimes (i count)
@@ -52,3 +52,11 @@
 ;;; sbcl : 52 seconds,  154 MB
 ;;; mcl  : 120 seconds, 11 MB
 ;;; ccl  : 52 seconds,  17.8 MB
+
+;;; rabbitmq
+;;; first w/o r8.0 classes
+;;; (setq *log-level* :debug)
+;;; [20100215T155724Z00] DEBUG #<CONNECTION #x4F1C566>: open-connection: requesting version: #(65 77 81 80 1 1 0 9)/:AMQP-1-1-0-9-1.
+;;; [20100215T155724Z00] DEBUG #<CONNECTION #x4F1C566>: open-connection: [ok=1], updated class to: AMQP-1-1-0-9-1:CONNECTION.
+;;; even thoug an r8 broker, it accepts the connection. ?
+;;; (publish-get-loop *ch1* *ch2* '("a") 1 :log-level :debug)

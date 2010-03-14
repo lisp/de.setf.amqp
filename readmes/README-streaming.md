@@ -1,6 +1,3 @@
-<head>
- <title>DE.SETF.AMQP + JSON</title>
-</head>
 
 DE.SETF.AMQP: Attempts at streaming.
 -------
