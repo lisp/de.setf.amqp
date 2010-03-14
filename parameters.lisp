@@ -20,16 +20,19 @@
 ;;;
 ;;; stream support
 
-(defvar amqp:*standard-port* 5672)
+(defvar amqp:*standard-port* 5672
+  "The port for connections to AMQP brokers/servers.")
 
 (defvar *frame-size* 4096
   "The wire-level frame size. buffer sizes are net frame header and posible trailer.
  NB. this must exceed method argument and class header property lengths, as those cannot be
  split betweeen frames. an unelaborated basic.publish content header is alredy over 140.") 
 
-(defvar amqp:*frame-size-maximum* (* 512 1024))
+(defvar amqp:*frame-size-maximum* (* 512 1024)
+  "The maximum frame size permitted in connections negotiation.")
 
-(defvar amqp:*default-version* :amqp-1-1-0-9-1)
+(defvar amqp:*default-version* :amqp-1-1-0-9-1
+  "The initial version requested upon openening a connection to a broker.")
 
 (defvar amqp.u:*version-headers* ()
   "An a-list which maps version inticator keywords to protocol version header buffers.
@@ -57,9 +60,11 @@
   "Value in seconds to pass as time out duration for connection
  socket operations.")
 
-(defparameter *default-locale* "en_US")
+(defparameter *default-locale* "en_US"
+  "The default locale for connection negotiation")
 
-(defparameter *default-mechanism* "PLAIN")
+(defparameter *default-mechanism* "PLAIN"
+  "The default authentication mechanism for connection negotiation.")
 
 (defparameter *max-channels* 256
   "The upper bounds on the channel count per connection.")
@@ -137,7 +142,7 @@
       (ccl::set-fpu-mode :invalid t))))
 
 #+sbcl  ;; does this work?
-(unless (boundp 'single-float-nam)
+(unless (boundp 'single-float-nan)
   (defconstant single-float-nan
     (+ single-float-positive-infinity single-float-negative-infinity))
   (defconstant double-float-nan
