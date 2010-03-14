@@ -160,6 +160,10 @@ An introduction to the [API](./documentation.md) is taking shape.
 In the meantime, there is a package [index](./documentation/package_AMQP.html), there are a few [examples](./readmes/) for the
 library proper and for the RabbitMQ library [emulation](./rabbitmq/examples.lisp).
 
+common-lisp.net hosts a mailing [list](http://www.common-lisp.net/mailman/listinfo/de-setf-amqp-devel)
+and a [trac](http://trac.common-lisp.net/de-setf-amqp/) instance for discussions and/or reports.
+
+
 Downloading
 -----------
 
