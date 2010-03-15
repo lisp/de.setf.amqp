@@ -256,7 +256,7 @@
       (setf outpos 0))))
 
 
-(defmethod stream-advance-to-column ((stream amqp-device))
+(defmethod stream-advance-to-column ((stream amqp-device) (column t))
   nil)
 
 
