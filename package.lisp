@@ -71,6 +71,17 @@
    :binary-64
    :binary-72
    :binary-8
+   :binary-1024-p
+   :binary-128-p
+   :binary-16-p
+   :binary-256-p
+   :binary-32-p
+   :binary-40-p
+   :binary-48-p
+   :binary-512-p
+   :binary-64-p
+   :binary-72-p
+   :binary-8-p
    :bind
    :bind-ok
    :bit
@@ -315,10 +326,10 @@
 
 
 (defpackage :de.setf.amqp.utility
-  (:use )
+  (:use :common-lisp  :puri )
   (:documentation "The :de.setf.amqp.utility package exports names to make library components available to
     applications. It uses no package, but is intended to be used - as is the case with the library implementation
-    itself. It corss-exports several terms from the AMQP standard package for this purpose.")
+    itself. It cross-exports several terms from the AMQP standard package for this purpose.")
   (:nicknames :amqp.u)
   (:import-from :de.setf.amqp
                 :*connection-timeout*
@@ -330,6 +341,114 @@
                 :*standard-port*
                 :*timestamp-epoch*
                 :+frame-end+
+   :binary-1024
+   :binary-128
+   :binary-16
+   :binary-256
+   :binary-32
+   :binary-40
+   :binary-48
+   :binary-512
+   :binary-64
+   :binary-72
+   :binary-8
+   :binary-1024-p
+   :binary-128-p
+   :binary-16-p
+   :binary-256-p
+   :binary-32-p
+   :binary-40-p
+   :binary-48-p
+   :binary-512-p
+   :binary-64-p
+   :binary-72-p
+   :binary-8-p
+   :frame-buffer
+   :string-16-p
+   :string-32-p
+   :string-8-p
+                )
+  #+ccl
+  (:import-from :ccl
+                #:open-stream-p
+                #:stream-clear-input
+                #:stream-clear-output
+                #:stream-direction
+                #:stream-element-type
+                #:stream-eofp
+                #:stream-finish-output
+                #:stream-force-output
+                #:stream-fresh-line
+                #:stream-listen
+                #:stream-read-byte
+                #:stream-write-byte
+                #:stream-write-string
+                )
+  #+clozure
+  (:import-from :ccl
+                :double-float-positive-infinity
+                :double-float-negative-infinity
+                #+ccl-1.4 :double-float-nan
+                #:stream-advance-to-column
+                #:stream-line-column
+                #:stream-peek-char
+                #:stream-read-char-no-hang
+                #:stream-read-char
+                #:stream-read-line
+                #:stream-start-line-p
+                #:stream-terpri
+                #:stream-unread-char
+                #:stream-write-char
+                )
+  #+mcl
+  (:import-from :ccl
+                #:stream-close
+                #:stream-read-sequence
+                #:stream-untyi
+                #:stream-tyi
+                #:stream-tyo
+                #:stream-write-sequence
+                )
+  #+sbcl
+  (:import-from :sb-gray
+                #:open-stream-p
+                #:stream-advance-to-column
+                #:stream-clear-input
+                #:stream-clear-output
+                #:stream-element-type
+                #:stream-finish-output
+                #:stream-force-output
+                #:stream-fresh-line
+                #:stream-line-column
+                #:stream-listen
+                #:stream-peek-char
+                #:stream-read-byte
+                #:stream-read-char
+                #:stream-read-char-no-hang
+                #:stream-read-line
+                #:stream-read-sequence
+                #:stream-start-line-p
+                #:stream-terpri
+                #:stream-unread-char
+                #:stream-write-byte
+                #:stream-write-char
+                #:stream-write-sequence
+                #:stream-write-string
+                )
+  #+sbcl
+  (:import-from :sb-ext
+                :double-float-positive-infinity
+                :double-float-negative-infinity
+                :single-float-positive-infinity
+                :single-float-negative-infinity)
+  #+sbcl
+  (:import-from :sb-simple-streams
+                :device-close
+                :device-open
+                :device-read
+                :device-write
+                :simple-stream
+                :stream-plist
                 )
   (:export
    :*channel*                           ; variable
@@ -676,11 +795,9 @@
    :stream-finish-output                ; function
    :stream-force-output                 ; function
    :stream-fresh-line                   ; function
-   :stream-input-handle                 ; function
    :stream-line-buffer                  ; function
    :stream-line-column                  ; function
    :stream-listen                       ; function
-   :stream-output-handle                ; function
    :stream-peek-char                    ; function
    :stream-plist                        ; function
    :stream-read-byte                    ; function
@@ -748,17 +865,6 @@
   ;; don't depending on load order, this introduces conflict.
   ;; eg, tools->xml->cl-http->quickdraw#line
   ;; #+ccl (:use :ccl)
-  #+clozure
-  (:import-from :ccl
-                :double-float-positive-infinity
-                :double-float-negative-infinity
-                #+ccl-1.4 :double-float-nan)
-  #+sbcl
-  (:import-from :sb-ext
-                :double-float-positive-infinity
-                :double-float-negative-infinity
-                :single-float-positive-infinity
-                :single-float-negative-infinity)
   #+sbcl
   (:use :sb-simple-streams)
   #+sbcl
@@ -771,72 +877,11 @@
                 :max-out-pos
                 :out-buffer
                 :outpos
-                :pending)
-  (:import-from :amqp
-                :*standard-port*
-                :*default-version*
-                :*frame-size-maximum*
-                :*connection-timeout*
-                :*default-locale*
-                :*default-mechanism*
-                :*log-level*
-                :frame-buffer
-                :command-loop
-                :command-case)
-  #+ccl
-  (:import-from :ccl
-                #:open-stream-p
-                #:stream-clear-input
-                #:stream-clear-output
-                #:stream-direction
-                #:stream-element-type
-                #:stream-eofp
-                #:stream-finish-output
-                #:stream-force-output
-                #:stream-fresh-line
-                #:stream-listen
-                #:stream-read-byte
-                #:stream-write-byte
-                #:stream-write-string
-                )
-  #+clozure
-  (:import-from :ccl
-                #:stream-write-char
-                #:stream-unread-char
-                #:stream-read-char
-                #:stream-read-char-no-hang
-                #:stream-read-line
-                #:stream-terpri
-                )
-  #+mcl
-  (:import-from :ccl
-                #:stream-close
-                #:stream-read-sequence
-                #:stream-untyi
-                #:stream-tyi
-                #:stream-tyo
-                #:stream-write-sequence
-                )
-  #+sbcl
-  (:import-from :sb-gray
-                #:open-stream-p
-                #:stream-clear-input
-                #:stream-clear-output
-                #:stream-element-type
-                #:stream-finish-output
-                #:stream-force-output
-                #:stream-fresh-line
-                #:stream-listen
-                #:stream-read-byte
-                #:stream-read-char
-                #:stream-read-char-no-hang
-                #:stream-read-sequence
-                #:stream-terpri
-                #:stream-unread-char
-                #:stream-write-byte
-                #:stream-write-char
-                #:stream-write-sequence
-                #:stream-write-string
+                :pending
+                :stream-output-handle     
+                :output-handle
+                :stream-input-handle
+                :input-handle
                 ))
 
 
@@ -844,7 +889,7 @@
   (:nicknames :amqp-user)
   (:documentation "The :amqp-user package is the basic AMQP application development package.
     It uses the necessary AMQP packages as well as thos customary for the respective lisp implementation.")
-  (:use :common-lisp :puri :de.setf.amqp.utility)
+  (:use :common-lisp :de.setf.amqp.utility)
   #+mcl (:use :ccl)
   #+mcl (:shadowing-import-from :de.setf.amqp.utility
                                 :connection-error)
