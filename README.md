@@ -163,6 +163,10 @@ library proper and for the RabbitMQ library [emulation](./rabbitmq/examples.lisp
 common-lisp.net hosts a mailing [list](http://www.common-lisp.net/mailman/listinfo/de-setf-amqp-devel)
 and a [trac](http://trac.common-lisp.net/de-setf-amqp/) instance for discussions and/or reports.
 
+Changes
+=======
+ * 2010-06-10 : corrected and completed float codecs
+
 
 Downloading
 -----------
