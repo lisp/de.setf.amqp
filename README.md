@@ -1,7 +1,7 @@
 
 
-DE.SETF.AMQP: a Common Lisp client library for AMQP
--------
+# DE.SETF.AMQP: a Common Lisp client library for AMQP
+
 
 `de.setf.amqp` implements a native Common Lisp client library for the 'Advanced Message Queuing
  Protocol' ([AMQP](http://en.wikipedia.org/wiki/AMQP)). The implementation comprises wire-level codecs, implementations
@@ -40,8 +40,7 @@ DE.SETF.AMQP: a Common Lisp client library for AMQP
  [3]: documentation/index.html
 
 
-Status
-------
+## Status
 
 This is intended as the base for a distributed semantic store.
 What one has here is a reasonably complete engineering prototype.
@@ -64,6 +63,8 @@ The present tests are limited to
   does not cons
 - simple data exchanges with a broker.
 
+
+### An Example
 
 The library has been built and [probed](file:///examples/examples.lisp) in the following combinations
 
@@ -163,20 +164,19 @@ library proper and for the RabbitMQ library [emulation](./rabbitmq/examples.lisp
 common-lisp.net hosts a mailing [list](http://www.common-lisp.net/mailman/listinfo/de-setf-amqp-devel)
 and a [trac](http://trac.common-lisp.net/de-setf-amqp/) instance for discussions and/or reports.
 
-Changes
-=======
+
+### Changes
+
  * 2010-06-10 : corrected and completed float codecs
 
-
-Downloading
------------
+### Downloading
 
 A [.dmg](http://github.com/downloads/lisp/de.setf.amqp/amqp-20100214-0.3.dmg) is available for MCL-5.2.
 Saved images are available for [ccl](http://github.com/downloads/lisp/de.setf.amqp/ccl-amqp.image.zip)
 and [sbcl](http://github.com/downloads/lisp/de.setf.amqp/sbcl-amqp.core.zip).
 
-Building
----------
+
+### Building
 
 In principle, `de.setf.amqp` is built with [`asdf`](http://www.common-lisp.net/projects/asdf).
 Once one has the sources and the `asdf` configuration in place, evaluate
@@ -190,8 +190,7 @@ negotiate automatically to use the correct implementation.
 Please consult the detailed instructions for the respective [runtime](./readmes/README-build.md) for more information.
 
  
-Licensing
----------
+## Licensing
 
 This version is released under version 3 of the GNU Affero license (GAL).[[5]]
 The required components are included as per the respective licenses and covered,
