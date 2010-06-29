@@ -2,8 +2,7 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines model tests for the 'de.setf.amqp' library.")
+(:documentation "This file defines model tests for the 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -14,7 +13,7 @@
   See the Affero General Public License for more details.
 
   You should have received a copy of the GNU Affero General Public License along with 'de.setf.amqp'.
-  If not, see the GNU [site](http://www.gnu.org/licenses/).")
+  If not, see the GNU [site](http://www.gnu.org/licenses/)."))
 
 
 (test:test amqp/connection/instantiate
@@ -60,12 +59,12 @@
   (with-test-connection (connection 'amqp-1-1-0-9-1:connection)
     (with-test-channel (channel connection :number 1)
       (and (eq (channel-connection channel) connection)
-           (typep (device-state channel) 'amqps:use-channel)
+           (typep (device-state channel) 'amqp.s:use-channel)
            (claim-input-frame channel)
            (claim-output-frame channel)))))
 
 
-(document amqp/connection/open
+(:documentation amqp/connection/open
   "Some notes about first connections.
 
  The first tests were against a QPID-0.5 broker (:AMQP-1-1-0-9). It really does
@@ -87,7 +86,7 @@
                        (connection-state connection)
                        (connection-uri connection)
                        (amqp:connection-server-properties connection))
-             (assert-device-state connection amqps:use-connection)
+             (assert-device-state connection amqp.s:use-connection)
              t)
       (when connection (close connection)))))
 
@@ -133,7 +132,7 @@
                      (if line (print line) (return))))))
     (when channel1 (close channel1))
     (when channel2 (close channel2))
-    (when connection (close connection))))
+    (when connection (close connection)))))
 ;; ! trying to declare a queue on channel 0 led to : "channel error [error code 504: channel error]"
 
 

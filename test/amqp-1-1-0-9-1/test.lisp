@@ -2,8 +2,7 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines codec tests for 0.9r1 components of the 'de.setf.amqp' library.")
+(:documentation "This file defines codec tests for 0.9r1 components of the 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -131,7 +130,7 @@
                                    :requeue t)
                                   (amqp:recover
                                    :requeue t)
-                                  (amqp:recover-ok)) :verbose-p t)))
+                                  (amqp:recover-ok)))))
 
   (test:test amqp/codec/channel/9-1
     "channel method codec tests
@@ -289,7 +288,13 @@
    rollback
    rollback-ok"
     (let ((amqp:*class.connection* 'amqp-1-1-0-9-1-loopback-connection))
-      (test-class-method-codecs 'amqp:tx ())))
+      (test-class-method-codecs 'amqp:tx
+                                `((amqp:select)
+                                  (amqp:select-ok)
+                                  (amqp:commit)
+                                  (amqp:commit-ok)
+                                  (amqp:rollback)
+                                  (amqp:rollback-ok)))))
 
   )
 

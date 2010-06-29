@@ -3,9 +3,8 @@
 (in-package :de.setf.amqp.implementation)
 
 
-(document :file
- (description "This file implements connection-related tests for streams based on AMQP connections for the
- 'de.setf.amqp' library.")
+(:documentation  "This file implements connection-related tests for streams based on AMQP connections for the
+ 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -19,7 +18,7 @@
   If not, see the GNU [site](http://www.gnu.org/licenses/)."))
 
 
-(document (connection/open) "Test setup:
+(:documentation (connection/open) "Test setup:
 
  testing w/ qpid
  installed 0.5 (/Development/Applications/AMQP/qpid-0.5/ )
@@ -73,7 +72,8 @@ Heap dump file created [1079483534 bytes in 35.675 secs]
 |#
 
 #+mcl
-(let ((count (* 1)))
+(test:test amqp.device-level.test-live-object.mcl
+  (let ((count (* 1)))
     (multiple-value-bind (results time count)
                          (test-live-objects (list "come here watson, ..."
                                                   (let ((i (char-code #\a))) (map-into (make-string 26) #'(lambda () (values (code-char i) (incf i)))))
@@ -88,10 +88,11 @@ Heap dump file created [1079483534 bytes in 35.675 secs]
        results
        (float (/ (/ time count) internal-time-units-per-second))
        (float (/ time internal-time-units-per-second))
-       count)))
+       count))))
 
 #+clozure
-(let ((count (* 1)))
+(test:test amqp.device-level.test-live-object.clozure
+  (let ((count (* 1)))
     (multiple-value-bind (results time count)
                          (test-live-objects (list "a thing of beauty is a wonder to behold"
                                                   (let ((i (char-code #\0))) (map-into (make-string 10) #'(lambda () (values (code-char i) (incf i)))))
@@ -106,7 +107,7 @@ Heap dump file created [1079483534 bytes in 35.675 secs]
        results
        (float (/ (/ time count) internal-time-units-per-second))
        (float (/ time internal-time-units-per-second))
-       count)))
+       count))))
 
 
 ;;; sbcl probes

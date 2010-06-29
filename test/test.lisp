@@ -2,8 +2,7 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines test utilities for the 'de.setf.amqp' library.")
+(:documentation "This file defines test utilities for the 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -25,7 +24,7 @@
                                 #+CMU extensions:fundamental-binary-output-stream
                                 #+CormanLisp stream
                                 #+LispWorks stream:fundamental-stream
-                                #+(and MCL digitool) ccl::output-binary-stream
+                                #+digitool ccl::output-binary-stream
                                 #+clozure-common-lisp ccl:fundamental-binary-output-stream
                                 #+sbcl sb-gray:fundamental-binary-output-stream
                                 #+scl ext:binary-output-stream)
@@ -33,6 +32,21 @@
            :reader stream-stream))
   #+CormanLisp
   (:default-initargs :element-type '(unsigned-byte 8)))
+
+(defclass binary-source-stream (#+ALLEGRO excl::fundamental-binary-input-stream
+                                #+clisp gray:fundamental-binary-input-stream
+                                #+CMU extensions:fundamental-binary-input-stream
+                                #+CormanLisp stream
+                                #+LispWorks stream:fundamental-stream
+                                #+digitool ccl::input-binary-stream
+                                #+clozure-common-lisp ccl:fundamental-binary-input-stream
+                                #+sbcl sb-gray:fundamental-binary-input-stream
+                                #+scl ext:binary-input-stream)
+  ()
+  #+CormanLisp
+  (:default-initargs :element-type '(unsigned-byte 8)))
+
+  
 
 (defMethod stream-element-type ((stream binary-trace-stream))
   '(unsigned-byte 8))
@@ -52,6 +66,19 @@
   (- end start))
 
 
+(defmethod device-listen  ((stream binary-source-stream))
+  ;; always return nil
+  ;; this is needed when the connection starts as it tries to flush pending input on a stream
+  nil)
+
+(defmethod stream-eofp ((stream binary-source-stream))
+  t)
+
+(defmethod stream-tyi ((stream binary-trace-stream))
+  nil)
+
+
+(defparameter *binary-test-input* (make-instance 'binary-source-stream))
 (defparameter *binary-trace-output* (make-instance 'binary-trace-stream))
 
 
@@ -67,7 +94,7 @@
                                          ,@initargs
                                          :number t
                                          :uri #u"amqp:///"
-                                         :input-handle *standard-input*
+                                         :input-handle *binary-test-input*
                                          :output-handle *binary-trace-output*)))
      ;; as the input handles have been provided to suppress
      ;; real protocol negotiation, need to connect it by-hand
