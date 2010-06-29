@@ -208,8 +208,8 @@ in this combined form,  under the GAL as well
   - 2003 [Kevin Rosenberg](mailto:kevin@rosenberg.net)
 
 
- [5]: agpl.txt
- [6]: http://common-lisp.net/project/bordeaux-threads/darcs/bordeaux-threads/CONTRIBUTORS
+> [5]: agpl.txt
+> [6]: http://common-lisp.net/project/bordeaux-threads/darcs/bordeaux-threads/CONTRIBUTORS
 
 --------
 ![made with mcl](http://www.digitool.com/img/mcl-made-1.gif "Made With MCL")

@@ -2,8 +2,7 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
-  (description "This file defines the wire-level frame model for for the `de.setf.amqp` Connon Lisp library.")
+(:documentation "This file defines the wire-level frame model for for the `de.setf.amqp` Connon Lisp library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -659,7 +658,7 @@
     (+ end 12)))
 
 
-(document (read-7-byte-header-frame read-8-byte-header-frame read-12-byte-header-frame)
+(:documentation (read-7-byte-header-frame read-8-byte-header-frame read-12-byte-header-frame)
   "The abstract frame structure (header . payload), is implemented variously in the respective versions.
  The header size varies. The end marker is eliminated. The field sizes change. To allow for this, each
  connection uses a specialized frame class and that class implements the general frame format.

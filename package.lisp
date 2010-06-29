@@ -2,11 +2,10 @@
 
 (in-package :cl-user)
 
-(de.setf.utility:document :file
-  (description "This file defines the packages for the 'de.setf.amqp' library.")
- (copyright
-  "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
-  "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
+(:documentation "This file defines the packages for the 'de.setf.amqp' library."
+  (copyright
+   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
+   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
   of the GNU Affero General Public License as published by the Free Software Foundation.
 
   'setf.amqp' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
@@ -15,8 +14,8 @@
 
   A copy of the GNU Affero General Public License should be included with 'de.setf.amqp' as `AMQP:agpl.txt`.
   If not, see the GNU [site](http://www.gnu.org/licenses/).")
-
- (long-description "Several packages are used
+  
+  (long-description "Several packages are used
 
  - `_` isolates macro symbols
  - `de.setf.amqp` (`amqp`) : exports the names of protocol classes and operators.
@@ -708,8 +707,6 @@
    :double-float-negative-infinity      ; variable
    :double-float-positive-infinity      ; variable
    :dtx-channel                         ; function
-   :encode-ieee-754-32                  ; function
-   :encode-ieee-754-64                  ; function
    :encode-method                       ; function
    :enqueue
    :error-class-code                    ; function

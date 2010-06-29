@@ -2,8 +2,8 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines utility operators for the 'de.setf.amqp' library.")
+(:documentation "This file defines utility operators for the 'de.setf.amqp' library."
+
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -21,23 +21,27 @@
 ;;; macros
 
 (defmacro assert-condition (form &rest args)
-  (let ((format-string nil) (format-arguments nil) (operator nil))
+  (let ((format-control nil) (format-arguments nil) (operator nil))
     (when (or (typep (first args) '(and symbol (not keyword)))
               (and (consp (first args)) (eq (caar args) 'setf)))
       (setf operator (pop args)))
+    ;; if there control is first, assume (control . args)
     (when (stringp (first args))
-      (setf format-string (pop args)
+      (setf format-control (pop args)
             format-arguments (shiftf args nil)))
-    (destructuring-bind (&key (operator operator) (format-string format-string) (format-arguments format-arguments)
+    (destructuring-bind (&key (operator operator)
+                              (format-string format-control) (format-control format-string)
+                              (format-arguments format-arguments)
                               (type (if (and (consp form) (eq (first form) 'typep)) (third form) `(satisfies ,form))))
                         args
       `(unless ,form
          (error 'simple-type-error
                 :expected-type (quote ,type)
-                :format-string ,(format nil "~@[~a: ~]condition failed: ~s~:[.~; ~~@?~]"
-                                        operator form
-                                  format-string)
-                :format-arguments ,(when format-string `(list ,format-string ,@format-arguments)))))))
+                :format-control ,(format nil "~@[~a: ~]condition failed: ~s~:[.~; ~~@?~]"
+                                         operator form
+                                         ;; if a control is present include the recursive format
+                                         format-control)
+                :format-arguments ,(when format-control `(list ,format-control ,@format-arguments)))))))
 
 (defmacro def-delegate-slot ((class slot) &rest operators)
   `(progn ,@(mapcar #'(lambda (op)

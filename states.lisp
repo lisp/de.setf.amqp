@@ -2,8 +2,7 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines the state model for AMQP classes  for the 'de.setf.amqp' library.")
+(:documentation "This file defines the state model for AMQP classes  for the 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3

@@ -4,7 +4,7 @@ DE.SETF.AMQP: build it with Clozure Common Lisp
 
 The system can be built and saved as a run-time image from the command line
 
-    $ export CCL=/Development/Applications/LISP/ccl-1.4/dppccl
+    $ export CCL=/Development/Applications/LISP/ccl-1-4/dppccl
     $ $CCL --no-init --load readmes/build-init.lisp \
       --eval "(asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-8-0)" \
       --eval "(asdf:operate 'asdf:load-op :de.setf.amqp.amqp-1-1-0-9-0)" \

@@ -2,9 +2,8 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
-  (description "This file defines abstract protocol classes for AMPQ version 0.8 components of the
- `de.setf.amqp` library.")
+(:documentation "This file defines abstract protocol classes for AMPQ version 0.8 components of the
+ `de.setf.amqp` library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3

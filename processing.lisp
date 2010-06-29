@@ -2,8 +2,8 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
- (description "This file defines the AMQP input processing pipeline for the 'de.setf.amqp' library.")
+(:documentation "This file defines the AMQP input processing pipeline for the 'de.setf.amqp' library."
+
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -55,7 +55,72 @@
     a class, that is passed, otherwise - for headers and body, the frame
     itself is passed.
 
- For an other takes on processing patterns see alternative implementations:
+
+ In general application processing and output frame generation is coordinated with the stream of
+input frames. input and output frame streams are both queue mediated. each channel is associated with a
+single process, but multiple channels share a single connection. There are three separate issues
+involved in application-specific request/response processing:
+
+ - control : asynchronous/synchronous binding of control flow to the command;
+ - protocol: which operations and which logic apply to which read/to-be-written commands;
+ - visibility : the scope and extent of the definition;
+
+ The _control_ mechanism must allow for several variations:
+
+               process        channel          connection      control
+    1-1-1-s     single         single            single         sync
+    1-1-1-a     single         single            single         async
+    1-*-1-s     single        multiple           single         sync
+    1-*-1-a     single        multiple           single         async
+    *-*-1-s    multiple       multiple           single         sync
+    *-*-1-a    multiple       multiple           single         async
+    1-*-*-s     single        multiple           multiple       sync
+    1-*-*-a     single        multiple           multiple       async
+    *-*-*-s    multiple       multiple           multiple       sync
+    *-*-*-a    multiple       multiple           multiple       async
+
+ This includes just a subset of all possible combinations, as multi-process/single-channel processing is not
+supported, and single-channel/multi-connection is not plausible. The async control mechanism does not
+necessarily imply an additional "event" process, just that input processong can occur other than as a response
+to an explicit read/poll. this would happen when input frames are processed
+as a side-effect of output, or frames are processed in addition to those which the
+application is intending to read.
+
+ The _protocol_ issues are managed through conventions for class and method naming and maps between
+line codes and abstract and protocl-version specific names.
+
+ Each possible response to _visibility_ issues supports a different the application architecture
+
+ - specialize the standard request-/respond-to operators with an additional protocol class for
+   synchronous message processing. this can follow a clim/presentation `with-` pattern, or
+   it can be in terms of an intrinsic element, such as the connection or channel. in the latter
+   case, where the aim is to avoid the additional parameter, pervasiv specialization is accomplished by
+   - specializing the ensure-object constructor for the connection or the channel classes 
+   - implementing a dynamic, context-specific type->class map for connections and/or channels
+   this approach is supported by the static `request-` / `respond-to-` operators, for which the base generic
+   operators incorporate an initial channel argument.
+ - establish command filters as part of the applications dynamic state / call-stack to implement arbitrary
+   state machines. this is accomplished with the `command-case` and
+   `command-loop` forms which conditionalize processing clauses by command (object x method) types.
+   static state machine.
+ - bind handlers to the communication stream - in the form of the connection or channel
+   to implement custom behavior with arbitrary  universal or selective operations on frames.
+
+In combination, these approaches yield the generic interface structure
+
+    ;; read frame
+    handle-frame (frame) ->
+     ;; parse class, method, arguments
+     handle-class-and-method (class . method) ->
+       ;; delegate to a dynamic handler stack
+       statically-declared/dynamically-extent handlers (case class method)
+       ;; alternatively, to channel/instance handlers
+       dynamically-declare/indefinite-extent handlers (funcall (channel-handler class method))
+       ;; ultimately, to static functions
+       (apply-static-method method class)
+
+
+ For other takes on processing patterns see alternative implementations:
  RabbitMQ's java library interposes the AMPCommand [1] class on the channel, which
  acts as a state machine to filter the incoming frames. It releases composed
  commands which combine the operator/arguments, an envelope with content header
@@ -64,7 +129,7 @@
  that all message content is the correct length, w/o interleaving that with application
 processing. On the other hand, it impedes streaming.
 
-
+---
  [1]: http://www.rabbitmq.com/releases/rabbitmq-java-client/v1.7.0/rabbitmq-java-client-javadoc-1.7.0/com/rabbitmq/client/impl/AMQCommand.html"))
 
 
@@ -439,7 +504,7 @@ processing. On the other hand, it impedes streaming.
 
 
 
-(document (process-command dynamic-process-command)
+(:documentation (process-command dynamic-process-command)
   "Interface Operators :
 
 
@@ -632,7 +697,7 @@ processing. On the other hand, it impedes streaming.
 (setf (ccl:assq 'command-case ccl::*fred-special-indent-alist*) 1)
 
 
-(document (compute-channel-command-handler channel-command-handler channel-command)
+(:documentation (compute-channel-command-handler channel-command-handler channel-command)
   "Instance-scoped Commands :
 
  Instance-scoped commands are integrated into a channel's command-handler function.
@@ -703,92 +768,3 @@ processing. On the other hand, it impedes streaming.
              (apply ,function channel class method args)))))
 
 
-#|
-
-;;; initial thoughts on how to process. for the most part adopted by the implementation...
-;;;
-;;; various methods can intervene in the request/response process. they differ
-;;; according to the application architecture
-;;;
-;;; - a specialized protocol class can be used to extend the request-/respond-to
-;;;   operators to implement synchronous message processing.
-;;;   - it can be introduced by specializing the connection or the channel
-;;;     classes and the ensure-object constructor
-;;;   - it can be introduced by modifying the connection's type->class map
-;;;     either statically or dynamically
-;;; - custom behavior can be implemented strictly in command-case forms as a
-;;;   static state machine.
-;;; - custom behavior can be implemented by adding a handler to the channel
-;;;   to apply arbitrary functions to frames universally or selectively.
-
-
-handle-frame (frame) ->
- handle-class-and-method (class . command) ->
-   loop handlers (funcall handler class command)
-   ;; if none handles
-   (apply-method method class)
-
-? using the (with- ) pattern: (consuming , or (with-comsumer ?
-analogous to clim accept contexts, it affects the (connection? channel? )input within its dynamic context
-
-define message processing protocol by specializing individual functions and providing a specialized protocol class instance,
-that is, by implementing a protocol interface, or by providing a processing object which defines all the requisite methods
-in terms of the data.
-
-as clos is not a containment model for specialization, the operators would need an additional initial arguement, event
-though it is mostly redundant, since most commands apply to just one class.
-it is more succinct to juet spread the method instance's arguments in the function call and apply it, by name to the class.
-
-this leaves class specialization as the customization method.
-if the method operators are statially defined, this s easier to comprehend and maintain, but harder to change the behaviour dynamically.
-one must substitute a different "factory" class - connection, channel, etc in order to get specialized command method discriminators.
-
-which makes it difficult to achieve (with semantics
-
-
-three separate issues
- - protocol: which operations and which logic apply to which read/to-be-written commands.
- - control : asynchronous/synchronous binding of control flow to the command.
- - visibility : the scope and extent of the definition.
-
-the protocol is specified by combining send-*/receive, command-case with
-implicit encoding and decoding operations and logic which interprets/specifies
-class and command fields and properties.
-
-the control structure concerns how the stream of input frames is coordinated with 
-the stream of output frames and with other application processing. the input and
-output streams are both queue mediated. each channel is associated with a single
-process, but multiple channels share a single connection. This must allow for several variations:
-
-           process        channel          connection      control
-1-1-1-s     single         single            single         sync
-1-1-1-a     single         single            single         async
-1-*-1-s     single        multiple           single         sync
-1-*-1-a     single        multiple           single         async
-*-*-1-s    multiple       multiple           single         sync
-*-*-1-a    multiple       multiple           single         async
-1-*-*-s     single        multiple           multiple       sync
-1-*-*-a     single        multiple           multiple       async
-*-*-*-s    multiple       multiple           multiple       sync
-*-*-*-s    multiple       multiple           multiple       async
-
-the "single" process / "async" control does not necessarily imply an additional
-"event" process, just that input processong can occur other than as a response
-to an explicit read/poll
-
-the variations are implemented in an amqp:client instance, which also caches
-properties which would be used for connection establishment. one would like to
-be able to specify as little as possible in advance, but the control adjust to
-contingencies. thus the input/output queues are always present to arbitrate
-access to a given connection. 
-
-(defclass amqp:client ()
-  (user)
-  (password))
-
-with a 1-1-1-S, in synchronous mode, the process writes frames or reads
-them as explicit operations. nothing happens to read implicitly when writing
-and write block, so they leave nothing queued.
-
-
-|#

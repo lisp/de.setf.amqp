@@ -3,9 +3,9 @@
 (in-package :de.setf.amqp.implementation)
 
 
-(document :file
- (description "This file generates protocol classes and wire-level codecs for AMQP based on the
-  xml-encoded protocol specification.")
+(:documentation "This file generates protocol classes and wire-level codecs for AMQP based on the
+  xml-encoded protocol specification."
+
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'setf.amqp' is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@
      ,@body))
 
 (defparameter *license*
-  '(document :file
+  '(:documentation :file
  (description "This file contains generated protocol classes and wire-level codecs for AMQP based on the
   xml-encoded protocol specification.")
  (copyright

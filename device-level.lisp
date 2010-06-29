@@ -2,9 +2,8 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
-  (description "This file implements device-level support for streams based on AMQP connections as part of the
- 'de.setf.amqp' library.")
+(:documentation "This file implements device-level support for streams based on AMQP connections as part of the
+ 'de.setf.amqp' library."
   (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -761,7 +760,7 @@ as well as the discussions of the the alternative fu interface.[5]
            (values version frame)))))))
 
 
-(document (negotiate-client-connection open-connection)
+(:documentation (negotiate-client-connection open-connection)
   "AMQP connection negotiation occurs in two steps. First, the peers agree on a protocol version. Second
 they exchange  authentication and control information to set up the connection. The first step is
 implemented by open-connection. It negotiates with the broker to agree on a supported protocol version
@@ -808,7 +807,7 @@ returned.")
     device))
 
 
-(document (device-read-content device-write-content)
+(:documentation (device-read-content device-write-content)
   "The content processing interface comprises the two operators
   * device-read-message (channel &rest)
   * device-write-message (channel body &rest)

@@ -1,13 +1,12 @@
 ;;; -*- Package: DE.SETF.AMQP.IMPLEMENTATION; -*-
 ;;;
-;;; version: amqp-1-1-0-9-1
+;;; version: amqp-1-1-0-9-0
 ;;; generated 20100127T210212
 
 (in-package "DE.SETF.AMQP.IMPLEMENTATION")
 
-(document :file
- (description "This file contains generated protocol classes and wire-level codecs for AMQP based on the
-  xml-encoded protocol specification.")
+(:documentation "This file contains generated protocol classes and wire-level codecs for AMQP based on the
+  xml-encoded protocol specification."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de)"
   "'setf.amqp' is free software: you can redistribute it and/or modify
@@ -78,7 +77,7 @@
     (ensure-export #:unbind-ok)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (macrolet ((ensure-export (x) `(export (intern ,(string x) :amqp-1-1-0-9-1) :amqp-1-1-0-9-1))) 
+  (macrolet ((ensure-export (x) `(export (intern ,(string x) :amqp-1-1-0-9-0) :amqp-1-1-0-9-0))) 
     (ensure-export #:basic)
     (ensure-export #:basic.ack)
     (ensure-export #:basic.cancel)
@@ -152,25 +151,25 @@
 ;;;   connection.close [reply-code reply-text class-id method-id]
 ;;;   connection.close-ok
 
-(def-amqp-class amqp-1-1-0-9-1:connection (amqp-1-1-0-9-1:object amqp:connection)
+(def-amqp-class amqp-1-1-0-9-0:connection (amqp-1-1-0-9-0:object amqp:connection)
   ((id :initform 10 :allocation :class)
    (method-names :initform
     '(amqp:start amqp:start-ok amqp:secure amqp:secure-ok amqp:tune amqp:tune-ok amqp:open amqp:open-ok amqp:close
       amqp:close-ok)
     :allocation :class))
   ()
-  ((version-major :initform (field-type-initform version-major amqp-1-1-0-9-1:octet) :type amqp-1-1-0-9-1:octet
+  ((version-major :initform (field-type-initform version-major amqp-1-1-0-9-0:octet) :type amqp-1-1-0-9-0:octet
     :documentation "protocol major version
 
  The major version number can take any value from 0 to 99 as defined in the
  AMQP specification.")
-   (version-minor :initform (field-type-initform version-minor amqp-1-1-0-9-1:octet) :type amqp-1-1-0-9-1:octet
+   (version-minor :initform (field-type-initform version-minor amqp-1-1-0-9-0:octet) :type amqp-1-1-0-9-0:octet
     :documentation "protocol minor version
 
  The minor version number can take any value from 0 to 99 as defined in the
  AMQP specification.")
-   (server-properties :initform (field-type-initform server-properties amqp-1-1-0-9-1:peer-properties) :type
-    amqp-1-1-0-9-1:peer-properties :documentation "server properties
+   (server-properties :initform (field-type-initform server-properties amqp-1-1-0-9-0:peer-properties) :type
+    amqp-1-1-0-9-0:peer-properties :documentation "server properties
 
  The properties SHOULD contain at least these fields: 'host', specifying the
  server host name or address, 'product', giving the name of the server product,
@@ -180,11 +179,11 @@
 
  Client connects to server and inspects the server properties. It checks for
  the presence of the required fields.")
-   (mechanisms :initform (field-type-initform mechanisms amqp-1-1-0-9-1:longstr) :type amqp-1-1-0-9-1:longstr
+   (mechanisms :initform (field-type-initform mechanisms amqp-1-1-0-9-0:longstr) :type amqp-1-1-0-9-0:longstr
     :documentation "available security mechanisms
 
  A list of the security mechanisms that the server supports, delimited by spaces.")
-   (locales :initform (field-type-initform locales amqp-1-1-0-9-1:longstr) :type amqp-1-1-0-9-1:longstr :documentation
+   (locales :initform (field-type-initform locales amqp-1-1-0-9-0:longstr) :type amqp-1-1-0-9-0:longstr :documentation
     "available message locales
 
  A list of the message locales that the server supports, delimited by spaces. The
@@ -194,14 +193,14 @@
 
  Client connects to server and inspects the locales field. It checks for
  the presence of the required locale(s).")
-   (client-properties :initform (field-type-initform client-properties amqp-1-1-0-9-1:peer-properties) :type
-    amqp-1-1-0-9-1:peer-properties :documentation "client properties
+   (client-properties :initform (field-type-initform client-properties amqp-1-1-0-9-0:peer-properties) :type
+    amqp-1-1-0-9-0:peer-properties :documentation "client properties
 
  The properties SHOULD contain at least these fields: 'product', giving the name
  of the client product, 'version', giving the name of the client version, 'platform',
  giving the name of the operating system, 'copyright', if appropriate, and
  'information', giving other general information.")
-   (mechanism :initform (field-type-initform mechanism amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (mechanism :initform (field-type-initform mechanism amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "selected security mechanism
 
  A single security mechanisms selected by the client, which must be one of those
@@ -217,22 +216,22 @@
  Client connects to server and sends an invalid security mechanism. The
  server must respond by closing the connection (a socket close, with no
  connection close negotiation).")
-   (locale :initform (field-type-initform locale amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr :documentation
+   (locale :initform (field-type-initform locale amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr :documentation
     "selected message locale
 
  A single message locale selected by the client, which must be one of those
  specified by the server.")
-   (challenge :initform (field-type-initform challenge amqp-1-1-0-9-1:longstr) :type amqp-1-1-0-9-1:longstr
+   (challenge :initform (field-type-initform challenge amqp-1-1-0-9-0:longstr) :type amqp-1-1-0-9-0:longstr
     :documentation "security challenge data
 
  Challenge information, a block of opaque binary data passed to the security
  mechanism.")
-   (response :initform (field-type-initform response amqp-1-1-0-9-1:longstr) :type amqp-1-1-0-9-1:longstr
+   (response :initform (field-type-initform response amqp-1-1-0-9-0:longstr) :type amqp-1-1-0-9-0:longstr
     :documentation "security response data
 
  A block of opaque data passed to the security mechanism. The contents of this
  data are defined by the SASL security mechanism.")
-   (channel-max :initform (field-type-initform channel-max amqp-1-1-0-9-1:short) :type amqp-1-1-0-9-1:short
+   (channel-max :initform (field-type-initform channel-max amqp-1-1-0-9-0:short) :type amqp-1-1-0-9-0:short
     :documentation "negotiated maximum channels
 
  The maximum total number of channels that the client will use per connection.
@@ -241,7 +240,7 @@
  by the server, the server MUST close the connection without attempting a
  negotiated close. The server may report the error in some fashion to assist
  implementors.")
-   (frame-max :initform (field-type-initform frame-max amqp-1-1-0-9-1:long) :type amqp-1-1-0-9-1:long :documentation
+   (frame-max :initform (field-type-initform frame-max amqp-1-1-0-9-0:long) :type amqp-1-1-0-9-0:long :documentation
     "negotiated maximum frame size
 
  The largest frame size that the client and server will use for the connection.
@@ -258,12 +257,12 @@
  by the server, the server MUST close the connection without attempting a
  negotiated close. The server may report the error in some fashion to assist
  implementors.")
-   (heartbeat :initform (field-type-initform heartbeat amqp-1-1-0-9-1:short) :type amqp-1-1-0-9-1:short :documentation
+   (heartbeat :initform (field-type-initform heartbeat amqp-1-1-0-9-0:short) :type amqp-1-1-0-9-0:short :documentation
     "desired heartbeat delay
 
  The delay, in seconds, of the connection heartbeat that the client wants. Zero
  means the client does not want a heartbeat.")
-   (virtual-host :initform (field-type-initform virtual-host amqp-1-1-0-9-1:path) :type amqp-1-1-0-9-1:path
+   (virtual-host :initform (field-type-initform virtual-host amqp-1-1-0-9-0:path) :type amqp-1-1-0-9-0:path
     :documentation "virtual host name
 
  The name of the virtual host to work with.
@@ -275,18 +274,18 @@
 
  The server SHOULD verify that the client has permission to access the
  specified virtual host.")
-   (reserved-2 :initform (field-type-initform reserved-2 amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :allocation
+   (reserved-2 :initform (field-type-initform reserved-2 amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :allocation
     :class)
-   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :allocation :class)
-   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code) :type amqp-1-1-0-9-1:reply-code)
-   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text) :type amqp-1-1-0-9-1:reply-text)
-   (class-id :initform (field-type-initform class-id amqp-1-1-0-9-1:class-id) :type amqp-1-1-0-9-1:class-id
+   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code) :type amqp-1-1-0-9-0:reply-code)
+   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text) :type amqp-1-1-0-9-0:reply-text)
+   (class-id :initform (field-type-initform class-id amqp-1-1-0-9-0:class-id) :type amqp-1-1-0-9-0:class-id
     :documentation "failing method class
 
  When the close is provoked by a method exception, this is the class of the
  method.")
-   (method-id :initform (field-type-initform method-id amqp-1-1-0-9-1:method-id) :type amqp-1-1-0-9-1:method-id
+   (method-id :initform (field-type-initform method-id amqp-1-1-0-9-0:method-id) :type amqp-1-1-0-9-0:method-id
     :documentation "failing method ID
 
  When the close is provoked by a method exception, this is the ID of the method."))
@@ -308,25 +307,25 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:start) (amqp:start amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:start) (amqp:start amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ((version-major
-   :initform (field-type-initform version-major amqp-1-1-0-9-1:octet)
-   :type amqp-1-1-0-9-1:octet
+   :initform (field-type-initform version-major amqp-1-1-0-9-0:octet)
+   :type amqp-1-1-0-9-0:octet
    :documentation "protocol major version
 
  The major version number can take any value from 0 to 99 as defined in the
  AMQP specification.")
   (version-minor
-   :initform (field-type-initform version-minor amqp-1-1-0-9-1:octet)
-   :type amqp-1-1-0-9-1:octet
+   :initform (field-type-initform version-minor amqp-1-1-0-9-0:octet)
+   :type amqp-1-1-0-9-0:octet
    :documentation "protocol minor version
 
  The minor version number can take any value from 0 to 99 as defined in the
  AMQP specification.")
   (server-properties
-   :initform (field-type-initform server-properties amqp-1-1-0-9-1:peer-properties)
-   :type amqp-1-1-0-9-1:peer-properties
+   :initform (field-type-initform server-properties amqp-1-1-0-9-0:peer-properties)
+   :type amqp-1-1-0-9-0:peer-properties
    :documentation "server properties
 
  The properties SHOULD contain at least these fields: 'host', specifying the
@@ -338,14 +337,14 @@
  Client connects to server and inspects the server properties. It checks for
  the presence of the required fields.")
   (mechanisms
-   :initform (field-type-initform mechanisms amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform mechanisms amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :documentation "available security mechanisms
 
  A list of the security mechanisms that the server supports, delimited by spaces.")
   (locales
-   :initform (field-type-initform locales amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform locales amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :documentation "available message locales
 
  A list of the message locales that the server supports, delimited by spaces. The
@@ -357,11 +356,11 @@
  the presence of the required locale(s)."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:start-ok) (amqp:start-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:start-ok) (amqp:start-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ((client-properties
-   :initform (field-type-initform client-properties amqp-1-1-0-9-1:peer-properties)
-   :type amqp-1-1-0-9-1:peer-properties
+   :initform (field-type-initform client-properties amqp-1-1-0-9-0:peer-properties)
+   :type amqp-1-1-0-9-0:peer-properties
    :documentation "client properties
 
  The properties SHOULD contain at least these fields: 'product', giving the name
@@ -369,8 +368,8 @@
  giving the name of the operating system, 'copyright', if appropriate, and
  'information', giving other general information.")
   (mechanism
-   :initform (field-type-initform mechanism amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform mechanism amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "selected security mechanism
 
  A single security mechanisms selected by the client, which must be one of those
@@ -387,55 +386,55 @@
  server must respond by closing the connection (a socket close, with no
  connection close negotiation).")
   (response
-   :initform (field-type-initform response amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform response amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :documentation "security response data
 
  A block of opaque data passed to the security mechanism. The contents of this
  data are defined by the SASL security mechanism.")
   (locale
-   :initform (field-type-initform locale amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform locale amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "selected message locale
 
  A single message locale selected by the client, which must be one of those
  specified by the server."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:secure) (amqp:secure amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:secure) (amqp:secure amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ((challenge
-   :initform (field-type-initform challenge amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform challenge amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :documentation "security challenge data
 
  Challenge information, a block of opaque binary data passed to the security
  mechanism."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:secure-ok) (amqp:secure-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:secure-ok) (amqp:secure-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ((response
-   :initform (field-type-initform response amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform response amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :documentation "security response data
 
  A block of opaque data passed to the security mechanism. The contents of this
  data are defined by the SASL security mechanism."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:tune) (amqp:tune amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:tune) (amqp:tune amqp-1-1-0-9-0:method)
   ((id :initform 30))
   ((channel-max
-   :initform (field-type-initform channel-max amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform channel-max amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :documentation "proposed maximum channels
 
  Specifies highest channel number that the server permits. Usable channel numbers
  are in the range 1..channel-max. Zero indicates no specified limit.")
   (frame-max
-   :initform (field-type-initform frame-max amqp-1-1-0-9-1:long)
-   :type amqp-1-1-0-9-1:long
+   :initform (field-type-initform frame-max amqp-1-1-0-9-0:long)
+   :type amqp-1-1-0-9-0:long
    :documentation "proposed maximum frame size
 
  The largest frame size that the server proposes for the connection, including
@@ -450,19 +449,19 @@
  Client connects to server and sends a large properties field, creating a frame
  of frame-min-size octets. The server must accept this frame.")
   (heartbeat
-   :initform (field-type-initform heartbeat amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform heartbeat amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :documentation "desired heartbeat delay
 
  The delay, in seconds, of the connection heartbeat that the server wants.
  Zero means the server does not want a heartbeat."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:tune-ok) (amqp:tune-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:tune-ok) (amqp:tune-ok amqp-1-1-0-9-0:method)
   ((id :initform 31))
   ((channel-max
-   :initform (field-type-initform channel-max amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform channel-max amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :documentation "negotiated maximum channels
 
  The maximum total number of channels that the client will use per connection.
@@ -472,8 +471,8 @@
  negotiated close. The server may report the error in some fashion to assist
  implementors.")
   (frame-max
-   :initform (field-type-initform frame-max amqp-1-1-0-9-1:long)
-   :type amqp-1-1-0-9-1:long
+   :initform (field-type-initform frame-max amqp-1-1-0-9-0:long)
+   :type amqp-1-1-0-9-0:long
    :documentation "negotiated maximum frame size
 
  The largest frame size that the client and server will use for the connection.
@@ -491,19 +490,19 @@
  negotiated close. The server may report the error in some fashion to assist
  implementors.")
   (heartbeat
-   :initform (field-type-initform heartbeat amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform heartbeat amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :documentation "desired heartbeat delay
 
  The delay, in seconds, of the connection heartbeat that the client wants. Zero
  means the client does not want a heartbeat."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:open) (amqp:open amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:open) (amqp:open amqp-1-1-0-9-0:method)
   ((id :initform 40))
   ((virtual-host
-   :initform (field-type-initform virtual-host amqp-1-1-0-9-1:path)
-   :type amqp-1-1-0-9-1:path
+   :initform (field-type-initform virtual-host amqp-1-1-0-9-0:path)
+   :type amqp-1-1-0-9-0:path
    :documentation "virtual host name
 
  The name of the virtual host to work with.
@@ -516,47 +515,47 @@
  The server SHOULD verify that the client has permission to access the
  specified virtual host.")
   (reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :allocation :class)
   (reserved-2
-   :initform (field-type-initform reserved-2 amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform reserved-2 amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :allocation :class))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:open-ok) (amqp:open-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:open-ok) (amqp:open-ok amqp-1-1-0-9-0:method)
   ((id :initform 41))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :allocation :class))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:close) (amqp:close amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:close) (amqp:close amqp-1-1-0-9-0:method)
   ((id :initform 50))
   ((reply-code
-   :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code)
-   :type amqp-1-1-0-9-1:reply-code)
+   :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code)
+   :type amqp-1-1-0-9-0:reply-code)
   (reply-text
-   :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text)
-   :type amqp-1-1-0-9-1:reply-text)
+   :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text)
+   :type amqp-1-1-0-9-0:reply-text)
   (class-id
-   :initform (field-type-initform class-id amqp-1-1-0-9-1:class-id)
-   :type amqp-1-1-0-9-1:class-id
+   :initform (field-type-initform class-id amqp-1-1-0-9-0:class-id)
+   :type amqp-1-1-0-9-0:class-id
    :documentation "failing method class
 
  When the close is provoked by a method exception, this is the class of the
  method.")
   (method-id
-   :initform (field-type-initform method-id amqp-1-1-0-9-1:method-id)
-   :type amqp-1-1-0-9-1:method-id
+   :initform (field-type-initform method-id amqp-1-1-0-9-0:method-id)
+   :type amqp-1-1-0-9-0:method-id
    :documentation "failing method ID
 
  When the close is provoked by a method exception, this is the ID of the method."))
   (:documentation "roles: client MUST; server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:connection amqp:close-ok) (amqp:close-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:connection amqp:close-ok) (amqp:close-ok amqp-1-1-0-9-0:method)
   ((id :initform 51))
   ()
   (:documentation "roles: client MUST; server MUST."))
@@ -569,26 +568,26 @@
 ;;;   channel.close [reply-code reply-text class-id method-id]
 ;;;   channel.close-ok
 
-(def-amqp-class amqp-1-1-0-9-1:channel (amqp-1-1-0-9-1:object amqp:channel)
+(def-amqp-class amqp-1-1-0-9-0:channel (amqp-1-1-0-9-0:object amqp:channel)
   ((id :initform 20 :allocation :class)
    (method-names :initform '(amqp:open amqp:open-ok amqp:flow amqp:flow-ok amqp:close amqp:close-ok) :allocation
     :class))
   ()
-  ((reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:longstr) :type amqp-1-1-0-9-1:longstr
+  ((reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:longstr) :type amqp-1-1-0-9-0:longstr
     :allocation :class)
-   (active :initform (field-type-initform active amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (active :initform (field-type-initform active amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "current flow setting
 
  Confirms the setting of the processed flow method: 1 means the peer will start
  sending or continue to send content frames; 0 means it will not.")
-   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code) :type amqp-1-1-0-9-1:reply-code)
-   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text) :type amqp-1-1-0-9-1:reply-text)
-   (class-id :initform (field-type-initform class-id amqp-1-1-0-9-1:class-id) :type amqp-1-1-0-9-1:class-id
+   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code) :type amqp-1-1-0-9-0:reply-code)
+   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text) :type amqp-1-1-0-9-0:reply-text)
+   (class-id :initform (field-type-initform class-id amqp-1-1-0-9-0:class-id) :type amqp-1-1-0-9-0:class-id
     :documentation "failing method class
 
  When the close is provoked by a method exception, this is the class of the
  method.")
-   (method-id :initform (field-type-initform method-id amqp-1-1-0-9-1:method-id) :type amqp-1-1-0-9-1:method-id
+   (method-id :initform (field-type-initform method-id amqp-1-1-0-9-0:method-id) :type amqp-1-1-0-9-0:method-id
     :documentation "failing method ID
 
  When the close is provoked by a method exception, this is the ID of the method."))
@@ -607,68 +606,68 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:open) (amqp:open amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:open) (amqp:open amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :allocation :class))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:open-ok) (amqp:open-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:open-ok) (amqp:open-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:longstr)
-   :type amqp-1-1-0-9-1:longstr
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:longstr)
+   :type amqp-1-1-0-9-0:longstr
    :allocation :class))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:flow) (amqp:flow amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:flow) (amqp:flow amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ((active
-   :initform (field-type-initform active amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform active amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "start/stop content frames
 
  If 1, the peer starts sending content frames. If 0, the peer stops sending
  content frames."))
   (:documentation "roles: server MUST; client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:flow-ok) (amqp:flow-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:flow-ok) (amqp:flow-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ((active
-   :initform (field-type-initform active amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform active amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "current flow setting
 
  Confirms the setting of the processed flow method: 1 means the peer will start
  sending or continue to send content frames; 0 means it will not."))
   (:documentation "roles: server MUST; client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:close) (amqp:close amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:close) (amqp:close amqp-1-1-0-9-0:method)
   ((id :initform 40))
   ((reply-code
-   :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code)
-   :type amqp-1-1-0-9-1:reply-code)
+   :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code)
+   :type amqp-1-1-0-9-0:reply-code)
   (reply-text
-   :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text)
-   :type amqp-1-1-0-9-1:reply-text)
+   :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text)
+   :type amqp-1-1-0-9-0:reply-text)
   (class-id
-   :initform (field-type-initform class-id amqp-1-1-0-9-1:class-id)
-   :type amqp-1-1-0-9-1:class-id
+   :initform (field-type-initform class-id amqp-1-1-0-9-0:class-id)
+   :type amqp-1-1-0-9-0:class-id
    :documentation "failing method class
 
  When the close is provoked by a method exception, this is the class of the
  method.")
   (method-id
-   :initform (field-type-initform method-id amqp-1-1-0-9-1:method-id)
-   :type amqp-1-1-0-9-1:method-id
+   :initform (field-type-initform method-id amqp-1-1-0-9-0:method-id)
+   :type amqp-1-1-0-9-0:method-id
    :documentation "failing method ID
 
  When the close is provoked by a method exception, this is the ID of the method."))
   (:documentation "roles: client MUST; server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:channel amqp:close-ok) (amqp:close-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:channel amqp:close-ok) (amqp:close-ok amqp-1-1-0-9-0:method)
   ((id :initform 41))
   ()
   (:documentation "roles: client MUST; server MUST."))
@@ -679,11 +678,11 @@
 ;;;   exchange.delete [reserved-1 exchange if-unused no-wait]
 ;;;   exchange.delete-ok
 
-(def-amqp-class amqp-1-1-0-9-1:exchange (amqp-1-1-0-9-1:object amqp:exchange)
+(def-amqp-class amqp-1-1-0-9-0:exchange (amqp-1-1-0-9-0:object amqp:exchange)
   ((id :initform 40 :allocation :class)
    (method-names :initform '(amqp:declare amqp:declare-ok amqp:delete amqp:delete-ok) :allocation :class))
   ()
-  ((type :initform (field-type-initform type amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr :documentation
+  ((type :initform (field-type-initform type amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr :documentation
     "exchange type
 
  Each exchange belongs to one of a set of exchange types implemented by the
@@ -701,7 +700,7 @@
  server does not support.
 
  TODO.")
-   (passive :initform (field-type-initform passive amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (passive :initform (field-type-initform passive amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "do not create exchange
 
  If set, the server will reply with Declare-Ok if the exchange already
@@ -723,7 +722,7 @@
  not.
 
  TODO.")
-   (durable :initform (field-type-initform durable amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (durable :initform (field-type-initform durable amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "request a durable exchange
 
  If set when creating a new exchange, the exchange will be marked as durable.
@@ -733,20 +732,20 @@
  The server MUST support both durable and transient exchanges.
 
  TODO.")
-   (reserved-2 :initform (field-type-initform reserved-2 amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :allocation
+   (reserved-2 :initform (field-type-initform reserved-2 amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :allocation
     :class)
-   (reserved-3 :initform (field-type-initform reserved-3 amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :allocation
+   (reserved-3 :initform (field-type-initform reserved-3 amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :allocation
     :class)
-   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-1:table) :type amqp-1-1-0-9-1:table :documentation
+   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-0:table) :type amqp-1-1-0-9-0:table :documentation
     "arguments for declaration
 
  A set of arguments for the declaration. The syntax and semantics of these
  arguments depends on the server implementation.")
-   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short) :type amqp-1-1-0-9-1:short :allocation
+   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short) :type amqp-1-1-0-9-0:short :allocation
     :class)
-   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name) :type amqp-1-1-0-9-1:exchange-name
+   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name) :type amqp-1-1-0-9-0:exchange-name
     :documentation "The client MUST NOT attempt to delete an exchange that does not exist.")
-   (if-unused :initform (field-type-initform if-unused amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (if-unused :initform (field-type-initform if-unused amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "delete only if unused
 
  If set, the server will only delete the exchange if it has no queue bindings. If
@@ -758,7 +757,7 @@
 
  The client declares an exchange, binds a queue to it, then tries to delete it
  setting if-unused to true.")
-   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait) :type amqp-1-1-0-9-1:no-wait))
+   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait) :type amqp-1-1-0-9-0:no-wait))
   (:documentation "roles: server MUST; client MUST.
 
       Exchanges match and distribute messages across queues. Exchanges can be configured in
@@ -769,15 +768,15 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:exchange amqp:declare) (amqp:declare amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:exchange amqp:declare) (amqp:declare amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "Exchange names starting with 'amq.' are reserved for pre-declared and
  standardised exchanges. The client MAY declare an exchange starting with
  'amq.' if the passive option is set, or the exchange already exists.
@@ -790,8 +789,8 @@
 
  The client attempts to declare an exchange with an illegal name.")
   (type
-   :initform (field-type-initform type amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform type amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "exchange type
 
  Each exchange belongs to one of a set of exchange types implemented by the
@@ -810,8 +809,8 @@
 
  TODO.")
   (passive
-   :initform (field-type-initform passive amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform passive amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "do not create exchange
 
  If set, the server will reply with Declare-Ok if the exchange already
@@ -834,8 +833,8 @@
 
  TODO.")
   (durable
-   :initform (field-type-initform durable amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform durable amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "request a durable exchange
 
  If set when creating a new exchange, the exchange will be marked as durable.
@@ -846,43 +845,43 @@
 
  TODO.")
   (reserved-2
-   :initform (field-type-initform reserved-2 amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform reserved-2 amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :allocation :class)
   (reserved-3
-   :initform (field-type-initform reserved-3 amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform reserved-3 amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :allocation :class)
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait)
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait)
   (arguments
-   :initform (field-type-initform arguments amqp-1-1-0-9-1:table)
-   :type amqp-1-1-0-9-1:table
+   :initform (field-type-initform arguments amqp-1-1-0-9-0:table)
+   :type amqp-1-1-0-9-0:table
    :documentation "arguments for declaration
 
  A set of arguments for the declaration. The syntax and semantics of these
  arguments depends on the server implementation."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:exchange amqp:declare-ok) (amqp:declare-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:exchange amqp:declare-ok) (amqp:declare-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:exchange amqp:delete) (amqp:delete amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:exchange amqp:delete) (amqp:delete amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "The client MUST NOT attempt to delete an exchange that does not exist.")
   (if-unused
-   :initform (field-type-initform if-unused amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform if-unused amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "delete only if unused
 
  If set, the server will only delete the exchange if it has no queue bindings. If
@@ -895,11 +894,11 @@
  The client declares an exchange, binds a queue to it, then tries to delete it
  setting if-unused to true.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait))
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:exchange amqp:delete-ok) (amqp:delete-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:exchange amqp:delete-ok) (amqp:delete-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ()
   (:documentation "roles: client MUST."))
@@ -916,14 +915,14 @@
 ;;;   queue.delete [reserved-1 queue if-unused if-empty no-wait]
 ;;;   queue.delete-ok [message-count]
 
-(def-amqp-class amqp-1-1-0-9-1:queue (amqp-1-1-0-9-1:object amqp:queue)
+(def-amqp-class amqp-1-1-0-9-0:queue (amqp-1-1-0-9-0:object amqp:queue)
   ((id :initform 50 :allocation :class)
    (method-names :initform
     '(amqp:declare amqp:declare-ok amqp:bind amqp:bind-ok amqp:unbind amqp:unbind-ok amqp:purge amqp:purge-ok
       amqp:delete amqp:delete-ok)
     :allocation :class))
   ()
-  ((passive :initform (field-type-initform passive amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+  ((passive :initform (field-type-initform passive amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "do not create queue
 
  If set, the server will reply with Declare-Ok if the queue already
@@ -949,7 +948,7 @@
  if not.
 
  TODO.")
-   (durable :initform (field-type-initform durable amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (durable :initform (field-type-initform durable amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "request a durable queue
 
  If set when creating a new queue, the queue will be marked as durable. Durable
@@ -967,7 +966,7 @@
  The server MUST support both durable and transient queues.
 
  A client declares two named queues, one durable and one transient.")
-   (exclusive :initform (field-type-initform exclusive amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (exclusive :initform (field-type-initform exclusive amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "request an exclusive queue
 
  Exclusive queues may only be accessed by the current connection, and are
@@ -985,7 +984,7 @@
  One client declares an exclusive queue. A second client on a different
  connection attempts to declare, bind, consume, purge, delete, or declare
  a queue of the same name.")
-   (auto-delete :initform (field-type-initform auto-delete amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (auto-delete :initform (field-type-initform auto-delete amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "auto-delete queue when unused
 
  If set, the queue is deleted when all consumers have finished using it. The last
@@ -999,12 +998,12 @@
  Client then attempts to declare the two queues using the same names again,
  but reversing the value of the auto-delete field in each case. Verify that the
  queues still exist with the original auto-delete flag values.")
-   (consumer-count :initform (field-type-initform consumer-count amqp-1-1-0-9-1:long) :type amqp-1-1-0-9-1:long
+   (consumer-count :initform (field-type-initform consumer-count amqp-1-1-0-9-0:long) :type amqp-1-1-0-9-0:long
     :documentation "number of consumers
 
  Reports the number of active consumers for the queue. Note that consumers can
  suspend activity (Channel.Flow) in which case they do not appear in this count.")
-   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name) :type amqp-1-1-0-9-1:exchange-name
+   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name) :type amqp-1-1-0-9-0:exchange-name
     :documentation "The name of the exchange to unbind from.
 
  The client MUST NOT attempt to unbind a queue from an exchange that
@@ -1015,17 +1014,17 @@
  The server MUST accept a blank exchange name to mean the default exchange.
 
  The client declares a queue and binds it to a blank exchange name.")
-   (routing-key :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (routing-key :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "routing key of binding
 
  Specifies the routing key of the binding to unbind.")
-   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-1:table) :type amqp-1-1-0-9-1:table :documentation
+   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-0:table) :type amqp-1-1-0-9-0:table :documentation
     "arguments of binding
 
  Specifies the arguments of the binding to unbind.")
-   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short) :type amqp-1-1-0-9-1:short :allocation
+   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short) :type amqp-1-1-0-9-0:short :allocation
     :class)
-   (queue :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name) :type amqp-1-1-0-9-1:queue-name
+   (queue :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name) :type amqp-1-1-0-9-0:queue-name
     :documentation "Specifies the name of the queue to delete.
 
  The client MUST either specify a queue name or have previously declared a
@@ -1036,7 +1035,7 @@
  The client MUST NOT attempt to delete a queue that does not exist.
 
  The client attempts to delete a non-existent queue.")
-   (if-unused :initform (field-type-initform if-unused amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (if-unused :initform (field-type-initform if-unused amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "delete only if unused
 
  If set, the server will only delete the queue if it has no consumers. If the
@@ -1048,7 +1047,7 @@
 
  The client declares a queue, and consumes from it, then tries to delete it
  setting if-unused to true.")
-   (if-empty :initform (field-type-initform if-empty amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (if-empty :initform (field-type-initform if-empty amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "delete only if empty
 
  If set, the server will only delete the queue if it has no messages.
@@ -1058,9 +1057,9 @@
 
  The client declares a queue, binds it and publishes some messages into it,
  then tries to delete it setting if-empty to true.")
-   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait) :type amqp-1-1-0-9-1:no-wait)
-   (message-count :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count) :type
-    amqp-1-1-0-9-1:message-count :documentation "Reports the number of messages deleted."))
+   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait) :type amqp-1-1-0-9-0:no-wait)
+   (message-count :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count) :type
+    amqp-1-1-0-9-0:message-count :documentation "Reports the number of messages deleted."))
   (:documentation "roles: server MUST; client MUST.
 
       Queues store and forward messages. Queues can be configured in the server or created at
@@ -1075,15 +1074,15 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:declare) (amqp:declare amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:declare) (amqp:declare amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "The queue name MAY be empty, in which case the server MUST create a new
  queue with a unique generated name and return this to the client in the
  Declare-Ok method.
@@ -1103,8 +1102,8 @@
 
  The client attempts to declare a queue with an illegal name.")
   (passive
-   :initform (field-type-initform passive amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform passive amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "do not create queue
 
  If set, the server will reply with Declare-Ok if the queue already
@@ -1131,8 +1130,8 @@
 
  TODO.")
   (durable
-   :initform (field-type-initform durable amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform durable amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "request a durable queue
 
  If set when creating a new queue, the queue will be marked as durable. Durable
@@ -1151,8 +1150,8 @@
 
  A client declares two named queues, one durable and one transient.")
   (exclusive
-   :initform (field-type-initform exclusive amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform exclusive amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "request an exclusive queue
 
  Exclusive queues may only be accessed by the current connection, and are
@@ -1171,8 +1170,8 @@
  connection attempts to declare, bind, consume, purge, delete, or declare
  a queue of the same name.")
   (auto-delete
-   :initform (field-type-initform auto-delete amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform auto-delete amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "auto-delete queue when unused
 
  If set, the queue is deleted when all consumers have finished using it. The last
@@ -1187,45 +1186,45 @@
  but reversing the value of the auto-delete field in each case. Verify that the
  queues still exist with the original auto-delete flag values.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait)
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait)
   (arguments
-   :initform (field-type-initform arguments amqp-1-1-0-9-1:table)
-   :type amqp-1-1-0-9-1:table
+   :initform (field-type-initform arguments amqp-1-1-0-9-0:table)
+   :type amqp-1-1-0-9-0:table
    :documentation "arguments for declaration
 
  A set of arguments for the declaration. The syntax and semantics of these
  arguments depends on the server implementation."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:declare-ok) (amqp:declare-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:declare-ok) (amqp:declare-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ((queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Reports the name of the queue. If the server generated a queue name, this field
  contains that name.")
   (message-count
-   :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count)
-   :type amqp-1-1-0-9-1:message-count)
+   :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count)
+   :type amqp-1-1-0-9-0:message-count)
   (consumer-count
-   :initform (field-type-initform consumer-count amqp-1-1-0-9-1:long)
-   :type amqp-1-1-0-9-1:long
+   :initform (field-type-initform consumer-count amqp-1-1-0-9-0:long)
+   :type amqp-1-1-0-9-0:long
    :documentation "number of consumers
 
  Reports the number of active consumers for the queue. Note that consumers can
  suspend activity (Channel.Flow) in which case they do not appear in this count."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:bind) (amqp:bind amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:bind) (amqp:bind amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to bind.
 
  The client MUST either specify a queue name or have previously declared a
@@ -1237,8 +1236,8 @@
 
  The client attempts to bind a non-existent queue.")
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "name of the exchange to bind to
 
  A client MUST NOT be allowed to bind a queue to a non-existent exchange.
@@ -1249,8 +1248,8 @@
 
  The client declares a queue and binds it to a blank exchange name.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "message routing key
 
  Specifies the routing key for the binding. The routing key is used for routing
@@ -1266,31 +1265,31 @@
  publisher sends the exchange a message with routing key R, then the message
  MUST be passed to the message queue if K = R.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait)
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait)
   (arguments
-   :initform (field-type-initform arguments amqp-1-1-0-9-1:table)
-   :type amqp-1-1-0-9-1:table
+   :initform (field-type-initform arguments amqp-1-1-0-9-0:table)
+   :type amqp-1-1-0-9-0:table
    :documentation "arguments for binding
 
  A set of arguments for the binding. The syntax and semantics of these arguments
  depends on the exchange class."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:bind-ok) (amqp:bind-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:bind-ok) (amqp:bind-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:unbind) (amqp:unbind amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:unbind) (amqp:unbind amqp-1-1-0-9-0:method)
   ((id :initform 50))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to unbind.
 
  The client MUST either specify a queue name or have previously declared a
@@ -1302,8 +1301,8 @@
 
  The client attempts to unbind a non-existent queue.")
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "The name of the exchange to unbind from.
 
  The client MUST NOT attempt to unbind a queue from an exchange that
@@ -1315,33 +1314,33 @@
 
  The client declares a queue and binds it to a blank exchange name.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "routing key of binding
 
  Specifies the routing key of the binding to unbind.")
   (arguments
-   :initform (field-type-initform arguments amqp-1-1-0-9-1:table)
-   :type amqp-1-1-0-9-1:table
+   :initform (field-type-initform arguments amqp-1-1-0-9-0:table)
+   :type amqp-1-1-0-9-0:table
    :documentation "arguments of binding
 
  Specifies the arguments of the binding to unbind."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:unbind-ok) (amqp:unbind-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:unbind-ok) (amqp:unbind-ok amqp-1-1-0-9-0:method)
   ((id :initform 51))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:purge) (amqp:purge amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:purge) (amqp:purge amqp-1-1-0-9-0:method)
   ((id :initform 30))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to purge.
 
  The client MUST either specify a queue name or have previously declared a
@@ -1353,27 +1352,27 @@
 
  The client attempts to purge a non-existent queue.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait))
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:purge-ok) (amqp:purge-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:purge-ok) (amqp:purge-ok amqp-1-1-0-9-0:method)
   ((id :initform 31))
   ((message-count
-   :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count)
-   :type amqp-1-1-0-9-1:message-count
+   :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count)
+   :type amqp-1-1-0-9-0:message-count
    :documentation "Reports the number of messages purged."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:delete) (amqp:delete amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:delete) (amqp:delete amqp-1-1-0-9-0:method)
   ((id :initform 40))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to delete.
 
  The client MUST either specify a queue name or have previously declared a
@@ -1385,8 +1384,8 @@
 
  The client attempts to delete a non-existent queue.")
   (if-unused
-   :initform (field-type-initform if-unused amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform if-unused amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "delete only if unused
 
  If set, the server will only delete the queue if it has no consumers. If the
@@ -1399,8 +1398,8 @@
  The client declares a queue, and consumes from it, then tries to delete it
  setting if-unused to true.")
   (if-empty
-   :initform (field-type-initform if-empty amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform if-empty amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "delete only if empty
 
  If set, the server will only delete the queue if it has no messages.
@@ -1411,15 +1410,15 @@
  The client declares a queue, binds it and publishes some messages into it,
  then tries to delete it setting if-empty to true.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait))
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:queue amqp:delete-ok) (amqp:delete-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:queue amqp:delete-ok) (amqp:delete-ok amqp-1-1-0-9-0:method)
   ((id :initform 41))
   ((message-count
-   :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count)
-   :type amqp-1-1-0-9-1:message-count
+   :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count)
+   :type amqp-1-1-0-9-0:message-count
    :documentation "Reports the number of messages deleted."))
   (:documentation "roles: client MUST."))
 
@@ -1442,47 +1441,47 @@
 ;;;   basic.recover [requeue]
 ;;;   basic.recover-ok
 
-(def-amqp-class amqp-1-1-0-9-1:basic (amqp-1-1-0-9-1:object amqp:basic)
+(def-amqp-class amqp-1-1-0-9-0:basic (amqp-1-1-0-9-0:object amqp:basic)
   ((id :initform 60 :allocation :class)
    (method-names :initform
     '(amqp:qos amqp:qos-ok amqp:consume amqp:consume-ok amqp:cancel amqp:cancel-ok amqp:publish amqp:return
       amqp:deliver amqp:get amqp:get-ok amqp:get-empty amqp:ack amqp:reject amqp:recover-async amqp:recover
       amqp:recover-ok)
     :allocation :class))
-  ((content-type :initform (field-type-initform content-type amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+  ((content-type :initform (field-type-initform content-type amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "MIME content type")
    (content-encoding
      :initform
-     (field-type-initform content-encoding amqp-1-1-0-9-1:shortstr)
+     (field-type-initform content-encoding amqp-1-1-0-9-0:shortstr)
      :type
-     amqp-1-1-0-9-1:shortstr
+     amqp-1-1-0-9-0:shortstr
      :documentation
      "MIME content encoding")
-   (headers :initform (field-type-initform headers amqp-1-1-0-9-1:table) :type amqp-1-1-0-9-1:table :documentation
+   (headers :initform (field-type-initform headers amqp-1-1-0-9-0:table) :type amqp-1-1-0-9-0:table :documentation
     "message header field table")
-   (delivery-mode :initform (field-type-initform delivery-mode amqp-1-1-0-9-1:octet) :type amqp-1-1-0-9-1:octet
+   (delivery-mode :initform (field-type-initform delivery-mode amqp-1-1-0-9-0:octet) :type amqp-1-1-0-9-0:octet
     :documentation "non-persistent (1) or persistent (2)")
-   (priority :initform (field-type-initform priority amqp-1-1-0-9-1:octet) :type amqp-1-1-0-9-1:octet :documentation
+   (priority :initform (field-type-initform priority amqp-1-1-0-9-0:octet) :type amqp-1-1-0-9-0:octet :documentation
     "message priority, 0 to 9")
-   (correlation-id :initform (field-type-initform correlation-id amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (correlation-id :initform (field-type-initform correlation-id amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "application correlation identifier")
-   (reply-to :initform (field-type-initform reply-to amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (reply-to :initform (field-type-initform reply-to amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "address to reply to")
-   (expiration :initform (field-type-initform expiration amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (expiration :initform (field-type-initform expiration amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "message expiration specification")
-   (message-id :initform (field-type-initform message-id amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (message-id :initform (field-type-initform message-id amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "application message identifier")
-   (timestamp :initform (field-type-initform timestamp amqp-1-1-0-9-1:timestamp) :type amqp-1-1-0-9-1:timestamp
+   (timestamp :initform (field-type-initform timestamp amqp-1-1-0-9-0:timestamp) :type amqp-1-1-0-9-0:timestamp
     :documentation "message timestamp")
-   (type :initform (field-type-initform type amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr :documentation
+   (type :initform (field-type-initform type amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr :documentation
     "message type name")
-   (user-id :initform (field-type-initform user-id amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (user-id :initform (field-type-initform user-id amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "creating user id")
-   (app-id :initform (field-type-initform app-id amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr :documentation
+   (app-id :initform (field-type-initform app-id amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr :documentation
     "creating application id")
-   (reserved :initform (field-type-initform reserved amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (reserved :initform (field-type-initform reserved amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "reserved, must be empty" :allocation :class))
-  ((prefetch-size :initform (field-type-initform prefetch-size amqp-1-1-0-9-1:long) :type amqp-1-1-0-9-1:long
+  ((prefetch-size :initform (field-type-initform prefetch-size amqp-1-1-0-9-0:long) :type amqp-1-1-0-9-0:long
     :documentation "prefetch window in octets
 
  The client can request that messages be sent in advance so that when the client
@@ -1501,7 +1500,7 @@
 
  Define a QoS prefetch-size limit and send a single message that exceeds
  that limit. Verify that the message arrives correctly.")
-   (prefetch-count :initform (field-type-initform prefetch-count amqp-1-1-0-9-1:short) :type amqp-1-1-0-9-1:short
+   (prefetch-count :initform (field-type-initform prefetch-count amqp-1-1-0-9-0:short) :type amqp-1-1-0-9-0:short
     :documentation "prefetch window in messages
 
  Specifies a prefetch window in terms of whole messages. This field may be used
@@ -1515,13 +1514,13 @@
  Define a QoS prefetch-size limit and a prefetch-count limit greater than
  one. Send multiple messages that exceed the prefetch size. Verify that
  no more than one message arrives at once.")
-   (global :initform (field-type-initform global amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (global :initform (field-type-initform global amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "apply to entire connection
 
  By default the QoS settings apply to the current channel only. If this field is
  set, they are applied to the entire connection.")
-   (no-local :initform (field-type-initform no-local amqp-1-1-0-9-1:no-local) :type amqp-1-1-0-9-1:no-local)
-   (exclusive :initform (field-type-initform exclusive amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (no-local :initform (field-type-initform no-local amqp-1-1-0-9-0:no-local) :type amqp-1-1-0-9-0:no-local)
+   (exclusive :initform (field-type-initform exclusive amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "request exclusive access
 
  Request exclusive consumer access, meaning only this consumer can access the
@@ -1534,13 +1533,13 @@
  (non-exclusive) queue and then consume from the queue. In the second
  connection attempt to consume from the same queue using the exclusive
  option.")
-   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-1:table) :type amqp-1-1-0-9-1:table :documentation
+   (arguments :initform (field-type-initform arguments amqp-1-1-0-9-0:table) :type amqp-1-1-0-9-0:table :documentation
     "arguments for declaration
 
  A set of arguments for the consume. The syntax and semantics of these
  arguments depends on the server implementation.")
-   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait) :type amqp-1-1-0-9-1:no-wait)
-   (mandatory :initform (field-type-initform mandatory amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (no-wait :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait) :type amqp-1-1-0-9-0:no-wait)
+   (mandatory :initform (field-type-initform mandatory amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "indicate mandatory routing
 
  This flag tells the server how to react if the message cannot be routed to a
@@ -1550,7 +1549,7 @@
  The server SHOULD implement the mandatory flag.
 
  TODO.")
-   (immediate :initform (field-type-initform immediate amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (immediate :initform (field-type-initform immediate amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "request immediate delivery
 
  This flag tells the server how to react if the message cannot be routed to a
@@ -1561,27 +1560,27 @@
  The server SHOULD implement the immediate flag.
 
  TODO.")
-   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code) :type amqp-1-1-0-9-1:reply-code)
-   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text) :type amqp-1-1-0-9-1:reply-text)
-   (consumer-tag :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag) :type
-    amqp-1-1-0-9-1:consumer-tag)
-   (queue :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name) :type amqp-1-1-0-9-1:queue-name
+   (reply-code :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code) :type amqp-1-1-0-9-0:reply-code)
+   (reply-text :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text) :type amqp-1-1-0-9-0:reply-text)
+   (consumer-tag :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag) :type
+    amqp-1-1-0-9-0:consumer-tag)
+   (queue :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name) :type amqp-1-1-0-9-0:queue-name
     :documentation "Specifies the name of the queue to get a message from.")
-   (no-ack :initform (field-type-initform no-ack amqp-1-1-0-9-1:no-ack) :type amqp-1-1-0-9-1:no-ack)
-   (redelivered :initform (field-type-initform redelivered amqp-1-1-0-9-1:redelivered) :type
-    amqp-1-1-0-9-1:redelivered)
-   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name) :type amqp-1-1-0-9-1:exchange-name
+   (no-ack :initform (field-type-initform no-ack amqp-1-1-0-9-0:no-ack) :type amqp-1-1-0-9-0:no-ack)
+   (redelivered :initform (field-type-initform redelivered amqp-1-1-0-9-0:redelivered) :type
+    amqp-1-1-0-9-0:redelivered)
+   (exchange :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name) :type amqp-1-1-0-9-0:exchange-name
     :documentation "Specifies the name of the exchange that the message was originally published to.
  If empty, the message was published to the default exchange.")
-   (routing-key :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (routing-key :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :documentation "Message routing key
 
  Specifies the routing key name specified when the message was published.")
-   (message-count :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count) :type
-    amqp-1-1-0-9-1:message-count)
-   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr) :type amqp-1-1-0-9-1:shortstr
+   (message-count :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count) :type
+    amqp-1-1-0-9-0:message-count)
+   (reserved-1 :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr) :type amqp-1-1-0-9-0:shortstr
     :allocation :class)
-   (multiple :initform (field-type-initform multiple amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (multiple :initform (field-type-initform multiple amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "acknowledge multiple messages
 
  If set to 1, the delivery tag is treated as 'up to and including', so that the
@@ -1595,9 +1594,9 @@
  Specifically, a client MUST not acknowledge the same message more than once.
 
  TODO.")
-   (delivery-tag :initform (field-type-initform delivery-tag amqp-1-1-0-9-1:delivery-tag) :type
-    amqp-1-1-0-9-1:delivery-tag)
-   (requeue :initform (field-type-initform requeue amqp-1-1-0-9-1:bit) :type amqp-1-1-0-9-1:bit :documentation
+   (delivery-tag :initform (field-type-initform delivery-tag amqp-1-1-0-9-0:delivery-tag) :type
+    amqp-1-1-0-9-0:delivery-tag)
+   (requeue :initform (field-type-initform requeue amqp-1-1-0-9-0:bit) :type amqp-1-1-0-9-0:bit :documentation
     "requeue the message
 
  If this field is zero, the message will be redelivered to the original
@@ -1621,11 +1620,11 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:qos) (amqp:qos amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:qos) (amqp:qos amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ((prefetch-size
-   :initform (field-type-initform prefetch-size amqp-1-1-0-9-1:long)
-   :type amqp-1-1-0-9-1:long
+   :initform (field-type-initform prefetch-size amqp-1-1-0-9-0:long)
+   :type amqp-1-1-0-9-0:long
    :documentation "prefetch window in octets
 
  The client can request that messages be sent in advance so that when the client
@@ -1645,8 +1644,8 @@
  Define a QoS prefetch-size limit and send a single message that exceeds
  that limit. Verify that the message arrives correctly.")
   (prefetch-count
-   :initform (field-type-initform prefetch-count amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform prefetch-count amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :documentation "prefetch window in messages
 
  Specifies a prefetch window in terms of whole messages. This field may be used
@@ -1661,32 +1660,32 @@
  one. Send multiple messages that exceed the prefetch size. Verify that
  no more than one message arrives at once.")
   (global
-   :initform (field-type-initform global amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform global amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "apply to entire connection
 
  By default the QoS settings apply to the current channel only. If this field is
  set, they are applied to the entire connection."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:qos-ok) (amqp:qos-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:qos-ok) (amqp:qos-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:consume) (amqp:consume amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:consume) (amqp:consume amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to consume from.")
   (consumer-tag
-   :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag)
-   :type amqp-1-1-0-9-1:consumer-tag
+   :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag)
+   :type amqp-1-1-0-9-0:consumer-tag
    :documentation "Specifies the identifier for the consumer. The consumer tag is local to a
  channel, so two clients can use the same consumer tags. If this field is
  empty the server will generate a unique tag.
@@ -1704,14 +1703,14 @@
  in which consumers have also been created (to test that the server uses
  unique consumer tags).")
   (no-local
-   :initform (field-type-initform no-local amqp-1-1-0-9-1:no-local)
-   :type amqp-1-1-0-9-1:no-local)
+   :initform (field-type-initform no-local amqp-1-1-0-9-0:no-local)
+   :type amqp-1-1-0-9-0:no-local)
   (no-ack
-   :initform (field-type-initform no-ack amqp-1-1-0-9-1:no-ack)
-   :type amqp-1-1-0-9-1:no-ack)
+   :initform (field-type-initform no-ack amqp-1-1-0-9-0:no-ack)
+   :type amqp-1-1-0-9-0:no-ack)
   (exclusive
-   :initform (field-type-initform exclusive amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform exclusive amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "request exclusive access
 
  Request exclusive consumer access, meaning only this consumer can access the
@@ -1725,51 +1724,51 @@
  connection attempt to consume from the same queue using the exclusive
  option.")
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait)
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait)
   (arguments
-   :initform (field-type-initform arguments amqp-1-1-0-9-1:table)
-   :type amqp-1-1-0-9-1:table
+   :initform (field-type-initform arguments amqp-1-1-0-9-0:table)
+   :type amqp-1-1-0-9-0:table
    :documentation "arguments for declaration
 
  A set of arguments for the consume. The syntax and semantics of these
  arguments depends on the server implementation."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:consume-ok) (amqp:consume-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:consume-ok) (amqp:consume-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ((consumer-tag
-   :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag)
-   :type amqp-1-1-0-9-1:consumer-tag
+   :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag)
+   :type amqp-1-1-0-9-0:consumer-tag
    :documentation "Holds the consumer tag specified by the client or provided by the server."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:cancel) (amqp:cancel amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:cancel) (amqp:cancel amqp-1-1-0-9-0:method)
   ((id :initform 30))
   ((consumer-tag
-   :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag)
-   :type amqp-1-1-0-9-1:consumer-tag)
+   :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag)
+   :type amqp-1-1-0-9-0:consumer-tag)
   (no-wait
-   :initform (field-type-initform no-wait amqp-1-1-0-9-1:no-wait)
-   :type amqp-1-1-0-9-1:no-wait))
+   :initform (field-type-initform no-wait amqp-1-1-0-9-0:no-wait)
+   :type amqp-1-1-0-9-0:no-wait))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:cancel-ok) (amqp:cancel-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:cancel-ok) (amqp:cancel-ok amqp-1-1-0-9-0:method)
   ((id :initform 31))
   ((consumer-tag
-   :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag)
-   :type amqp-1-1-0-9-1:consumer-tag))
+   :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag)
+   :type amqp-1-1-0-9-0:consumer-tag))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:publish) (amqp:publish amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:publish) (amqp:publish amqp-1-1-0-9-0:method)
   ((id :initform 40))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "Specifies the name of the exchange to publish to. The exchange name can be
  empty, meaning the default exchange. If the exchange name is specified, and that
  exchange does not exist, the server will raise a channel exception.
@@ -1793,15 +1792,15 @@
 
  TODO.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "Message routing key
 
  Specifies the routing key for the message. The routing key is used for routing
  messages depending on the exchange configuration.")
   (mandatory
-   :initform (field-type-initform mandatory amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform mandatory amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "indicate mandatory routing
 
  This flag tells the server how to react if the message cannot be routed to a
@@ -1812,8 +1811,8 @@
 
  TODO.")
   (immediate
-   :initform (field-type-initform immediate amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform immediate amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "request immediate delivery
 
  This flag tells the server how to react if the message cannot be routed to a
@@ -1826,106 +1825,106 @@
  TODO."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:return) (amqp:return amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:return) (amqp:return amqp-1-1-0-9-0:method)
   ((id :initform 50))
   ((reply-code
-   :initform (field-type-initform reply-code amqp-1-1-0-9-1:reply-code)
-   :type amqp-1-1-0-9-1:reply-code)
+   :initform (field-type-initform reply-code amqp-1-1-0-9-0:reply-code)
+   :type amqp-1-1-0-9-0:reply-code)
   (reply-text
-   :initform (field-type-initform reply-text amqp-1-1-0-9-1:reply-text)
-   :type amqp-1-1-0-9-1:reply-text)
+   :initform (field-type-initform reply-text amqp-1-1-0-9-0:reply-text)
+   :type amqp-1-1-0-9-0:reply-text)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "Specifies the name of the exchange that the message was originally published
  to. May be empty, meaning the default exchange.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "Message routing key
 
  Specifies the routing key name specified when the message was published."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:deliver) (amqp:deliver amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:deliver) (amqp:deliver amqp-1-1-0-9-0:method)
   ((id :initform 60))
   ((consumer-tag
-   :initform (field-type-initform consumer-tag amqp-1-1-0-9-1:consumer-tag)
-   :type amqp-1-1-0-9-1:consumer-tag)
+   :initform (field-type-initform consumer-tag amqp-1-1-0-9-0:consumer-tag)
+   :type amqp-1-1-0-9-0:consumer-tag)
   (delivery-tag
-   :initform (field-type-initform delivery-tag amqp-1-1-0-9-1:delivery-tag)
-   :type amqp-1-1-0-9-1:delivery-tag)
+   :initform (field-type-initform delivery-tag amqp-1-1-0-9-0:delivery-tag)
+   :type amqp-1-1-0-9-0:delivery-tag)
   (redelivered
-   :initform (field-type-initform redelivered amqp-1-1-0-9-1:redelivered)
-   :type amqp-1-1-0-9-1:redelivered)
+   :initform (field-type-initform redelivered amqp-1-1-0-9-0:redelivered)
+   :type amqp-1-1-0-9-0:redelivered)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "Specifies the name of the exchange that the message was originally published to.
  May be empty, indicating the default exchange.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "Message routing key
 
  Specifies the routing key name specified when the message was published."))
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:get) (amqp:get amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:get) (amqp:get amqp-1-1-0-9-0:method)
   ((id :initform 70))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:short)
-   :type amqp-1-1-0-9-1:short
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:short)
+   :type amqp-1-1-0-9-0:short
    :allocation :class)
   (queue
-   :initform (field-type-initform queue amqp-1-1-0-9-1:queue-name)
-   :type amqp-1-1-0-9-1:queue-name
+   :initform (field-type-initform queue amqp-1-1-0-9-0:queue-name)
+   :type amqp-1-1-0-9-0:queue-name
    :documentation "Specifies the name of the queue to get a message from.")
   (no-ack
-   :initform (field-type-initform no-ack amqp-1-1-0-9-1:no-ack)
-   :type amqp-1-1-0-9-1:no-ack))
+   :initform (field-type-initform no-ack amqp-1-1-0-9-0:no-ack)
+   :type amqp-1-1-0-9-0:no-ack))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:get-ok) (amqp:get-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:get-ok) (amqp:get-ok amqp-1-1-0-9-0:method)
   ((id :initform 71))
   ((delivery-tag
-   :initform (field-type-initform delivery-tag amqp-1-1-0-9-1:delivery-tag)
-   :type amqp-1-1-0-9-1:delivery-tag)
+   :initform (field-type-initform delivery-tag amqp-1-1-0-9-0:delivery-tag)
+   :type amqp-1-1-0-9-0:delivery-tag)
   (redelivered
-   :initform (field-type-initform redelivered amqp-1-1-0-9-1:redelivered)
-   :type amqp-1-1-0-9-1:redelivered)
+   :initform (field-type-initform redelivered amqp-1-1-0-9-0:redelivered)
+   :type amqp-1-1-0-9-0:redelivered)
   (exchange
-   :initform (field-type-initform exchange amqp-1-1-0-9-1:exchange-name)
-   :type amqp-1-1-0-9-1:exchange-name
+   :initform (field-type-initform exchange amqp-1-1-0-9-0:exchange-name)
+   :type amqp-1-1-0-9-0:exchange-name
    :documentation "Specifies the name of the exchange that the message was originally published to.
  If empty, the message was published to the default exchange.")
   (routing-key
-   :initform (field-type-initform routing-key amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform routing-key amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :documentation "Message routing key
 
  Specifies the routing key name specified when the message was published.")
   (message-count
-   :initform (field-type-initform message-count amqp-1-1-0-9-1:message-count)
-   :type amqp-1-1-0-9-1:message-count))
+   :initform (field-type-initform message-count amqp-1-1-0-9-0:message-count)
+   :type amqp-1-1-0-9-0:message-count))
   (:documentation "roles: client MAY."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:get-empty) (amqp:get-empty amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:get-empty) (amqp:get-empty amqp-1-1-0-9-0:method)
   ((id :initform 72))
   ((reserved-1
-   :initform (field-type-initform reserved-1 amqp-1-1-0-9-1:shortstr)
-   :type amqp-1-1-0-9-1:shortstr
+   :initform (field-type-initform reserved-1 amqp-1-1-0-9-0:shortstr)
+   :type amqp-1-1-0-9-0:shortstr
    :allocation :class))
   (:documentation "roles: client MAY."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:ack) (amqp:ack amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:ack) (amqp:ack amqp-1-1-0-9-0:method)
   ((id :initform 80))
   ((delivery-tag
-   :initform (field-type-initform delivery-tag amqp-1-1-0-9-1:delivery-tag)
-   :type amqp-1-1-0-9-1:delivery-tag)
+   :initform (field-type-initform delivery-tag amqp-1-1-0-9-0:delivery-tag)
+   :type amqp-1-1-0-9-0:delivery-tag)
   (multiple
-   :initform (field-type-initform multiple amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform multiple amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "acknowledge multiple messages
 
  If set to 1, the delivery tag is treated as 'up to and including', so that the
@@ -1941,14 +1940,14 @@
  TODO."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:reject) (amqp:reject amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:reject) (amqp:reject amqp-1-1-0-9-0:method)
   ((id :initform 90))
   ((delivery-tag
-   :initform (field-type-initform delivery-tag amqp-1-1-0-9-1:delivery-tag)
-   :type amqp-1-1-0-9-1:delivery-tag)
+   :initform (field-type-initform delivery-tag amqp-1-1-0-9-0:delivery-tag)
+   :type amqp-1-1-0-9-0:delivery-tag)
   (requeue
-   :initform (field-type-initform requeue amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform requeue amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "requeue the message
 
  If requeue is true, the server will attempt to requeue the message. If requeue
@@ -1964,11 +1963,11 @@
  TODO."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:recover-async) (amqp:recover-async amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:recover-async) (amqp:recover-async amqp-1-1-0-9-0:method)
   ((id :initform 100))
   ((requeue
-   :initform (field-type-initform requeue amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform requeue amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "requeue the message
 
  If this field is zero, the message will be redelivered to the original
@@ -1976,11 +1975,11 @@
  potentially then delivering it to an alternative subscriber."))
   (:documentation "roles: server MAY."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:recover) (amqp:recover amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:recover) (amqp:recover amqp-1-1-0-9-0:method)
   ((id :initform 110))
   ((requeue
-   :initform (field-type-initform requeue amqp-1-1-0-9-1:bit)
-   :type amqp-1-1-0-9-1:bit
+   :initform (field-type-initform requeue amqp-1-1-0-9-0:bit)
+   :type amqp-1-1-0-9-0:bit
    :documentation "requeue the message
 
  If this field is zero, the message will be redelivered to the original
@@ -1988,7 +1987,7 @@
  potentially then delivering it to an alternative subscriber."))
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:basic amqp:recover-ok) (amqp:recover-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:basic amqp:recover-ok) (amqp:recover-ok amqp-1-1-0-9-0:method)
   ((id :initform 111))
   ()
   (:documentation "roles: client MUST."))
@@ -2001,7 +2000,7 @@
 ;;;   tx.rollback
 ;;;   tx.rollback-ok
 
-(def-amqp-class amqp-1-1-0-9-1:tx (amqp-1-1-0-9-1:object amqp:tx)
+(def-amqp-class amqp-1-1-0-9-0:tx (amqp-1-1-0-9-0:object amqp:tx)
   ((id :initform 90 :allocation :class)
    (method-names :initform '(amqp:select amqp:select-ok amqp:commit amqp:commit-ok amqp:rollback amqp:rollback-ok)
     :allocation :class))
@@ -2025,32 +2024,32 @@
     "))
 
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:select) (amqp:select amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:select) (amqp:select amqp-1-1-0-9-0:method)
   ((id :initform 10))
   ()
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:select-ok) (amqp:select-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:select-ok) (amqp:select-ok amqp-1-1-0-9-0:method)
   ((id :initform 11))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:commit) (amqp:commit amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:commit) (amqp:commit amqp-1-1-0-9-0:method)
   ((id :initform 20))
   ()
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:commit-ok) (amqp:commit-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:commit-ok) (amqp:commit-ok amqp-1-1-0-9-0:method)
   ((id :initform 21))
   ()
   (:documentation "roles: client MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:rollback) (amqp:rollback amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:rollback) (amqp:rollback amqp-1-1-0-9-0:method)
   ((id :initform 30))
   ()
   (:documentation "roles: server MUST."))
 
-(def-amqp-method (amqp-1-1-0-9-1:tx amqp:rollback-ok) (amqp:rollback-ok amqp-1-1-0-9-1:method)
+(def-amqp-method (amqp-1-1-0-9-0:tx amqp:rollback-ok) (amqp:rollback-ok amqp-1-1-0-9-0:method)
   ((id :initform 31))
   ()
   (:documentation "roles: client MUST."))

@@ -3,8 +3,7 @@
 (in-package :de.setf.amqp.implementation)
 
 
-(document :file
- (description "This file defines buffer accessors for AMQP data as part of the 'de.setf.amqp' library.")
+(:documentation "This file defines buffer accessors for AMQP data as part of the 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -70,7 +69,7 @@
 
 
 
-(document (with-argument-decoders with-property-decoders)
+(:documentation (with-argument-decoders with-property-decoders)
   "The wire-level representation presents three patterns:
 
  - a fixed record structure for fields universally present - eg, frame type, channel, and size
@@ -275,7 +274,7 @@
 
 
 
-(document "The individual AMQP field types all resolve to common lisp types. Some directly, but most in
+(:documentation "The individual AMQP field types all resolve to common lisp types. Some directly, but most in
  terms of custom type definitions. This applies, for example, to types where the AMQP size specifies the bit
  count of the respective size field rather than the length of the data. For example, string-8. These type
  definitions for these base types follow below. All names are in the :amqp package.
@@ -283,13 +282,14 @@
  Given these, the operator def-encodings (see below) defines version specific type predicates, elementary
  buffer accessors and composite codecs.")
 
-#-sbcl
+#+digitool
 (deftype amqp:frame-buffer (&optional length)
   (if length
     `(simple-array (unsigned-byte 8) (*))
     `(simple-array (unsigned-byte 8) (,length))))
 
-#+sbcl  ;; don't tell it more than it needs to know, otherwise shorter vectors conflict with declarations
+#+(or clozure sbcl)
+;; don't tell it more than it needs to know, otherwise shorter vectors conflict with declarations
 (deftype amqp:frame-buffer (&optional length)
   (declare (ignore length))
   `(simple-array (unsigned-byte 8) (*)))
@@ -307,6 +307,18 @@
                       initial-contents))
       (string (map-into buffer #'char-code initial-contents))
       (vector (replace buffer initial-contents)))))
+
+#+digitool
+(deftype amqp::string-buffer (&optional length)
+  (if length
+    `(simple-array character (*))
+    `(simple-array character (,length))))
+
+#+(or clozure sbcl)
+;; don't tell it more than it needs to know, otherwise shorter vectors conflict with declarations
+(deftype amqp::string-buffer (&optional length)
+  (declare (ignore length))
+  `(simple-array character (*)))
 
 
 (deftype amqp:bit ()
@@ -438,7 +450,7 @@
 
 
 
-(document (compute-type-initform field-type-initform)
+(:documentation (compute-type-initform field-type-initform)
   "Where class slots definitions and codec keyword arguments require default values, these
  are imputed from the respective field type. This occurs as the specifications are translated into
  class and method definitions, at which point any version specific types are generalized and yield
@@ -499,7 +511,7 @@
   (compute-field-type-initform field type))
 
 
-(document (def-encodings def-byte-accessors def-string-accessors)
+(:documentation (def-encodings def-byte-accessors def-string-accessors)
   "The codecs implement transformations between lisp objects and byte sequences. The buffer type,
 frame-buffer, is defined as (vector (unsigned-byte 8) (*)). It serves as a declaration and an argument
 constraint. Each version's codecs are are expressed in terms of that version's types and its operators.
@@ -759,10 +771,9 @@ In addition compound buffer accessors are defined for the types
 
 
 
-(document (encode-ieee-754-32 encode-ieee-754-64)
-  " codec operators
-
- The protocol data domain names vary from version to version, but they
+(:documentation ieee-754-32-integer-to-float ieee-754-64-integer-to-float
+                ieee-754-32-float-to-integer ieee-754-64-float-to-integer
+  "The protocol data domain names vary from version to version, but they
  resolve to a limited number of lisp types, mostly
 
     string
@@ -783,44 +794,128 @@ In addition compound buffer accessors are defined for the types
 ;;;
 ;;; floating point is brute force.
 
-(defun encode-ieee-754-32 (integer)
+(defun ieee-754-32-integer-to-float (integer)
   (let* ((negative-p (logbitp 31 integer))
          (sign (if negative-p -1 +1))
-         (exponent (- (ash (logand #x7f800000 integer) -23) 127))
+         (raw-exponent (ash (logand #x7f800000 integer) -23))
+         (exponent (- raw-exponent 127))
          (fraction (logand #x007fffff integer)))
-    (cond ((zerop exponent)
-           (if (zerop fraction)
-             (float 0 single-float-epsilon)
-             (float (* sign (* fraction #.(expt 2 -23)) (expt 2 exponent)) single-float-epsilon)))
-          ((= exponent #.(1- (expt 2 8)))
-           (if (zerop fraction)
-             (if negative-p single-float-negative-infinity single-float-positive-infinity)
-             single-float-nan))
-          (t
-           (float (* sign (1+ (* fraction #.(expt 2 -23))) (expt 2 exponent))
-                  single-float-epsilon)))))
+    (case raw-exponent
+      (#xff
+       (if (zerop fraction)
+         (if negative-p single-float-negative-infinity single-float-positive-infinity)
+         single-float-nan))
+      (#x00
+       ;; (print (list :to-float sign raw-exponent exponent fraction))
+       (if (zerop fraction)
+         (if negative-p -0.0s0 0.0s0)
+         (float (* sign (* fraction (expt 2 (- exponent 22)))) single-float-epsilon)))
+      (t
+       ;; (print (list :to-float sign raw-exponent exponent fraction))
+       (float (* sign (1+ (* fraction #.(expt 2 -23))) (expt 2 exponent))
+              single-float-epsilon)))))
 
-(defun encode-ieee-754-64 (integer)
+(defun ieee-754-64-integer-to-float (integer)
   (let* ((negative-p (logbitp 63 integer))
          (sign (if negative-p -1 +1))
-         (exponent (- (ash (logand #x7ff0000000000000 integer) -52) 2043))
+         (raw-exponent (ash (logand #x7ff0000000000000 integer) -52))
+         (exponent (- raw-exponent 1023))
          (fraction (logand #x000fffffffffffff integer)))
-    (cond ((zerop exponent)
-           (if (zerop fraction)
-             (float 0 single-float-epsilon)
-             (float (* sign (* fraction #.(expt 2 -52)) (expt 2 exponent)) double-float-epsilon)))
-          ((= exponent #.(1- (expt 2 11)))
-           (if (zerop fraction)
-             (if negative-p double-float-negative-infinity double-float-positive-infinity)
-             double-float-nan))
-          (t
-           (float (* sign (1+ (* fraction #.(expt 2 -52))) (expt 2 (- exponent 127)))
-                  double-float-epsilon)))))
+    (case raw-exponent
+      (#x7ff
+       (if (zerop fraction)
+         (if negative-p double-float-negative-infinity double-float-positive-infinity)
+         double-float-nan))
+      (#x000
+       ;; (print (list :to-float sign raw-exponent exponent fraction))
+       (if (zerop fraction)
+         (if negative-p -0.0d0 0.0d0)
+         (float (* sign (* fraction (expt 2 (- exponent 51)))) double-float-epsilon)))
+      (t
+       ;; (print (list :to-float sign raw-exponent exponent fraction))
+       (float (* sign (1+ (* fraction #.(expt 2 -52))) (expt 2 exponent))
+              double-float-epsilon)))))
 
-;; (eql (encode-ieee-754-32 #b00111110001000000000000000000000) 0.15625)
-;; (eql (encode-ieee-754-32 #b11000010111011010100000000000000) -118.625)
+;; (eql (ieee-754-32-integer-to-float #b00111110001000000000000000000000) 0.15625)
+;; (eql (ieee-754-32-integer-to-float #b11000010111011010100000000000000) -118.625)
+
+(defun raw-decode-short-float (float)
+  (etypecase float
+    (short-float )
+    (long-float (setf float (float float 1.0s0))))
+  #+ccl (multiple-value-bind (fraction exponent sign)
+                             (ccl::fixnum-decode-short-float float)
+          (values fraction exponent (plusp sign)))
+  ;; from sbcl:src;code;float.lisp
+  #+sbcl (let* ((bits (sb-kernel::single-float-bits (abs float)))
+                (exp (ldb sb-vm:single-float-exponent-byte bits))
+                (sig (ldb sb-vm:single-float-significand-byte bits))
+                (sign (minusp (float-sign float))))
+           (values sig exp sign))
+  #-(or ccl sbcl) (error "NYI: fixnum-decode-short-float"))
+
+(defun raw-decode-long-float (float)
+  (etypecase float
+    (short-float (setf float (float float 1.0d0)))
+    (long-float ))
+  #+ccl (multiple-value-bind (hi lo exp sign) (ccl::%integer-decode-double-float float)
+          (values (logior (ash hi 28) lo) exp (minusp sign)))
+  #+sbcl (let* ((abs (abs float))
+                (hi (sb-kernel::double-float-high-bits abs))
+                (lo (sb-kernel::double-float-low-bits abs))
+                (exp (ldb sb-vm:double-float-exponent-byte hi))
+                ;(sig (ldb sb-vm:double-float-significand-byte hi))
+                (sign (minusp (float-sign float))))
+           (values
+            (logior (ash (logior (ldb sb-vm:double-float-significand-byte hi)
+                                 sb-vm:double-float-hidden-bit)
+                         32)
+                    lo)
+            exp sign))
+  #-(or ccl sbcl) (error "NYI: fixnum-decode-long-float"))
 
 
+(defun ieee-754-32-float-to-integer (float)
+  (cond ((= float single-float-negative-infinity)
+         #xff800000)
+        ((= float single-float-positive-infinity)
+         #x7f800000)
+        ((eql float single-float-nan)
+         ;; http://en.wikipedia.org/wiki/NaN#Encodings
+         ;; http://java.sun.com/javase/6/docs/api/java/lang/Double.html#doubleToLongBits(double)
+         #x7fc00000)
+        ((= float 0.0s0)
+         (if (minusp (float-sign float)) #x80000000 #x00000000))
+        (t
+         (multiple-value-bind (fraction exponent sign)
+                              (raw-decode-short-float float)
+           (if (zerop exponent)
+             (logior (if sign #x80000000 0)
+                     (logand fraction #x007fffff))
+             (logior (if sign #x80000000 0)
+                     (ash exponent 23)
+                     (logand fraction #x007fffff)))))))
+
+(defun ieee-754-64-float-to-integer (float)
+  (cond ((= float double-float-negative-infinity)
+         #xfff0000000000000)
+        ((= float double-float-positive-infinity)
+         #x7ff0000000000000)
+        ((eql float double-float-nan)
+         ;; http://en.wikipedia.org/wiki/NaN#Encodings
+         ;; http://java.sun.com/javase/6/docs/api/java/lang/Double.html#doubleToLongBits(double)
+         #x7ff8000000000000)        
+        ((= float 0.0d0)
+         (if (minusp (float-sign float)) #x8000000000000000 #x0000000000000000))
+        (t
+         (multiple-value-bind (fraction exponent sign)
+                              (raw-decode-long-float float)
+           (if (zerop exponent)
+             (logior (if sign #x8000000000000000 0)
+                     (logand fraction #x000fffffffffffff))
+             (logior (if sign #x8000000000000000 0)
+                     (ash exponent 52)
+                     (logand fraction #x000fffffffffffff)))))))
 
 
 #+ignore                                ; not used as the logic is protocol-specific
@@ -928,21 +1023,21 @@ In addition compound buffer accessors are defined for the types
 
 
 (defun buffer-short-float (buffer position)
-  (values (encode-ieee-754-32 (buffer-integer buffer position 4))
+  (values (ieee-754-32-integer-to-float (buffer-integer buffer position 4))
           (+ position 4)))
 
 (defun (setf buffer-short-float) (value buffer position)
-  (declare (ignore value buffer position))
-  (error "NYI: (setf buffer-short-float)"))
+  (setf (buffer-integer buffer position) (ieee-754-32-float-to-integer value))
+  (values value (+ position 4)))
 
 
 (defun buffer-double-float (buffer position)
-  (values (encode-ieee-754-64 (buffer-integer buffer position 8))
+  (values (ieee-754-64-integer-to-float (buffer-integer buffer position 8))
           (+ position 8)))
 
 (defun (setf buffer-double-float) (value buffer position)
-  (declare (ignore value buffer position))
-  (error "NYI: (setf buffer-double-float)"))
+  (setf (buffer-integer buffer position) (ieee-754-64-float-to-integer value))
+  (values value (+ position 8)))
 
 
 #+(or )
@@ -986,8 +1081,7 @@ In addition compound buffer accessors are defined for the types
                                                  :de.setf.amqp.implementation))
                    (bytes (floor length 8)))
                `(progn (defun ,buffer-unsigned-name (buffer position &optional (assert-conditions t))
-                         #-sbcl (declare (type (frame-buffer ,*frame-size*) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position))
                          (when assert-conditions
                            (assert-argument-type ,buffer-unsigned-name buffer frame-buffer)
@@ -1004,8 +1098,7 @@ In addition compound buffer accessors are defined for the types
                            (values value position)))
                        
                        (defun (setf ,buffer-unsigned-name) (value buffer position &optional (assert-conditions t))
-                         #-sbcl (declare (type (frame-buffer ,*frame-size*) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position)
                                   (type ,(if (<= (expt 2 length) most-positive-fixnum) 'fixnum 'integer) value))
                          (assert-condition (and (integerp value) (>= value 0) (< value ,(expt 2 length)))
@@ -1055,7 +1148,7 @@ In addition compound buffer accessors are defined for the types
     (64 (setf (buffer-unsigned-byte-64 buffer position) value))))
 
 
-(document (buffer-timestamp (setf buffer-stimestamp))
+(:documentation (buffer-timestamp (setf buffer-stimestamp))
   "Timestamps are '64-bit POSIX time_t format with an accuracy of one second[1].
  The UNIX epoch is 1970-01-01T00:00:00Z. This is specified by the amqp:*timestamp-epoch*,
  which the buffer accessors use to shift to/from universal time.
@@ -1094,8 +1187,7 @@ In addition compound buffer accessors are defined for the types
                     (length-bytes (floor length-bits 8)))
                (declare (ignore buffer-utf16-name buffer-utf32-name))
                `(progn (defun ,buffer-iso-name (buffer position)
-                         #-sbcl (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position))
                          (assert-argument-type ,buffer-iso-name buffer frame-buffer)
                          (assert-condition (and (typep position 'fixnum) (<= (+ position ,length-bytes) (length buffer)))
@@ -1106,8 +1198,7 @@ In addition compound buffer accessors are defined for the types
                            (incf position ,length-bytes)
                            (if (plusp length)
                              (let ((result (make-array length :element-type +string-element-type+)))
-                               #-sbcl (declare (type (simple-array character (,*frame-size*)) result))
-                               #+sbcl (declare (type (simple-array character (*)) result))
+                               (declare (type amqp::string-buffer result))
                                (assert-condition (<= (+ position length) (length buffer))
                                                  ,buffer-iso-name "string overflows buffer: (~s + ~s), ~s"
                                                  position length (length buffer))
@@ -1118,13 +1209,13 @@ In addition compound buffer accessors are defined for the types
                                (values result position))
                              (values "" position))))
                        (defun (setf ,buffer-iso-name) (value buffer position)
-                         #-sbcl (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position)
                                   (type string value))
-                         (assert-argument-type ,buffer-iso-name buffer frame-buffer)
-                         (assert-argument-type ,buffer-iso-name value string)   ; no remorse
+                         (assert-argument-type (setf ,buffer-iso-name) buffer frame-buffer)
+                         (assert-argument-type (setf ,buffer-iso-name) value string)   ; no remorse
                          (let* ((length (length value)))
+                           ; (print (list length value buffer (+ position length ,length-bytes) (length buffer)))
                            (assert-condition (< length ,(expt 2 length-bits))
                                              (setf ,buffer-iso-name) "String overflows the size constraint")
                            (assert-condition (and (typep position 'fixnum) (<= (+ position length ,length-bytes) (length buffer)))
@@ -1133,13 +1224,13 @@ In addition compound buffer accessors are defined for the types
                            (setf (,buffer-unsigned-name buffer position nil) length)
                            (incf position ,length-bytes)
                            (dotimes (i length)
+                             ; (print (list length value buffer position i (aref value i)))
                              (setf (aref buffer position) (char-code (aref value i)))
                              (incf position))
                            (values value position buffer)))
 
                        (defun ,buffer-utf8-name (buffer position)
-                         #-sbcl (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position))
                          (assert-argument-type ,buffer-iso-name buffer frame-buffer)
                          (assert-condition (and (typep position 'fixnum) (<= (+ position ,length-bytes) (length buffer)))
@@ -1152,12 +1243,12 @@ In addition compound buffer accessors are defined for the types
                            (incf position ,length-bytes)
                            (if (plusp length)
                              (let ((result (make-array length :element-type +string-element-type+)))
-                               (declare (type (simple-array character (,*frame-size*)) result))
+                               (declare (type amqp::string-buffer result))
                                (assert-condition (<= (setf end (+ position length)) (length buffer))
                                                  ,buffer-iso-name "string size overflows buffer: (~s + ~s), ~s"
                                                  position length (length buffer))
                                (flet ((buffer-extract-byte (buffer)
-                                        (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
+                                        (declare (type amqp::frame-buffer buffer))
                                         (assert-condition (< position end)
                                                           ,buffer-iso-name "string overflows own size: ~s, ~s"
                                                           position end)
@@ -1169,24 +1260,24 @@ In addition compound buffer accessors are defined for the types
                                (values result end))
                              (values "" end))))
                        (defun (setf ,buffer-utf8-name) (value buffer position)
-                         #-sbcl (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
-                         #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                         (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position)
                                   (type string value))
                          (assert-argument-type (setf ,buffer-utf8-name) buffer frame-buffer)
-                         (assert-argument-type ,buffer-iso-name value string)
+                         (assert-argument-type (setf ,buffer-utf8-name) value string)
                          (let* ((length (length value))
                                 (max-position 0)
                                 (start position)
                                 (encoder (load-time-value (content-encoding-byte-encoder (content-encoding :utf-8)))))
-                           ;; can't check bounds here as the object length does not signify
+                           ;; can't check bounds here as the object length does not signify, but still limit
+                           ;; to the maximum buffer size
                            (incf position ,length-bytes)
-                           (setf max-position (+ position ,(expt 2 length-bits)))
+                           (setf max-position (min (+ position ,(expt 2 length-bits)) (length buffer)))
+                           ; (print (list length value buffer (+ position length ,length-bytes) (length buffer) max-position))
                            (assert-condition (< length ,(expt 2 length-bits))
                                              (setf ,buffer-utf8-name) "String overflows the size constraint")
                            (flet ((buffer-insert-byte (buffer byte)
-                                    #-sbcl (declare (type (simple-array (unsigned-byte 8) (,*frame-size*)) buffer))
-                                    #+sbcl (declare (type (simple-array (unsigned-byte 8) (*)) buffer))
+                                    (declare (type amqp:frame-buffer buffer))
                                     (declare (type (unsigned-byte 8) byte))
                                     ;; check bounds here as it's finally the encoded positioning
                                     (assert-condition (< position max-position)
@@ -1196,6 +1287,7 @@ In addition compound buffer accessors are defined for the types
                                     (incf position)))
                              (declare (dynamic-extent #'buffer-insert-byte))    ; just in case
                              (dotimes (i length)        ; can't check bounds here either
+                               ; (print (list length value buffer position i (aref value i)))
                                (funcall encoder (char value i) #'buffer-insert-byte buffer))
                              ;; update the length prefix after the fact
                            (setf (,buffer-unsigned-name buffer start nil) (- position (+ start ,length-bytes)))

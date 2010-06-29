@@ -2,9 +2,8 @@
 
 (in-package :de.setf.amqp.implementation)
 
-(document :file
-  (description "This file defines the CLOS model for AMQP `object` and `method` entities for the
- 'de.setf.amqp' library.")
+(:documentation "This file defines the CLOS model for AMQP `object` and `method` entities for the
+ 'de.setf.amqp' library."
  (copyright
   "Copyright 2010 [james anderson](mailto:james.anderson@setf.de) All Rights Reserved"
   "'de.setf.amqp' is free software: you can redistribute it and/or modify it under the terms of version 3
@@ -502,7 +501,7 @@
   (:documentation "The abstract tunnel class is specialized for each protocol version."))
 
 
-(document "class and connection relative id-to-abstract-type maps"
+(:documentation "class and connection relative id-to-abstract-type maps"
   "to version-specific classes. the primary operators (ensure-method ensure-object)
   combine a context and a designator - either a code when parsing, or an abstract
   name  in processing functions, and produce an instance of the concrete
@@ -562,7 +561,7 @@
   )
 
 
-(document (amqp:ensure-method amqp:ensure-object)
+(:documentation (amqp:ensure-method amqp:ensure-object)
   "Each class combines with its operators to perform commands. In addition each channel is associated with
  class.command instances which apply to it and a connection is assocaiated with it channels. In order that
  subsequent operations reflect previous settings, each context caches constituents. In the case of the
