@@ -68,8 +68,8 @@
 
  ---
  [1]: ftp://parcftp.xerox.com/pub/cl/cleanup/mail/stream-definition-by-user.mail
- [2]: ftp://ftp.clozure.com/stream-definition-by-user.mail
- [3]:http://www.nhplace.com/kent/CL/Issues/stream-definition-by-user-notes.html
+ [2]: ftp://ftp.clozure.com/pub/stream-definition-by-user.mail
+ [3]: http://www.nhplace.com/kent/CL/Issues/stream-definition-by-user-notes.html
  [4]: http://www.grumblesmurf.org/corman-patches/modules/gray-streams.lisp
  [5]: http://www.cs.cmu.edu/afs/cs/project/clisp/hackers/phg/clim/src/utils/cl-streams.lisp"))
 
