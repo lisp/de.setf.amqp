@@ -913,11 +913,10 @@
          initargs))
 
 (defmethod print-object ((instance amqp:channel) stream)
-  (with-slots (uri number) instance
-    (print-unreadable-object (instance stream :identity t :type t)
-      (write-char #\[ stream)
-      (print-object uri stream)
-      (format stream "].~d" number))))
+  (print-unreadable-object (instance stream :identity t :type t)
+    (write-char #\[ stream)
+    (print-object (bound-slot-value instance 'uri) stream)
+    (format stream "].~d" (bound-slot-value instance 'number))))
 
 
 (defmethod object-channel ((channel amqp:channel))
@@ -1190,6 +1189,10 @@
 (def-ensure-method (amqp:exchange amqp:delete-ok))
 
 
+(defmethod print-object ((instance amqp:exchange) stream)
+  (print-unreadable-object (instance stream :identity t :type t)
+    (format stream "[~a]" (or (ignore-errors (amqp:exchange-exchange instance)) "?"))))
+
 (defgeneric amqp:exchange-exchange (object)
   (:documentation "The exchange name accessor is extended with a string method to allow to
  coerce arguments to a string value in request/response operators.")
@@ -1249,6 +1252,12 @@
 (def-ensure-method (amqp:queue amqp:purge-ok))
 (def-ensure-method (amqp:queue amqp:delete))
 (def-ensure-method (amqp:queue amqp:delete-ok))
+
+
+(defmethod print-object ((instance amqp:queue) stream)
+  (print-unreadable-object (instance stream :identity t :type t)
+    (format stream "[~a]" (or (ignore-errors (amqp:queue-queue instance)) "?"))))
+
 
 (defgeneric amqp:queue-queue (object)
   (:documentation "The queue name accessor is extended with a string method to allow to

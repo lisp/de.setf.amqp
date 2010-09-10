@@ -56,7 +56,7 @@
                :net.common-lisp.closer-mop
                :net.common-lisp.bordeaux-threads
                :de.weitz.cl-ppcre
-               :com.b9.puri.ppcre
+               :com.b9.puri.puri-ppcre
                :de.setf.utility
                :de.setf.utility.mime
                #+sbcl :sb-simple-streams)

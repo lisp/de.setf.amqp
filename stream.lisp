@@ -77,7 +77,7 @@
 ;;;
 ;;; input
 
-(defmethod stream-read-char ((stream amqp-device))
+(defun amqp-stream-read-char (stream)
   "Read a character from an open channel on an amqp-device according to the channel's current encoding.
   At EOF return the stream-eof-marker."
   (with-slots (decoder) stream
@@ -91,6 +91,10 @@
                  (prog1 (aref buffer buffpos)
                    (incf buffpos))))))
       (or (funcall decoder #'buffer-extract-byte stream) (stream-eof-marker stream)))))
+
+(defmethod stream-read-char ((stream amqp-device))
+  (amqp-stream-read-char stream))
+
 
 ;;;!!! for multi-byte encodings the content-encoding needs to supply this
 ;;;!!! in order that the position is properly maintained.
@@ -303,7 +307,7 @@
 ;; truename : NYI
 
 
-(defmethod stream-read-byte ((stream amqp-device))
+(defun amqp-stream-read-byte (stream)
   "Read a byte from an open channel on an amqp-device. Manage buffer positions and refresh
  buffers from read frames as required. AAt EOF return the stream-eof-marker."
   (with-slots (buffer buffpos buffer-ptr body-position) stream
@@ -316,8 +320,11 @@
         (incf body-position))
       (stream-eof-marker stream))))
 
+(defmethod stream-read-byte ((stream amqp-device))
+  (amqp-stream-read-byte stream))
 
-(defmethod stream-write-byte ((stream amqp-device) byte)
+
+(defun amqp-stream-write-byte (stream byte)
   "Write a byte to an open channel on an amqp-device. Add the byte at the current buffer position.
  If either the buffer is full, or the stream length is reached, write the buffer."
   (with-slots (out-buffer outpos max-out-pos body-position body-length) stream
@@ -327,6 +334,9 @@
     (when (>= outpos max-out-pos)
       (device-write stream nil 0 nil t))
     byte))
+
+(defmethod stream-write-byte ((stream amqp-device) byte)
+  (amqp-stream-write-byte stream byte))
 
 
 
@@ -483,3 +493,20 @@
         do (device-read stream buffer start end t)))
 
 
+
+;;;
+;;; stream-reader/writer
+
+(defmethod stream-reader ((stream amqp-device))
+  (typecase (amqp.u:channel-content-type stream)
+    (mime:binary
+     (values #'amqp-stream-read-byte stream))
+    (t
+     (values #'amqp-stream-read-char stream))))
+
+(defmethod stream-writer ((stream amqp-device))
+  (typecase (amqp.u:channel-content-type stream)
+    (mime:binary
+     (values #'amqp-stream-write-byte stream))
+    (t
+     (values #'amqp-stream-write-char stream))))

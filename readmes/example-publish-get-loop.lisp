@@ -46,6 +46,8 @@
 
 (publish-get-loop *ch1* *ch2* '("this is a test") 1)
 
+(close *c* :abort t)
+
 ;;; (time (publish-get-loop *ch1* *ch2* '("a") 10000))
 
 ;;; os x, g5-2.5g, qpid-0.5

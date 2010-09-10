@@ -20,49 +20,11 @@
 ;;;
 ;;; macros
 
-(defmacro assert-condition (form &rest args)
-  (let ((format-control nil) (format-arguments nil) (operator nil))
-    (when (or (typep (first args) '(and symbol (not keyword)))
-              (and (consp (first args)) (eq (caar args) 'setf)))
-      (setf operator (pop args)))
-    ;; if there control is first, assume (control . args)
-    (when (stringp (first args))
-      (setf format-control (pop args)
-            format-arguments (shiftf args nil)))
-    (destructuring-bind (&key (operator operator)
-                              (format-string format-control) (format-control format-string)
-                              (format-arguments format-arguments)
-                              (type (if (and (consp form) (eq (first form) 'typep)) (third form) `(satisfies ,form))))
-                        args
-      `(unless ,form
-         (error 'simple-type-error
-                :expected-type (quote ,type)
-                :format-control ,(format nil "~@[~a: ~]condition failed: ~s~:[.~; ~~@?~]"
-                                         operator form
-                                         ;; if a control is present include the recursive format
-                                         format-control)
-                :format-arguments ,(when format-control `(list ,format-control ,@format-arguments)))))))
-
 (defmacro def-delegate-slot ((class slot) &rest operators)
   `(progn ,@(mapcar #'(lambda (op)
                         `(progn (defmethod ,op ((instance ,class)) (,op (slot-value instance ',slot)))
                                 (defmethod (setf ,op) (value (instance ,class)) (setf (,op (slot-value instance ',slot)) value))))
                     operators)))
-
-(defmacro assert-argument-type (operator variable type &optional (required-p t) (test `(typep ,variable ',type)))
-  (let ((form `(assert ,test ()
-                       ,(format nil "~s: the ~:[(optional) ~;~] ~a argument must be of type ~a."
-                                operator required-p variable type))))
-    (if required-p
-      form
-      `(when ,variable ,form))))
-
-(defmacro assert-argument-types (operator &rest assertions)
-  `(progn ,@(loop for assertion in assertions
-                  collect `(assert-argument-type ,operator ,@assertion))))
-
-#+mcl
-(setf (ccl:assq 'assert-argument-types ccl:*fred-special-indent-alist*) 1)
 
 
 ;;; assorted

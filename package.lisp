@@ -277,6 +277,7 @@
    :wire-level-type
    :with-commands
    :with-open-channel
+   :with-open-connection
    :content-too-large-error
    :no-consumers-error
    :connection-forced-error
@@ -367,6 +368,9 @@
    :string-32-p
    :string-8-p
                 )
+  (:import-from :de.setf.utility
+                :stream-reader
+                :stream-writer)
   #+ccl
   (:import-from :ccl
                 #:open-stream-p
@@ -802,6 +806,7 @@
    :stream-read-char-no-hang            ; function
    :stream-read-line                    ; function
    :stream-read-sequence                ; function
+   :stream-reader                       ; function
    :stream-start-line-p                 ; function
    :stream-terpri                       ; function
    :stream-tyi                          ; function
@@ -812,6 +817,7 @@
    :stream-write-char                   ; function
    :stream-write-sequence               ; function
    :stream-write-string                 ; function
+   :stream-writer                       ; function
    :stream.cancel                       ; function
    :stream.cancel-ok                    ; function
    :stream.consume                      ; function

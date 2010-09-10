@@ -322,6 +322,13 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
  deliver commands and process them either as polled or asynchronous events.")
   
   (:request
+   (:method ((queue amqp:queue) &rest args)
+     (declare (dynamic-extent args))
+     (let ((channel (queue-channel queue)))
+       (apply #'channel-request-consume channel (amqp:channel.basic channel)
+              :queue queue
+              args)))
+     
    (:method ((basic amqp:basic) &rest args &key queue consumer-tag no-local no-ack exclusive no-wait arguments)
      (declare (dynamic-extent args))
 
@@ -418,7 +425,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      class)))
 
 
-(def-amqp-command amqp:deliver (class &key consumer-tag delivery-tag redelivered exchange routing-key)
+(def-amqp-command amqp:deliver (class &key body consumer-tag delivery-tag redelivered exchange routing-key)
   (:documentation "C<--S : notify a client of an incoming consumer message.
  CLASS : The client class to which the message is being delivered.
   A read frame generates an immediate basic instance, which then delegates
@@ -483,6 +490,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
 
    (:method ((channel amqp:queue) &rest args &key queue no-ack body)
      (declare (dynamic-extent args) (ignore no-ack body))
+     ;;;??? should better use the queues own channel?
      (apply #'channel-request-get amqp:channel (amqp:channel.basic amqp:channel)
             :queue queue
             args))
@@ -578,15 +586,18 @@ defined by the exchange configuration and distributed to any active consumers wh
 any, is committed.")
 
   (:request
+   (:method ((exchange amqp:exchange) &rest args)
+     "Given an exchange, delegate to its channel's basic instance."
+     (declare (dynamic-extent args))
+     (apply #'amqp::request-publish (amqp:channel.basic (amqp.u:exchange-channel exchange)) args))
+
    (:method ((channel amqp:channel) &rest args)
      "The class' channel is state is set to use-channel.body.output, the stream is cleared,
  and the encoding is asserted. If a body is supplied, then, it is written. Otherwise the
  channel is left available as a stream."
-
      (declare (dynamic-extent args))
      ;; delegate to the channel's basic class
-     (apply #'amqp::request-publish (amqp:channel.basic channel)
-            args))
+     (apply #'amqp::request-publish (amqp:channel.basic channel) args))
 
    (:method ((basic amqp:basic) &rest args &key body exchange routing-key mandatory immediate)
      (declare (ignore routing-key mandatory immediate))

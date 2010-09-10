@@ -187,20 +187,23 @@ as well as the discussions of the the alternative fu interface.[5]
 (defmethod device-close ((device amqp:channel) (abort t))
   "remove the channel from the connection."
   (amqp:log :debug device "Close in state: ~s" (channel-state device))
-  (when (open-stream-p device)
-    (cond (abort
-           (call-next-method))
-          (t 
-           (let ((initial-state (shiftf (channel-state device) amqp.s:close-channel)))
-             (typecase initial-state
-               ;; if in use, send the close request, the flush it
-               (amqp.s:use-channel
-                (amqp:request-close device)
-                ;; complete and flush the content.
-                (device-flush device t)))
-             (call-next-method))))
-    ;; in any case disconnect
-    (disconnect-channel (channel-connection device) device)))
+  (if (zerop (channel-number device))
+    (amqp:log :warn device "Attempt to close channel zero.")
+    (when (open-stream-p device)
+      (cond (abort
+             (setf (channel-state device) amqp.s:close-channel)
+             (call-next-method))
+            (t 
+             (let ((initial-state (shiftf (channel-state device) amqp.s:close-channel)))
+               (typecase initial-state
+                 ;; if in use, send the close request, the flush it
+                 (amqp.s:use-channel
+                  (amqp:request-close device)
+                  ;; complete and flush the content.
+                  (device-flush device t)))
+               (call-next-method))))
+      ;; in any case disconnect
+      (disconnect-channel (channel-connection device) device))))
 
 
 (defmethod device-read ((device amqp:channel) buffer-arg start end blocking)
@@ -431,11 +434,12 @@ as well as the discussions of the the alternative fu interface.[5]
 
 
 (defmethod device-clear-input ((device amqp:channel) buffer-only)
-  ;;; clear a possible pushed character and "empty" buffer.
-  ;;; unless buffer-only, also flush any not yet read frames until
-  ;;; the end of the body is reached
+  ;;; call the decoder to clear a possible pushed character and correct position
+  ;;; then "empty" the buffer.
+  ;;; then, unless buffer-only, also flush any not yet read frames until the end of the body is reached
   (with-slots (decoder buffer buffpos buffer-ptr body-position body-length) device
-    (funcall decoder #'(lambda (s) (declare (ignore s)) 0) device)
+    (when decoder                       ; maybe not present for binary streams
+      (funcall decoder #'(lambda (s) (declare (ignore s)) 0) device))
     ;; skip over anything already in the buffer
     (setf body-position (+ body-position (- buffer-ptr buffpos)))
     (setf buffpos buffer-ptr)
@@ -517,7 +521,9 @@ as well as the discussions of the the alternative fu interface.[5]
 
 
 (defmethod device-close ((device amqp:connection) (abort t))
-  (map nil #'(lambda (c) (when c (device-close c abort)))
+  (map nil #'(lambda (c)
+               (when (and c (plusp (channel-number c)))
+                 (device-close c abort)))
        (get-connection-channels device))
   (if abort
     (call-next-method)
@@ -841,7 +847,7 @@ returned.")
                                          consumer-tag
                                          )
   (:documentation "Given a channel which has received a Basic.Deliver or Basic.Get/Get-ok,
- firat, prepare the channel based on the content header properties, and read the content
+ first, prepare the channel based on the content header properties, and read the content
  according to the combined channel data type and content type. Combine the header's possibly
  incomplete content type with the channel's to specify the effective decoding.")
 
@@ -855,9 +861,10 @@ returned.")
            (package (getf headers :package))
            (mime-type (class-mime-type basic)))
       ;; element-type in the basic header combines the read values with the channel's content-type
-      (setf element-type (or (find-symbol element-type package)
-                             (error "Invalid type x package combination: ~s, ~s."
-                                    element-type package)))
+      (when element-type
+        (setf element-type (or (find-symbol element-type package)
+                               (error "Invalid type x package combination: ~s, ~s."
+                                      element-type package))))
       (amqp:log :debug channel "device-read-content: in (~s ~s) in state ~s x~s"
                 element-type mime-type (channel-state channel) (device-body-length channel))
       (device-read-content-body channel (or body element-type) mime-type))))
@@ -880,13 +887,13 @@ returned.")
             (setf body-length body-size
                   buffer-ptr 0
                   body-position 0))
-          (update-device-codecs channel mime-type)
+          ;; (update-device-codecs channel mime-type) 
+          (setf (channel-content-type channel) mime-type)
           (setf (channel-state channel)
                 (if (string-equal (getf headers :transfer-encoding) "chunked")
                   amqp.s:use-channel.body.input.chunked
                   amqp.s:use-channel.body.input)) 
           (return-from command-loop basic))))))
-
 
 (defgeneric device-read-content-body (device type content-type)
 
@@ -900,6 +907,7 @@ returned.")
   (:method ((channel amqp:channel) (body-op function) (content-type mime:*/*))
     "Given a the null type, just return the channel as a stream to be read."
     (prog1 (funcall body-op channel content-type)
+      ;; once the operator has read, clear to the end of the message
       (device-clear-input channel nil)))
 
   (:method ((channel amqp:channel) (type (eql 'vector)) (content-type mime:application/octet-stream))

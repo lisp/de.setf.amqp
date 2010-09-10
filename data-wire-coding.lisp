@@ -1086,10 +1086,10 @@ In addition compound buffer accessors are defined for the types
                          (when assert-conditions
                            (assert-argument-type ,buffer-unsigned-name buffer frame-buffer)
                            (assert-condition (and (typep position 'fixnum) (<= (+ position ,bytes) (length buffer)))
-                                             buffer-unsigned-name "value overflows buffer: (~s + ~s), ~s"
+                                             ,buffer-unsigned-name "value overflows buffer: (~s + ~s), ~s"
                                              position ,bytes (length buffer)))
                          (let ((value 0))
-                           (declare (type ,(if (<= (expt 2 length) most-positive-fixnum) 'fixnum 'integer) value))
+                           (declare (type (unsigned-byte ,length) value))
                            ,@(loop for i from 1 to bytes
                                    append `((setf value ,(if (= i 1)
                                                            '(aref buffer position)
@@ -1100,8 +1100,8 @@ In addition compound buffer accessors are defined for the types
                        (defun (setf ,buffer-unsigned-name) (value buffer position &optional (assert-conditions t))
                          (declare (type amqp:frame-buffer buffer))
                          (declare (type fixnum position)
-                                  (type ,(if (<= (expt 2 length) most-positive-fixnum) 'fixnum 'integer) value))
-                         (assert-condition (and (integerp value) (>= value 0) (< value ,(expt 2 length)))
+                                  (type (unsigned-byte ,length) value))
+                         (assert-condition (typep value '(unsigned-byte ,length))
                                            (setf ,buffer-unsigned-name) "Invalid byte value, exceeds domain: ~s."
                                            value)
                          (when assert-conditions
@@ -1115,12 +1115,28 @@ In addition compound buffer accessors are defined for the types
                                                          (setf value (ash value -8))))
                                         (+ position ,bytes))))
                        
+                       ;; the signed read can reuse the unsigned version, but the writer has different type constraints
                        (defun ,buffer-signed-name (buffer position  &optional (assert-conditions t))
                          (values (,signed-name (,buffer-unsigned-name buffer position assert-conditions))
                                  (+ position ,bytes)))
                        
                        (defun (setf ,buffer-signed-name) (value buffer position &optional (assert-conditions t))
-                         (setf (,buffer-unsigned-name buffer position assert-conditions) value))))))
+                         (declare (type amqp:frame-buffer buffer))
+                         (declare (type fixnum position)
+                                  (type (signed-byte ,length) value))
+                         (assert-condition (typep value '(signed-byte ,length))
+                                           (setf ,buffer-signed-name) "Invalid byte value, exceeds domain: ~s."
+                                           value)
+                         (when assert-conditions
+                           (assert-argument-type (setf ,buffer-signed-name) buffer frame-buffer)
+                           (assert-condition (and (typep position 'fixnum) (<= (+ position ,bytes) (length buffer)))
+                                             (setf ,buffer-signed-name) "value overflows buffer: (~s + ~s), ~s"
+                                             position ,bytes (length buffer)))
+                         (values value
+                                 (progn ,@(loop for i from (1- bytes) downto 0
+                                                append `((setf (aref buffer (+ position ,i)) (logand #xff value))
+                                                         (setf value (ash value -8))))
+                                        (+ position ,bytes))))))))
   
   (def-byte-accessors 8)
   (def-byte-accessors 16)
@@ -1282,7 +1298,7 @@ In addition compound buffer accessors are defined for the types
                                     ;; check bounds here as it's finally the encoded positioning
                                     (assert-condition (< position max-position)
                                                       (setf ,buffer-utf8-name) "String overflows size constraint: ~s, ~s"
-                                             ',buffer-utf8-name position max-position)
+                                                      position max-position)
                                     (setf (aref buffer position) byte)
                                     (incf position)))
                              (declare (dynamic-extent #'buffer-insert-byte))    ; just in case
@@ -1406,9 +1422,15 @@ In addition compound buffer accessors are defined for the types
 (defun (setf buffer-protocol-header-version) (version buffer)
   "Store a protocol header into a buffer.
  Accept a version keyword and set the version header as registered in the list of supported versions."
+  (let ((encoded-version (version-protocol-header version)))
+    (cond (encoded-version)
+          ((null amqp.u:*version-headers*)
+           (error "No AMQP version implementation loaded."))
+          (t
+           (error "Invalid version : ~s." version)))
 
-  (replace buffer (or (version-protocol-header version) (error "Invalid version : ~s." version)) :start1 0 :end1 8)
-  version)
+    (replace buffer encoded-version :start1 0 :end1 8)
+    version))
 
 
 (defun buffer-protocol-header-version (buffer &optional (error-p t))
@@ -1416,6 +1438,8 @@ In addition compound buffer accessors are defined for the types
  Return the respective version keyword as registered in the list of supported versions."
 
   (cond ((protocol-header-version (if (= (length buffer) 8) buffer (setf buffer (subseq buffer 0 8)))))
+        ((null amqp.u:*version-headers*)
+         (error "No AMQP version implementation loaded."))
         (error-p
          (error "Invalid version : ~s." buffer))
         (t

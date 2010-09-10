@@ -133,7 +133,6 @@
     (setf (device-content-type device) (mime-type type))))
 
  
-
 (defmethod update-device-codecs ((device amqp-device) (type mime:*/*))
   (multiple-value-bind (decoder encoder)
                        (compute-charset-codecs (device-content-type device))
@@ -143,6 +142,17 @@
       (setf-device-encoder encoder device)))
   type)
 
+
+(defmethod update-device-codecs ((device amqp-device) (type mime:application/octet-stream))
+  "given a binary content type, set the codecs to byte-identity - but note they will fail
+ for any callers which expect characters."
+  (flet ((get-unsigned-byte (get-byte destination)
+           (funcall get-byte destination))
+         (put-unsigned-byte (byte put-byte destination)
+           (funcall put-byte destination byte)))
+    (setf-device-decoder #'get-unsigned-byte device)
+    (setf-device-encoder #'put-unsigned-byte device)
+    type))
 
 
 (defmethod mime-type-charset ((device amqp-device))
@@ -276,7 +286,11 @@
 
 #+mcl
 (defmethod terminate ((object simple-stream))
-  (device-close object t))
+  ;; double-check for incompletely closed channels etc.
+  (typecase (device-state object)
+    (amqp.s:close )
+    (t
+     (device-close object t))))
 
 (when (fboundp 'stream-close)
   (defmethod stream-close ((stream amqp-device))
@@ -343,7 +357,7 @@
     (amqp-stream-write-char stream character))
   
   (defun amqp-j-write-chars (string stream start end)
-    (amql-stream-write-string stream string start end))
+    (amqp-stream-write-string stream string start end))
   
   (defun amqp-j-listen (stream)
     (stream-listen (stream-input-handle stream)))
