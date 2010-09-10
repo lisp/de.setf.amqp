@@ -880,15 +880,17 @@ In addition compound buffer accessors are defined for the types
          #xff800000)
         ((= float single-float-positive-infinity)
          #x7f800000)
-        ((eql float single-float-nan)
+        ;; allow for sbcl inability to compile code with nan constants 
+        (#-sbcl (eql float single-float-nan)
+         #+sbcl (sb-ext:float-nan-p float)
          ;; http://en.wikipedia.org/wiki/NaN#Encodings
          ;; http://java.sun.com/javase/6/docs/api/java/lang/Double.html#doubleToLongBits(double)
          #x7fc00000)
-        ((= float 0.0s0)
+        ((= float 0.0f0)
          (if (minusp (float-sign float)) #x80000000 #x00000000))
         (t
          (multiple-value-bind (fraction exponent sign)
-                              (raw-decode-short-float float)
+                              (raw-deconstruct-short-float float)
            (if (zerop exponent)
              (logior (if sign #x80000000 0)
                      (logand fraction #x007fffff))
@@ -901,7 +903,9 @@ In addition compound buffer accessors are defined for the types
          #xfff0000000000000)
         ((= float double-float-positive-infinity)
          #x7ff0000000000000)
-        ((eql float double-float-nan)
+        ;; allow for sbcl inability to compile code with nan constants                                                                                
+        (#-sbcl (eql float double-float-nan)
+         #+sbcl (sb-ext:float-nan-p float)
          ;; http://en.wikipedia.org/wiki/NaN#Encodings
          ;; http://java.sun.com/javase/6/docs/api/java/lang/Double.html#doubleToLongBits(double)
          #x7ff8000000000000)        
@@ -909,7 +913,7 @@ In addition compound buffer accessors are defined for the types
          (if (minusp (float-sign float)) #x8000000000000000 #x0000000000000000))
         (t
          (multiple-value-bind (fraction exponent sign)
-                              (raw-decode-long-float float)
+                              (raw-deconstruct-long-float float)
            (if (zerop exponent)
              (logior (if sign #x8000000000000000 0)
                      (logand fraction #x000fffffffffffff))
