@@ -804,11 +804,12 @@ In addition compound buffer accessors are defined for the types
       (#xff
        (if (zerop fraction)
          (if negative-p single-float-negative-infinity single-float-positive-infinity)
-         single-float-nan))
+         #-sbcl single-float-nan
+         #+sbcl (eval 'single-float-nan)))
       (#x00
        ;; (print (list :to-float sign raw-exponent exponent fraction))
        (if (zerop fraction)
-         (if negative-p -0.0s0 0.0s0)
+         (if negative-p -0.0f0 0.0f0)
          (float (* sign (* fraction (expt 2 (- exponent 22)))) single-float-epsilon)))
       (t
        ;; (print (list :to-float sign raw-exponent exponent fraction))
@@ -825,7 +826,8 @@ In addition compound buffer accessors are defined for the types
       (#x7ff
        (if (zerop fraction)
          (if negative-p double-float-negative-infinity double-float-positive-infinity)
-         double-float-nan))
+         #-sbcl double-float-nan
+         #+sbcl (eval 'double-float-nan)))
       (#x000
        ;; (print (list :to-float sign raw-exponent exponent fraction))
        (if (zerop fraction)
