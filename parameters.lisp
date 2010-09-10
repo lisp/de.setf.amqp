@@ -140,9 +140,10 @@
         (funcall '+ single-float-positive-infinity single-float-negative-infinity))
       (ccl::set-fpu-mode :invalid t))))
 
-#+sbcl  ;; does this work?
+#+sbcl  ;; works on osx and linux
 (unless (boundp 'single-float-nan)
-  (defconstant single-float-nan
-    (+ single-float-positive-infinity single-float-negative-infinity))
-  (defconstant double-float-nan
-    (+ double-float-positive-infinity double-float-negative-infinity)))
+  (sb-vm::with-float-traps-masked (:invalid)
+    (defconstant single-float-nan
+      (eval '(+ single-float-positive-infinity single-float-negative-infinity)))
+    (defconstant double-float-nan
+      (eval '(+ double-float-positive-infinity double-float-negative-infinity)))))
