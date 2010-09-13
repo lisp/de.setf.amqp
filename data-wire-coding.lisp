@@ -841,10 +841,10 @@ In addition compound buffer accessors are defined for the types
 ;; (eql (ieee-754-32-integer-to-float #b00111110001000000000000000000000) 0.15625)
 ;; (eql (ieee-754-32-integer-to-float #b11000010111011010100000000000000) -118.625)
 
-(defun raw-decode-short-float (float)
+(defun raw-deconstruct-single-float (float)
   (etypecase float
-    (short-float )
-    (long-float (setf float (float float 1.0s0))))
+    (single-float )
+    (double-float (setf float (float float 1.0f0))))
   #+ccl (multiple-value-bind (fraction exponent sign)
                              (ccl::fixnum-decode-short-float float)
           (values fraction exponent (plusp sign)))
@@ -854,12 +854,12 @@ In addition compound buffer accessors are defined for the types
                 (sig (ldb sb-vm:single-float-significand-byte bits))
                 (sign (minusp (float-sign float))))
            (values sig exp sign))
-  #-(or ccl sbcl) (error "NYI: fixnum-decode-short-float"))
+  #-(or ccl sbcl) (error "NYI: raw-deconstruct-single-float"))
 
-(defun raw-decode-long-float (float)
+(defun raw-deconstruct-double-float (float)
   (etypecase float
-    (short-float (setf float (float float 1.0d0)))
-    (long-float ))
+    (single-float (setf float (float float 1.0d0)))
+    (double-float ))
   #+ccl (multiple-value-bind (hi lo exp sign) (ccl::%integer-decode-double-float float)
           (values (logior (ash hi 28) lo) exp (minusp sign)))
   #+sbcl (let* ((abs (abs float))
@@ -874,7 +874,7 @@ In addition compound buffer accessors are defined for the types
                          32)
                     lo)
             exp sign))
-  #-(or ccl sbcl) (error "NYI: fixnum-decode-long-float"))
+  #-(or ccl sbcl) (error "NYI: raw-deconstruct-double-float"))
 
 
 (defun ieee-754-32-float-to-integer (float)
@@ -892,7 +892,7 @@ In addition compound buffer accessors are defined for the types
          (if (minusp (float-sign float)) #x80000000 #x00000000))
         (t
          (multiple-value-bind (fraction exponent sign)
-                              (raw-deconstruct-short-float float)
+                              (raw-deconstruct-single-float float)
            (if (zerop exponent)
              (logior (if sign #x80000000 0)
                      (logand fraction #x007fffff))
@@ -915,7 +915,7 @@ In addition compound buffer accessors are defined for the types
          (if (minusp (float-sign float)) #x8000000000000000 #x0000000000000000))
         (t
          (multiple-value-bind (fraction exponent sign)
-                              (raw-deconstruct-long-float float)
+                              (raw-deconstruct-double-float float)
            (if (zerop exponent)
              (logior (if sign #x8000000000000000 0)
                      (logand fraction #x000fffffffffffff))
