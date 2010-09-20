@@ -367,10 +367,11 @@
    :string-16-p
    :string-32-p
    :string-8-p
-                )
+   )
   (:import-from :de.setf.utility
                 :stream-reader
-                :stream-writer)
+                :stream-writer
+                )
   #+ccl
   (:import-from :ccl
                 #:open-stream-p
