@@ -152,7 +152,10 @@ as well as the discussions of the the alternative fu interface.[5]
          (unless (zerop (channel-number device))
            ;; resolve the channel's identifer relative to the connection - with
            ;; non-strict handling to allow a scheme.
-           (let* ((uri (merge-uris (channel-uri device) (connection-uri connection) nil nil))
+           (let* (;; (uri (merge-uris (channel-uri device) (connection-uri connection) nil nil))
+                  ;; don't merge again here. iinitialize-instance already does it to the initialization argument
+                  ;; and the channel should never move from one connection to another.
+                  (uri (channel-uri device))
                   (host (uri-host uri)))
              (setf-device-uri uri device)
 
