@@ -132,7 +132,11 @@ processing. On the other hand, it impedes streaming.
 ---
  [1]: http://www.rabbitmq.com/releases/rabbitmq-java-client/v1.7.0/rabbitmq-java-client-javadoc-1.7.0/com/rabbitmq/client/impl/AMQCommand.html"))
 
+;;; the two process-connection-loop version are identical but for the means used to ascertain available input.
+;;; #+poll-for-input loops over draining the output queue, listening on and processing input from the connection, and yielding
+;;; #-poll-for-input selects on the connection's socket instead of yielding.
 
+#+poll-for-input
 (defgeneric process-connection-loop (connection)
   (:documentation "As run in the connection thread loop:
  - write any pending output frames.
@@ -174,6 +178,55 @@ processing. On the other hand, it impedes streaming.
                   (incf in)))
           ;; once all io is finished, step back...
           (bt:thread-yield))))))
+
+#-poll-for-input
+(defgeneric process-connection-loop (connection)
+  (:documentation "Called to processes input and output frames to a single connection.
+ - write any pending output frames.
+ - read any pending input frames and dispatch then through process frame
+ - at the outset and before i/o, check that the connection is still open.
+   if not return nil. if io fails - an interrupt or network failure closed
+   the connection, also return nil.
+ - once all input is processed, wait on the connection's socket.
+ If run in a dedicated connection thread, the wait happens w/o holding nay resources, which allows other threads
+ to write any output through to the connection. If run single-threaded all processing is event driven through
+ the process-frame call.")
+
+  (:method ((connection amqp:connection))
+    (let ((in 0) (out 0) (deadline nil)
+          (waiters (usocket:make-wait-list (list (device-socket connection)))))
+      (loop
+        (flet ((ensure-open (&optional (open-p (open-stream-p connection)))
+                 (unless open-p
+                   (return-from process-connection-loop (values in out))))
+               (heartbeat-needed ()
+                 (and deadline
+                      (>= (get-universal-time) deadline)))
+               (update-heartbeat ()
+                 (let ((heartbeat (connection-heartbeat connection)))
+                   (setf deadline
+                         (when (plusp heartbeat)
+                           (+ (get-universal-time) heartbeat))))))
+          (loop (ensure-open)
+                (let ((frame (get-encoded-frame connection)))
+                  (unless frame (return))
+                  (unless (write-frame connection frame)
+                    (ensure-open nil))
+                  (incf out)
+                  (release-frame frame)
+                  (update-heartbeat)))
+          (when (heartbeat-needed)
+            (send-heartbeat connection))
+          (loop (ensure-open)
+                (unless (stream-listen connection) (return))
+                (let ((frame (claim-input-frame connection)))
+                  (unless (read-frame connection frame)
+                    (ensure-open nil))
+                  (process-frame connection frame)
+                  (incf in)))
+          ;; once all io is finished, step back...
+          ;; !!! presuming single thread
+          (usocket:wait-for-input waiters :timeout nil))))))
 
 
 (defun connection-toplevel-loop (&optional (*connection* *connection*))

@@ -152,7 +152,10 @@ as well as the discussions of the the alternative fu interface.[5]
          (unless (zerop (channel-number device))
            ;; resolve the channel's identifer relative to the connection - with
            ;; non-strict handling to allow a scheme.
-           (let* ((uri (merge-uris (channel-uri device) (connection-uri connection) nil nil))
+           (let* (;; (uri (merge-uris (channel-uri device) (connection-uri connection) nil nil))
+                  ;; don't merge again here. iinitialize-instance already does it to the initialization argument
+                  ;; and the channel should never move from one connection to another.
+                  (uri (channel-uri device))
                   (host (uri-host uri)))
              (setf-device-uri uri device)
 
@@ -367,11 +370,11 @@ as well as the discussions of the the alternative fu interface.[5]
  * was the content length known ahead of time: .output or .output.chunked ?
 
  if there is content, wrap up the body frame and send it.
- given the now empty buffer, if the content body complete, then it matters whether the length was
+ given the now empty buffer, if the content body is now complete, then it matters whether the length was
  predetermined. if it was, that is, in state .output, since this is not an abort, sufficient
- frames must be sent to achieve the content length. if the length was not predtermined, then the
+ frames must be sent to achieve the content length. if the length was not predetermined, then the
  state is .output.chunked and the end of the sequence of commands is indicated by sending a
- zero-length body frame and then padding to fill the content length. shoudl this have been an
+ zero-length body frame and then a frame padded to fill the content length. should this have been an
  empty buffer, then the zero-length frame will be followed by a full length pad."
 
   (let ((result-length 0))
@@ -904,6 +907,9 @@ returned.")
       (read-sequence body channel :start 0 :end body-length)
       body))
 
+  (:method ((channel amqp:channel) (type null) (content-type mime:text/plain))
+    (device-read-content-body channel 'string content-type))
+
   (:method ((channel amqp:channel) (body-op function) (content-type mime:*/*))
     "Given a the null type, just return the channel as a stream to be read."
     (prog1 (funcall body-op channel content-type)
@@ -916,6 +922,9 @@ returned.")
             (body (make-frame-buffer body-length)))
         (device-read channel body 0 body-length nil)
         body))
+
+  (:method ((channel amqp:channel) (type null) (content-type mime:application/octet-stream))
+    (device-read-content-body channel 'vector content-type))
 
   (:method ((channel amqp:channel) (channel-type (eql 'list)) (content-type mime::application/sexp))
     "Given an sexp mime type, then read the form."

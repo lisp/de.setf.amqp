@@ -347,7 +347,7 @@
                                              (get type 'amqp:bit))
                                          (error "Bit type not supported for properties: ~s." name))
                                         (t
-                                         `(when ,name (amqp:field ,name ,type))))))
+                                         `(amqp:field ,name ,type)))))
                             properties)))
            
            (setf-content-header-class-id ,class-code ,buffer-var)

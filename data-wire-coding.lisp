@@ -228,7 +228,9 @@
    field (value type) : if the value is not null, encodes in at the present position and updates same
       based on the value's encoded length. the presences is recored in the bit flags, which are set
       retrospectivelt at the conclusion.
- VALUE : the length of the encoded data"
+ VALUE : the length of the encoded data
+
+ nb. property flag chunking is handled when they are written into the buffer."
 
   (let* ((buffer-var (if (and (symbolp buffer) (eq (macroexpand-1 buffer env) buffer))
                        buffer (gensym (string :buffer-))))
@@ -252,15 +254,23 @@
           bit-count (* 15 short-count))
     `(macrolet ((amqp:field (value type)
                   (list 'let (list (list ',value-var value))
-                        (list 'setf (list 'ldb (list 'byte 1 (list 'decf ',bit-count-var)) ',flag-var)
+                        (list 'decf ',bit-count-var)    ; predecrement: highest possible bit is 14
+                        #+amqp.debug-with-property-encoders
+                        (list 'format '*trace-output* "~&~a=(~s) ~16,'0b @~d -> " `(quote ,value) value ',flag-var ',bit-count-var)
+                        (list 'setf (list 'ldb (list 'byte 1 ',bit-count-var) ',flag-var)
                               (list 'if ',value-var 1 0))
-                        (list 'when ',value-var
+                        #+amqp.debug-with-property-encoders
+                        (list 'format '*trace-output* "~16,'0b" ',flag-var)
+                        ;; don't worry about chunking/continuation here. it happens when written to the bufferr
+                        (list 'if ',value-var
                               (list 'setf ',position-var
                                     (list 'nth-value 1
                                           (list 'setf (list (cons-symbol (symbol-package type) :buffer- type)
                                                             ',buffer-var
                                                             ',position-var)
-                                                ',value-var)))))))
+                                                ',value-var)))
+                              #+amqp.debug-with-property-encoders
+                              (list 'format '*trace-output* "~&~a ! ~16,'0b  @~d" `(quote ,value)  ',flag-var ',bit-count-var)))))
        (let* (,@(unless (eq buffer buffer-var) `((,buffer-var ,buffer)))
               (,start-var ,start)
               (,position-var (+ ,start-var ,byte-count))
@@ -640,6 +650,7 @@ In addition compound buffer accessors are defined for the types
                                position))))
                  
                  (defun ,buffer-setf-field-value-pair-op (name value buffer position &optional type-code-p)
+                   "Write a name-value pair. !! coerce a keyword name to a string to allow p-lists."
                    (setf position (nth-value 1 (setf (buffer-string-8 buffer position) (string name))))
                    (setf position (nth-value 1 (setf (,buffer-field-value-op buffer position type-code-p) value)))
                    (values value position))
@@ -992,6 +1003,8 @@ In addition compound buffer accessors are defined for the types
 
 
 (defun buffer-property-flags-16 (buffer position)
+  "Retrieve chunked property flags from the byte BUFFER at the given POSITION.
+ Each chunk is 15 bits long, with the low bit to indicate continuation."
   (let ((result 0))
     (loop
       (multiple-value-bind (segment new-position)
@@ -1002,6 +1015,8 @@ In addition compound buffer accessors are defined for the types
           (return (values result new-position)))))))
 
 (defun (setf buffer-property-flags-16) (flags buffer position count)
+  "Store chunked property flages into the byte BUFFER at the given POSITION.
+ Each chunk is 15 bits long, with the low bit to indicate continuation."
   (dotimes (i count)
     (let ((segment (ldb (byte 15 (* 15 (1- (- count i)))) flags)))
       (setf segment (ash segment 1))
@@ -1398,7 +1413,7 @@ In addition compound buffer accessors are defined for the types
 ;;; the protocol headers. in fact, the relation is conventional and is recorded in
 ;;; amqp.u:*version-headers* by each version as it loads.
 
-#(or )
+#+(or )
 (progn
 (defgeneric buffer-protocol-header (buffer)
   (:documentation "Extract a protocol header from a buffer.

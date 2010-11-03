@@ -27,7 +27,7 @@
   (short-int          (unsigned-byte 16)   )
   (long-int           (unsigned-byte 32)   :line-code #\I)
   (long-long-int      (unsigned-byte 64)   )
-  (short-string       (amqp:string 8)      ) ;; actually utf6
+  (short-string       (amqp:string 8)      ) ;; actually utf
   (long-string        (amqp:string 32)     :line-code #\S)
   (timestamp          (unsigned-byte 64)   :line-code #\T)
   (decimal-value      amqp:decimal         :line-code #\D)

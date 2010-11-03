@@ -54,9 +54,9 @@
 
 
 (defmacro response-function (name)
-  "For use as the intiform for method response functions, if the target is defined, ok. Otherwise use instead
- the decult response function, which signals an error."
-  `(if (fboundp ',name) ',name 'default-channel-respond-to))
+  "For use as the initform for method response functions, if the target is defined, ok. Otherwise use instead
+ the default response function, which signals an error."
+  `(if (fboundp ',name) ',name '(lambda (class &rest args) (apply #'default-channel-respond-to class ',name args))))
 
 
 (defgeneric default-channel-respond-to
@@ -386,7 +386,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      queue)))
     
 
-(def-amqp-command amqp:Declare-ok (class &key queue message-count consumer-count)
+(def-amqp-command amqp:declare-ok (class &key queue message-count consumer-count)
   (:documentation "C<--S : Confirm a declare.  Sync response to Declare.
  This command appears as eventual response to Declare and should be processed
  synchronously together with that. I one appears independently, ignore it.")
@@ -435,7 +435,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
     adjustments to stream parameters for future reading.")
   
   (:response
-   (:method ((basic amqp:basic) &rest args)
+   (:method ((basic amqp:basic) &rest args) 
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
        (prog1 (apply #'device-read-content channel args)
@@ -579,7 +579,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      class)))
 
 
-(def-amqp-command amqp:Publish (class &key body exchange routing-key mandatory immediate)
+(def-amqp-command amqp:Publish (class &key body exchange routing-key mandatory immediate timestamp)
   (:documentation "C-->S : publish a message :
 This method publishes a message to a specific exchange. The message will be routed to queues as 
 defined by the exchange configuration and distributed to any active consumers when the transaction, if 
@@ -599,8 +599,8 @@ any, is committed.")
      ;; delegate to the channel's basic class
      (apply #'amqp::request-publish (amqp:channel.basic channel) args))
 
-   (:method ((basic amqp:basic) &rest args &key body exchange routing-key mandatory immediate)
-     (declare (ignore routing-key mandatory immediate))
+   (:method ((basic amqp:basic) &rest args &key body exchange routing-key mandatory immediate timestamp)
+     (declare (ignore routing-key mandatory immediate timestamp))
      (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
      (setf (basic-exchange basic) exchange)     ; cache for possible use in chunk headers
      (when body
@@ -820,6 +820,7 @@ any, is committed.")
        (assert (>= frame-max (connection-frame-max connection)) ()
                "Connection frame size too small: ~s, ~s" connection frame-max))
      (setf (connection-heartbeat connection) heartbeat)
+     (setf frame-max (connection-frame-max connection))
      (amqp::send-tune-ok connection :channel-max channel-max :frame-max frame-max :heartbeat heartbeat))))
 
 

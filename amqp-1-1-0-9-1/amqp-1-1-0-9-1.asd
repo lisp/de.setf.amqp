@@ -27,7 +27,10 @@
   :version 20100111.1
   :depends-on (:de.setf.amqp)
   :components ((:file "package")
-               (:file "data-wire-coding")
+               ;; conformant
+               ;; (:file "data-wire-coding")
+               ;; rabbitmq-like
+               (:file "data-wire-coding-rmq")
                (:file "abstract-classes")
                (:file "classes")
                (:file "device-level"))

@@ -716,6 +716,19 @@
                 effective-type package)
         (setf (getf headers :element-type) (string effective-type)))))
 
+  ;; rabbitmq/qpid are broken wrt 0.9.1. they encode headers with a non-standard wire encoding
+  ;; this would avoid the problem, but suppresses headers. 
+  #+(or)
+  (let ((connection (when channel (channel-connection channel))))
+    (when (and connection
+               (equal (getf (amqp:connection-server-properties connection) :|product|)
+                      "RabbitMQ")
+               (equal (getf (amqp:connection-server-properties connection) :|version|)
+                             "2.1.0"))
+      (when headers
+        (amqp:log :warn instance "headers suppressed: ~s" headers)
+        (setf headers nil))))
+
   (apply #'call-next-method instance slots
          :mime-type mime-type           ; always reset this upon initialization
          :content-type content-type

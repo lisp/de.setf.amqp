@@ -78,6 +78,7 @@
 (defclass amqp.u:12-byte-header-output-frame (12-byte-header-frame output-frame) ())
 
 
+(defparameter *frame-format-byte-count* 12)
 
 (defgeneric format-frame (frame stream)
   (:method ((frame amqp::frame) stream)
@@ -102,13 +103,16 @@
               data
               (when header (frame-size frame))
               (length data))
-      (let* ((size (if header (min (frame-size frame) (length data)) (length data)))
-             (beginning (min size 8))
-             (end (min 8 (- size beginning))))
-        (dotimes (x beginning) (format stream " ~0,'2d" (aref data x)))
-        (when (< (+ beginning end) size)
-          (write-string " ..." stream))
-        (dotimes (x end) (format stream " ~0,'2d" (aref data (+ x (- size end))))))
+      (let* ((size (if header (min (frame-size frame) (length data)) (length data))))
+        (if *frame-format-byte-count*
+          (let* ((beginning (min size *frame-format-byte-count*))
+                (end (min *frame-format-byte-count* (- size beginning))))
+            (dotimes (x beginning) (format stream " ~0,'2d" (aref data x)))
+            (when (< (+ beginning end) size)
+              (write-string " ..." stream))
+            (dotimes (x end) (format stream " ~0,'2d" (aref data (+ x (- size end))))))
+          (dotimes (x size)
+            (format stream " ~0,'2d" (aref data x)))))
       (write-string "]" stream))))
 
 (defgeneric format-frame-header (frame stream)
@@ -690,7 +694,6 @@
       (error 'end-of-file :stream stream))
     (assert (eql (setf frame-end-marker (read-byte stream)) #xCE) ()
             "Invalid frame end: ~s" frame-end-marker)
-    
     (values frame frame-length)))
 
 
