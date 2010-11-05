@@ -439,7 +439,14 @@
     :initform nil
     :reader get-connection-heartbeat :writer setf-connection-heartbeat
     :type (or null amqp:heartbeat)
-    :documentation "Caches the connection heartbeat instance."))
+    :documentation "Caches the connection heartbeat instance.")
+   (idle-handlers
+    :initform nil
+    :accessor amqp.u::connection-idle-handlers
+    :type list
+    :documentation "A list of functions, of one argument, each of which is in applied to
+     the connection in process-connection-loop after input/output is completed and before
+     selecting on the conenction's socket."))
   (:documentation "The abstract connection class is specialized for each protocol version.
     Each connection binds the properties negotiated with the peer broker, and a sequence of
     open channels, each identified by number. Of these channel-zero is used for control operations."))

@@ -224,9 +224,13 @@ processing. On the other hand, it impedes streaming.
                     (ensure-open nil))
                   (process-frame connection frame)
                   (incf in)))
+          ;; run idle handlers
+          (dolist (idle-handler (amqp.u::connection-idle-handlers connection))
+            (unless (funcall idle-handler connection)
+              (return-from process-connection-loop (values in out))))
           ;; once all io is finished, step back...
           ;; !!! presuming single thread
-          (usocket:wait-for-input waiters :timeout nil))))))
+          (usocket:wait-for-input waiters :timeout 1))))))
 
 
 (defun connection-toplevel-loop (&optional (*connection* *connection*))
