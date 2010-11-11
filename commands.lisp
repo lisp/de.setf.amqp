@@ -56,7 +56,7 @@
 (defmacro response-function (name)
   "For use as the initform for method response functions, if the target is defined, ok. Otherwise use instead
  the default response function, which signals an error."
-  `(if (fboundp ',name) ',name '(lambda (class &rest args) (apply #'default-channel-respond-to class ',name args))))
+  `(if (fboundp ',name) ',name (function (lambda (class &rest args) (apply #'default-channel-respond-to class ',name args)))))
 
 
 (defgeneric default-channel-respond-to
@@ -435,7 +435,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
     adjustments to stream parameters for future reading.")
   
   (:response
-   (:method ((basic amqp:basic) &rest args) 
+   (:method ((basic amqp:basic) &rest args)
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
        (prog1 (apply #'device-read-content channel args)
