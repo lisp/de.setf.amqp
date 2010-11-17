@@ -281,6 +281,8 @@ as well as the discussions of the the alternative fu interface.[5]
                    "Frame buffer i/o permitted for entire buffers only.")
            (let* ((frame nil))
              (loop (setf frame (get-read-frame device :wait blocking))
+                   (amqp:log :debug device "device-read: next read frame: state: ~a, size: ~d, body: ~s/~s, buffer: ~s/~s/~s."
+                             (type-of (device-state device)) (frame-size frame) body-position body-length buffpos buffer-ptr buf-len)
                    ;; if non-blocking, maybe no frame
                    (if frame 
                      (cond ((plusp (frame-size frame))
@@ -294,6 +296,8 @@ as well as the discussions of the the alternative fu interface.[5]
                               (setf buf-len (length buffer))   ; could change iff possible to re-tune
                               (assert (<= buffer-ptr buf-len) ()
                                       "Invalid buffer sizes: ptr ~d, len ~d." buffer-ptr buf-len)
+                              (amqp:log :debug device "device-read: adjusted pointers: state: ~a, body: ~s/~s, buffer: ~s/~s/~s."
+                                        (type-of (device-state device)) body-position body-length buffpos buffer-ptr buf-len)
                               (return length)))
                            (t
                             ;; if the frame is a zero-length frame, always skip it 
@@ -302,6 +306,8 @@ as well as the discussions of the the alternative fu interface.[5]
                             ;; skip next padding frame as well.
                             (typecase (device-state device) 
                               (amqp.s:use-channel.body.input.chunked
+                               (amqp:log :debug device "device-read: skip zero chunk: state: ~a, body: ~s/~s, buffer: ~s/~s/~s."
+                                         (type-of (device-state device)) body-position body-length buffpos buffer-ptr buf-len)
                                (setf (device-state device) amqp.s:use-channel.body.input)
                                (cond ((setf frame (get-read-frame device :wait t))      ; resolve it now
                                       (assert (and (eq (frame-type-class-name frame) 'amqp:body)
@@ -440,22 +446,25 @@ as well as the discussions of the the alternative fu interface.[5]
   ;;; call the decoder to clear a possible pushed character and correct position
   ;;; then "empty" the buffer.
   ;;; then, unless buffer-only, also flush any not yet read frames until the end of the body is reached
-  (with-slots (decoder buffer buffpos buffer-ptr body-position body-length) device
+  (with-slots (decoder buffer buffpos buffer-ptr buf-len body-position body-length) device
     (when decoder                       ; maybe not present for binary streams
       (funcall decoder #'(lambda (s) (declare (ignore s)) 0) device))
     ;; skip over anything already in the buffer
+    (amqp:log :debug device "device-clear-input: skip current-frame: state: ~a, body: ~s/~s, buffer: ~s/~s/~s."
+                  (type-of (device-state device)) body-position body-length buffpos buffer-ptr buf-len)
     (setf body-position (+ body-position (- buffer-ptr buffpos)))
     (setf buffpos buffer-ptr)
     ;; optionally drain pending input
     (unless buffer-only
       ;; flush input
-      (amqp:log :debug device "device-clear-input: drain expected frames: state: ~a, at ~s of ~s"
-                (device-state device) body-position body-length)
-      (loop (when (>= body-position body-length)
-              (return))
-            (unless (plusp (device-read device nil 0 nil t))
-              (return))
-            (incf body-position buffer-ptr)))
+      (loop
+        (amqp:log :debug device "device-clear-input: drain expected frames: state: ~a, at ~s of ~s"
+                  (device-state device) body-position body-length)
+        (when (>= body-position body-length)
+          (return))
+        (unless (plusp (device-read device nil 0 nil t))
+          (return))
+        (incf body-position buffer-ptr)))
     nil))
 
 
@@ -870,6 +879,10 @@ returned.")
                                       element-type package))))
       (amqp:log :debug channel "device-read-content: in (~s ~s) in state ~s x~s"
                 element-type mime-type (channel-state channel) (device-body-length channel))
+      (with-slots (buffpos buffer-ptr) channel
+        ;; clear possible past EOF; permits immediate device-clear to skip w/o first reading any input
+        (setf buffpos 0)
+        (setf buffer-ptr 0))
       (device-read-content-body channel (or body element-type) mime-type))))
 
 
