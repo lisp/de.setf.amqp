@@ -686,12 +686,11 @@
     (setf content-type (if channel
                          (string (type-of (channel-content-type channel)))
                          "")))
-  (unless content-encoding
-    (setf content-encoding (if channel
-                             (string (or (mime-type-charset (channel-content-type channel)) ""))
-                             "")))
+  (setf content-encoding
+        (or (content-encoding content-encoding)
+            (when channel (mime-type-charset (channel-content-type channel)))))
   (setf mime-type (mime-type content-type))
-  (unless (string-equal content-encoding (mime-type-charset mime-type))
+  (unless (eq content-encoding (mime-type-charset mime-type))
     (setf mime-type (clone-instance mime-type :charset content-encoding)))
 
   ;; if given a body, but no body size, try to figure it out.
@@ -739,7 +738,7 @@
   (apply #'call-next-method instance slots
          :mime-type mime-type           ; always reset this upon initialization
          :content-type content-type
-         :content-encoding content-encoding
+         :content-encoding (if content-encoding (string content-encoding) "")
          :body-size body-size
          :headers headers
          args))

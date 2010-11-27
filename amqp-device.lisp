@@ -353,6 +353,22 @@
                     (incf i)))
             0)))))
   
+  (defun amqp-j-unread-char (stream char)
+    (with-slots (buffpos body-position buffer) stream
+      (let ((old-decoder (device-decoder stream)))
+        (flet ((unread-decoder (byte-decoder stream)
+                 (declare (ignore byte-decoder))
+                 (with-slots (buffpos body-position) stream
+                   (setf-device-decoder old-decoder stream)
+                   (incf body-position)
+                   (incf buffpos)
+                   char)))  
+          (decf body-position)
+          (decf buffpos)
+          (setf char (aref buffer buffpos))
+          (setf-device-decoder #'unread-decoder stream)
+          nil))))
+    
   (defun amqp-j-write-char (character stream)
     (amqp-stream-write-char stream character))
   
@@ -368,7 +384,9 @@
     (sb-simple-streams::with-stream-class (amqp-device device)
       (setf (sm sb-simple-streams::j-read-char device) #'amqp-j-read-char
             (sm sb-simple-streams::j-read-chars device) #'amqp-j-read-chars
-            (sm sb-simple-streams::j-unread-char device) #'sb-simple-streams::%unread-char
+            ;; bad stack overflow !
+            ;; (sm sb-simple-streams::j-unread-char device) #'sb-simple-streams::%unread-char
+            (sm sb-simple-streams::j-unread-char device) #'amqp-j-unread-char
             (sm sb-simple-streams::j-write-char device) #'amqp-j-write-char
             (sm sb-simple-streams::j-write-chars device) #'amqp-j-write-chars
             (sm sb-simple-streams::j-listen device) #'amqp-j-listen)))

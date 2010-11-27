@@ -498,7 +498,7 @@ as well as the discussions of the the alternative fu interface.[5]
   "Prepare a connection by opening a socket to broker, negotiating the
  protocol parameter, and opening the virutal host."
 
-  (etypecase (device-state device)
+  (typecase (device-state device)
     (amqp.s:open-connection
      (if (or (stream-input-handle device)
              (stream-output-handle device))
@@ -529,7 +529,11 @@ as well as the discussions of the the alternative fu interface.[5]
                       (negotiate-client-connection device)
                       t))))))))
     (amqp.s:use-connection
-     (call-next-method))))
+     (call-next-method))
+    (t
+     ;; have observed it called from shared-initialize to update an obsolete instance
+     ;; when terminating it in for gc !!
+     nil)))
 
 
 (defmethod device-close ((device amqp:connection) (abort t))
