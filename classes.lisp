@@ -244,11 +244,13 @@
 (def-amqp-abstract-class amqp:basic (amqp-channeled-object amqp-content-object)
   ((context
     :reader basic-channel)
+   #+(or) ;; use the standard one
    (exchange-instance
     :initform nil
     :accessor basic-exchange
     :type (or string null)
     :documentation "Caches the exchange from the most recent publish for re-use in chunked content.")
+   #+(or) ;; use basic.content-type
    (mime-type
     :initform nil :initarg :mime-type
     :accessor class-mime-type))
@@ -666,10 +668,11 @@
 (def-ensure-method (amqp:basic amqp:recover-ok) )
 
 (defmethod shared-initialize ((instance amqp:basic) (slots t) &rest args
-                              &key content-type content-encoding
+                              &key 
                               (context (bound-slot-value instance 'context))
                               (channel context)
-                              (mime-type (when channel (device-content-type channel)))
+                              (content-type (device-content-type channel))
+                              content-encoding
                               (body nil body-s) (body-size nil) headers
                               (package *package*))
   "Initialize a basic class by augmenting the content type/encoding from the
@@ -680,27 +683,28 @@
   (declare (dynamic-extent args))
   (assert-argument-types shared-initialize
     (channel amqp:channel)
-    (content-type (or null string))
-    (content-encoding (or null string)))
-  (unless content-type
-    (setf content-type (if channel
-                         (string (type-of (channel-content-type channel)))
-                         "")))
+    (content-type (or string mime:*/*))
+    (content-encoding (or null string symbol content-encoding)))
+  ;; coerce content type and encoding to instances to initialize
+  ;; but later pass strings as slot values
+  (setf content-type (mime:mime-type content-type))
   (setf content-encoding
-        (or (content-encoding content-encoding)
-            (when channel (mime-type-charset (channel-content-type channel)))))
-  (setf mime-type (mime-type content-type))
-  (unless (eq content-encoding (mime-type-charset mime-type))
-    (setf mime-type (clone-instance mime-type :charset content-encoding)))
+        (etypecase content-encoding
+          (content-encoding content-encoding)
+          (null (content-encoding (mime-type-charset content-type)))
+          ((or string symbol) (content-encoding content-encoding))))
+  (unless (eq (content-encoding-name content-encoding) (mime-type-charset content-type))
+    (setf content-type (clone-instance content-type
+                                       :charset (content-encoding-name content-encoding))))
 
   ;; if given a body, but no body size, try to figure it out.
   ;; if that's not possible, indicate continued in the header
   (when body-s
-    (assert (typep mime-type 'mime:*/*) ()
+    (assert (typep content-type 'mime:*/*) ()      ; ought to always be true (see above)
             "Supplied body requires a content type.")
     (unless body-size
       ;; try to determine the size
-      (setf body-size (channel-compute-body-size channel body mime-type))
+      (setf body-size (channel-compute-body-size channel body content-type))
       (etypecase body-size
         (null 
          (setf (getf headers :transfer-encoding) "chunked")
@@ -736,12 +740,12 @@
         (setf headers nil))))
 
   (apply #'call-next-method instance slots
-         :mime-type mime-type           ; always reset this upon initialization
-         :content-type content-type
-         :content-encoding (if content-encoding (string content-encoding) "")
+         :content-type (string (type-of content-type))
+         :content-encoding (or (content-encoding-name content-encoding) "")
          :body-size body-size
          :headers headers
-         args))
+         args) 
+  instance )
 
 
 (defgeneric channel-compute-body-size (channel object encoding)
@@ -784,7 +788,7 @@
 
 (defmethod mime:mime-type ((basic amqp:basic) &rest args)
   (declare (ignore args))
-  (class-mime-type basic))
+  (amqp:basic-content-type  basic))
 
 
 (defgeneric canonical-element-type (channel concrete-type abstract-typ)
@@ -828,11 +832,46 @@
 ;;; (canonical-element-type nil 'ctring 'character)
 ;;; (canonical-element-type nil "string" 'character)
 
-(defgeneric basic-headers (basic)
+
+(defgeneric amqp:basic-headers (basic)
   (:documentation "Returns the basic instance's headers."))
 
-(defgeneric basic-no-ack (basic)
-  (:documentation "Returns the basic instance's acknowledgement setting"))
+(defun amqp.u:basic-header (context keyword)
+  (getf (amqp:basic-headers context) keyword))
+
+(defun (setf amqp.u:basic-header) (value context keyword)
+  (setf (getf (amqp:basic-headers context) keyword) value))
+
+
+(macrolet ((def-basic-accessors (&rest names)
+             `(progn ,@(mapcar #'(lambda (name)
+                                   (etypecase name
+                                     (symbol `(defgeneric ,(intern (string name) :amqp) (basic)))
+                                     (cons `(defgeneric ,(intern (string (first name)) :amqp) (basic) ,@(rest name)))))
+                               names))))
+  (def-basic-accessors
+    :basic-consumer-tag
+    :basic-content-encoding
+    (:basic-content-type (:documentation "Returns the basic instance's content type as a string."))
+    :basic-correlation-id
+    :basic-delivery-mode
+    :basic-delivery-tag
+    :basic-exchange
+    :basic-expiration
+    :basic-headers
+    :basic-immediate
+    :basic-mandatory
+    :basic-message-id
+    (:basic-no-ack (:documentation "Returns the basic instance's acknowledgement setting."))
+    :basic-no-local
+    :basic-no-wait
+    :basic-queue
+    :basic-redelivered
+    :basic-reply-to
+    :basic-routing-key
+    :basic-timestamp
+    :basic-user-id))
+
 
 #+(or ) ;; mcl's clos implements method dispatch by hand
 (progn
@@ -932,10 +971,13 @@
          initargs))
 
 (defmethod print-object ((instance amqp:channel) stream)
-  (print-unreadable-object (instance stream :identity t :type t)
-    (write-char #\[ stream)
-    (print-object (bound-slot-value instance 'uri) stream)
-    (format stream "].~d" (bound-slot-value instance 'number))))
+  ;; this signals an error if sbcl is tracing a function which is run during initialization
+  ;; with an attempt to reference the %flags slot. 
+  (handler-case (print-unreadable-object (instance stream :identity t :type t)
+                  (format stream " [~s].~d"
+                          (bound-slot-value instance 'puri:uri)
+                          (bound-slot-value instance 'amqp.i::number)))
+    (error (c) (format stream "can't print: ~s" c))))
 
 
 (defmethod object-channel ((channel amqp:channel))
@@ -1002,6 +1044,9 @@
       (if channel
         (channel-number channel)
         (error "Class has no channel: ~s." class)))))
+
+(defmethod amqp:basic-headers ((channel amqp:channel))
+  (amqp:basic-headers (channel.basic channel)))
 
 
 ;;;
@@ -1361,11 +1406,13 @@
   (:documentation "Returns a free input frame or creates a new one.")
 
   (:method ((channel amqp:channel))
+    (declare (ftype function (setf frame-channel-number)))
     (let ((frame (dequeue (device-free-input-frames channel))))
       (setf (frame-channel-number frame) (channel-number channel))
       frame))
 
   (:method ((connection amqp:connection))
+    (declare (ftype function (setf frame-channel-number)))
     (let ((frame (dequeue (device-free-input-frames connection))))
       (setf (frame-channel-number frame) 0)
       frame)))
@@ -1379,6 +1426,7 @@
     (flet ((make-channel-frame ()
              (make-output-frame channel)))
       (declare (dynamic-extent #'make-channel-frame))
+      (declare (ftype function (setf frame-channel-number)))
       (let ((frame (dequeue (device-free-output-frames channel)
                             :if-empty #'make-channel-frame)))
         (setf (frame-channel-number frame) (channel-number channel))
@@ -1391,6 +1439,7 @@
     (flet ((make-connection-frame ()
              (make-output-frame connection)))
       (declare (dynamic-extent #'make-connection-frame))
+      (declare (ftype function (setf frame-channel-number)))
       (let ((frame (dequeue (device-free-output-frames connection)
                             :if-empty #'make-connection-frame)))
         (setf (frame-channel-number frame) 0)

@@ -365,7 +365,7 @@
                    char)))  
           (decf body-position)
           (decf buffpos)
-          (setf char (aref buffer buffpos))
+          (setf char (code-char (aref buffer buffpos)))
           (setf-device-decoder #'unread-decoder stream)
           nil))))
     

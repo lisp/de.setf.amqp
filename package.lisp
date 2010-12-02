@@ -56,8 +56,27 @@
    :array
    :array-p
    :basic
+   :basic-consumer-tag
+   :basic-content-encoding
+   :basic-content-type
+   :basic-correlation-id
+   :basic-delivery-mode
+   :basic-delivery-tag
+   :basic-exchange
+   :basic-expiration
    :basic-headers
+   :basic-immediate
+   :basic-mandatory
+   :basic-message-id
    :basic-no-ack
+   :basic-no-local
+   :basic-no-wait
+   :basic-queue
+   :basic-redelivered
+   :basic-reply-to
+   :basic-routing-key
+   :basic-timestamp
+   :basic-user-id
    :binary
    :binary-1024
    :binary-128
@@ -341,33 +360,33 @@
                 :*standard-port*
                 :*timestamp-epoch*
                 :+frame-end+
-   :binary-1024
-   :binary-128
-   :binary-16
-   :binary-256
-   :binary-32
-   :binary-40
-   :binary-48
-   :binary-512
-   :binary-64
-   :binary-72
-   :binary-8
-   :binary-1024-p
-   :binary-128-p
-   :binary-16-p
-   :binary-256-p
-   :binary-32-p
-   :binary-40-p
-   :binary-48-p
-   :binary-512-p
-   :binary-64-p
-   :binary-72-p
-   :binary-8-p
-   :frame-buffer
-   :string-16-p
-   :string-32-p
-   :string-8-p
-   )
+                :binary-1024
+                :binary-128
+                :binary-16
+                :binary-256
+                :binary-32
+                :binary-40
+                :binary-48
+                :binary-512
+                :binary-64
+                :binary-72
+                :binary-8
+                :binary-1024-p
+                :binary-128-p
+                :binary-16-p
+                :binary-256-p
+                :binary-32-p
+                :binary-40-p
+                :binary-48-p
+                :binary-512-p
+                :binary-64-p
+                :binary-72-p
+                :binary-8-p
+                :frame-buffer
+                :string-16-p
+                :string-32-p
+                :string-8-p
+                )
   (:import-from :de.setf.utility
                 :stream-reader
                 :stream-writer
@@ -486,9 +505,10 @@
    :amqp-device                         ; class
    :amqp-socket-device                  ; class
    :basic-channel                       ; function
-   :basic-exchange                      ; function
-   :basic-headers                       ; function
-   :basic-no-ack                        ; function
+   ; :basic-exchange                      ; function
+   ; :basic-headers                       ; function
+   ; :basic-no-ack                        ; function
+   :basic-header                        ; function
    :basic.ack                           ; function
    :basic.cancel                        ; function
    :basic.cancel-ok                     ; function
@@ -655,7 +675,7 @@
    :channel.queue                       ; function
    :channel.stream                      ; function
    :channel.tx                          ; function
-   :class-mime-type
+   ; :class-mime-type
    :class-properties
    :collection                          ; class
    :collection-content                  ; function

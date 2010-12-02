@@ -385,8 +385,8 @@
                                          :allocation :class)
                    ;; initialize to quoted name; it's defined later
                    `(request-function :initform ',(cons-symbol :amqp :channel-request- amqp:method-name) ) ;:allocation :class)
-                   `(response-function :initform (response-function ,(cons-symbol :amqp :channel-respond-to- amqp:method-name))
-                                       :allocation :class)
+                   `(response-function :initform (response-function ',(cons-symbol :amqp :channel-respond-to- amqp:method-name))
+                                       :allocation :instance)
                    `(name :initform ',amqp:method-name :allocation :class)
                    '(header :initform nil)
                    '(data :initform nil)

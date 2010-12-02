@@ -387,6 +387,8 @@ as well as the discussions of the the alternative fu interface.[5]
     (typecase (device-state device)
       (amqp.s:use-channel.body.output
        (with-slots (out-buffer outpos max-out-pos body-position body-length) device
+         (amqp:log :debug device "device-flush (~a) ~d, ~d, ~d"
+              (device-state device) body-length body-position max-out-pos)
          (flet ((flush-frame ()
                   (let* ((frame (claim-output-frame device))
                          (length outpos))
@@ -408,9 +410,9 @@ as well as the discussions of the the alternative fu interface.[5]
            (cond (complete
                   (typecase (device-state device)
                     (amqp.s:use-channel.body.output.chunked
-                     ;; if the content was chunked, send a zero-length frame and refert to .output
-                     (amqp:log :debug device "Ending chunking. padding ~d bytes..."
-                               (- body-length body-position))
+                     ;; if the content was chunked, send a zero-length frame and revert to .output
+                     (amqp:log :debug device "Ending chunking. padding ~d v/s ~d bytes..."
+                               (- body-length body-position) max-out-pos)
                      (flush-frame)
                      (setf (device-state device) amqp.s:use-channel.body.output)))
                   ;; now send frames to fill the difference between content-position and
@@ -430,7 +432,7 @@ as well as the discussions of the the alternative fu interface.[5]
                      ;; send a new publish, reset the buffer positions, and continue streaming
                      (let ((basic (channel.basic device)))    
                        (amqp:log :debug basic "Starting next chunk: publish...")
-                       (amqp:send-publish basic :exchange (basic-exchange basic))
+                       (amqp:send-publish basic :exchange (amqp:basic-exchange basic))
                        (setf outpos 0
                              max-out-pos (length out-buffer)
                              ;; start a new body
@@ -875,19 +877,19 @@ returned.")
            (headers (amqp:basic-headers basic))
            (element-type (getf headers :element-type))
            (package (getf headers :package))
-           (mime-type (class-mime-type basic)))
+           (content-type (mime:mime-type (amqp:basic-content-type basic))))
       ;; element-type in the basic header combines the read values with the channel's content-type
       (when element-type
         (setf element-type (or (find-symbol element-type package)
                                (error "Invalid type x package combination: ~s, ~s."
                                       element-type package))))
       (amqp:log :debug channel "device-read-content: in (~s ~s) in state ~s x~s"
-                element-type mime-type (channel-state channel) (device-body-length channel))
+                element-type content-type (channel-state channel) (device-body-length channel))
       (with-slots (buffpos buffer-ptr) channel
         ;; clear possible past EOF; permits immediate device-clear to skip w/o first reading any input
         (setf buffpos 0)
         (setf buffer-ptr 0))
-      (device-read-content-body channel (or body element-type) mime-type))))
+      (device-read-content-body channel (or body element-type) content-type))))
 
 
 (defgeneric device-read-content-header (channel )
@@ -898,7 +900,7 @@ returned.")
         ;; merge the header's content type with the stream's
         (let* ((body-size (class-body-size basic))
                (headers (amqp:basic-headers basic))
-               (mime-type (mime-type basic)))
+               (content-type (mime:mime-type (amqp:basic-content-type basic))))
           (assert-argument-type device-read-content-body body-size integer)
 
           (with-slots (buffer buffer-ptr body-length body-position) channel
@@ -907,8 +909,9 @@ returned.")
             (setf body-length body-size
                   buffer-ptr 0
                   body-position 0))
-          ;; (update-device-codecs channel mime-type) 
-          (setf (channel-content-type channel) mime-type)
+          ;; cause (update-device-codecs channel mime-type)
+          (unless (eq (channel-content-type channel) content-type)
+            (setf (channel-content-type channel) content-type))
           (setf (channel-state channel)
                 (if (string-equal (getf headers :transfer-encoding) "chunked")
                   amqp.s:use-channel.body.input.chunked

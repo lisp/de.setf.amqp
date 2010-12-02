@@ -53,10 +53,12 @@
 
 
 
-(defmacro response-function (name)
+(defun response-function (name)
   "For use as the initform for method response functions, if the target is defined, ok. Otherwise use instead
  the default response function, which signals an error."
-  `(if (fboundp ',name) ',name (function (lambda (class &rest args) (apply #'default-channel-respond-to class ',name args)))))
+  (if (fboundp name)
+     name
+     #'(lambda (class &rest args) (apply #'default-channel-respond-to class name args))))
 
 
 (defgeneric default-channel-respond-to
@@ -579,18 +581,21 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      class)))
 
 
-(def-amqp-command amqp:Publish (class &key body exchange routing-key mandatory immediate timestamp)
+(def-amqp-command amqp:Publish (class &key  body exchange routing-key mandatory immediate
+                                      content-type content-encoding headers delivery-mode
+                                      priority correlation-id reply-to expiration message-id timestamp
+                                      type user-id)
   (:documentation "C-->S : publish a message :
 This method publishes a message to a specific exchange. The message will be routed to queues as 
 defined by the exchange configuration and distributed to any active consumers when the transaction, if 
 any, is committed.")
-
+  
   (:request
    (:method ((exchange amqp:exchange) &rest args)
      "Given an exchange, delegate to its channel's basic instance."
      (declare (dynamic-extent args))
      (apply #'amqp::request-publish (amqp:channel.basic (amqp.u:exchange-channel exchange)) args))
-
+   
    (:method ((channel amqp:channel) &rest args)
      "The class' channel is state is set to use-channel.body.output, the stream is cleared,
  and the encoding is asserted. If a body is supplied, then, it is written. Otherwise the
@@ -598,16 +603,30 @@ any, is committed.")
      (declare (dynamic-extent args))
      ;; delegate to the channel's basic class
      (apply #'amqp::request-publish (amqp:channel.basic channel) args))
-
-   (:method ((basic amqp:basic) &rest args &key body exchange routing-key mandatory immediate timestamp)
-     (declare (ignore routing-key mandatory immediate timestamp))
+   
+   (:method ((basic amqp:basic) &rest args &key (body nil body-s)
+             (ticket nil t-s)
+             (exchange (amqp:basic-exchange basic))
+             (routing-key (amqp:basic-routing-key basic))
+             (mandatory (amqp:basic-mandatory basic))
+             (immediate (amqp:basic-immediate basic))
+             content-type content-encoding headers delivery-mode
+             priority correlation-id reply-to expiration message-id timestamp
+             type user-id)
+     (declare (ignore content-type content-encoding headers delivery-mode
+                      priority correlation-id reply-to expiration message-id timestamp
+                      type user-id))
      (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
-     (setf (basic-exchange basic) exchange)     ; cache for possible use in chunk headers
-     (when body
+     (setf (amqp:basic-exchange basic) exchange)     ; cache for possible use in chunk headers
+     (when body-s
        (setf args (copy-list args))
-       (remf args :body))     
-     (apply #'amqp::send-publish basic :exchange exchange args)
-
+       (remf args :body))
+     (if t-s                            ; version variation
+       (amqp::send-publish basic :ticket ticket :exchange exchange :routing-key routing-key
+                           :mandatory mandatory :immediate immediate)
+       (amqp::send-publish basic :exchange exchange :routing-key routing-key
+                           :mandatory mandatory :immediate immediate))
+     
      (let ((channel (object-channel basic)))
        (apply #'device-write-content channel body :exchange exchange args)))))
 
