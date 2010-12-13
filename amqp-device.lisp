@@ -130,7 +130,7 @@
     (update-device-codecs device type)
     type)
   (:method ((type t) (device amqp-device))
-    (setf (device-content-type device) (mime-type type))))
+    (setf (device-content-type device) (mime:mime-type type))))
 
  
 (defmethod update-device-codecs ((device amqp-device) (type mime:*/*))

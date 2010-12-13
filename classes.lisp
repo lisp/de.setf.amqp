@@ -741,7 +741,9 @@
 
   (apply #'call-next-method instance slots
          :content-type (string (type-of content-type))
-         :content-encoding (or (content-encoding-name content-encoding) "")
+         :content-encoding (if content-encoding
+                             (string (content-encoding-name content-encoding))
+                             "")
          :body-size body-size
          :headers headers
          args) 

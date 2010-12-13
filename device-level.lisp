@@ -909,7 +909,7 @@ returned.")
             (setf body-length body-size
                   buffer-ptr 0
                   body-position 0))
-          ;; cause (update-device-codecs channel mime-type)
+          ;; cause (update-device-codecs channel content-type)
           (unless (eq (channel-content-type channel) content-type)
             (setf (channel-content-type channel) content-type))
           (setf (channel-state channel)
@@ -1024,7 +1024,7 @@ returned.")
     ;; transfer element type
     (let* ((basic (apply #'device-write-content-header channel body args)))
 
-      (prog1 (apply #'device-write-content-body channel body (mime-type basic) args)
+      (prog1 (apply #'device-write-content-body channel body (mime:mime-type (amqp:basic-content-type basic)) args)
         (device-flush channel t)))))
 
 
@@ -1039,13 +1039,13 @@ returned.")
     (let* ((basic (apply #'amqp:channel.basic channel :body body args))
            (body-size (class-body-size basic))
            (headers (amqp:basic-headers basic))
-           (mime-type (mime-type basic)))
+           (content-type (mime:mime-type (amqp:basic-content-type basic))))
       (with-slots (out-buffer max-out-pos outpos body-length body-position) channel
         (unless out-buffer
           (device-initialize-output-buffer channel))
         (setf body-length body-size
               body-position 0))
-      (update-device-codecs channel mime-type)
+      (update-device-codecs channel content-type)
       (setf (channel-state channel)
             (if (string-equal (getf headers :transfer-encoding) "chunked")
               amqp.s:use-channel.body.output.chunked
