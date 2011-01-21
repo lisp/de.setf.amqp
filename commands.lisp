@@ -157,10 +157,12 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
 
      (command-loop (basic)
        ;; skip everything except the -ok
-       (amqp:cancel-ok (class) (return-from command-loop))
+       (amqp:cancel-ok ((class amqp:basic) &key consumer-tag)
+                       (amqp:log :debug class "cancel ok: ~s"  consumer-tag)
+                       ;; once the request is acknowledged, return the consumer tag
+                       (return-from command-loop consumer-tag))
        (amqp:header (frame) t)
-       (amqp:body (frame) t))
-     basic)))
+       (amqp:body (frame) t)))))
 
 
 (def-amqp-command amqp:cancel-ok (class &key consumer-tag)
@@ -349,10 +351,9 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      (command-loop (basic)
        (amqp:consume-ok ((class amqp:basic) &key consumer-tag)
          (amqp:log :debug class "consume ok: ~s"  consumer-tag)
-         (return-from command-loop)))
-     
-     ;; once the request is acknowledged, return the issuing class
-     basic)))
+         (setf (amqp:basic-consumer-tag basic) consumer-tag)
+         ;; once the request is acknowledged, return the consumer tag
+         (return-from command-loop consumer-tag))))))
 
 
 (def-amqp-command amqp:consume-ok (class &key consumer-tag)
