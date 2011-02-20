@@ -586,20 +586,17 @@
 (defgeneric read-frame (connection frame &key start end)
   (:documentation "Read from the connection socket into the given frame.
  This varies per protocol as the header layout varies.")
-
-  #+amqp.log-frames
+  
+  
   (:method :around ((connection amqp:connection) (frame t) &key start end)
-    (multiple-value-prog1 (call-next-method)
-      (amqp:log :debug connection "read-frame: (~a,~a) ~s" start end frame)))
-
-  (:method :before ((connection amqp:connection) (frame t) &key start end)
-           (declare (ignore start end))
-           (unless (open-stream-p connection)
-             (error 'end-of-file :stream connection)))
-               
-  (:method :after ((connection amqp:connection) (frame t) &key start end)
-     (declare (ignore start end))
-     (setf (connection-read-frame-timestamp connection) (get-universal-time))))
+     (unless (open-stream-p connection)
+       (error 'end-of-file :stream connection))
+     (multiple-value-bind (frame length)
+                          (call-next-method)
+       (amqp:log :debug connection "read-frame: (~a,~a) ~s = ~d" start end frame length)
+       (setf (connection-read-frame-timestamp connection) (get-universal-time))
+       (incf (device-frame-position connection) length)
+       (values frame length))))
 
 (defgeneric write-frame (connection frame &key start end)
   (:documentation "Write from the given frame to the connection socket.
@@ -627,6 +624,7 @@
 (defmethod write-frame ((connection amqp:connection) (frame amqp.u:7-byte-header-output-frame) &key (start 0) (end nil))
   (let ((stream (stream-output-handle connection)))
     (setf end (or end (frame-size frame)))
+    (incf (device-frame-position connection) (+ end 7 1))
     (write-sequence (frame-header frame) stream :start start)
     (write-sequence (frame-data frame) stream :end end)
     (write-sequence #(#xCE) stream)
@@ -642,6 +640,7 @@
 (defmethod write-frame ((connection amqp:connection) (frame amqp.u:8-byte-header-output-frame) &key (start 0) (end nil))
   (let ((stream (stream-output-handle connection)))
     (setf end (or end (frame-size frame)))
+    (incf (device-frame-position connection) (+ end 8 1))
     (write-sequence (frame-header frame) stream :start start)
     (write-sequence (frame-data frame) stream :end end)
     (write-sequence #(#xCE) stream)
@@ -657,6 +656,7 @@
 (defmethod write-frame ((connection amqp:connection) (frame amqp.u:12-byte-header-output-frame) &key (start 0) (end nil))
   (let ((stream (stream-output-handle connection)))
     (setf end (or end (frame-size frame)))
+    (incf (device-frame-position connection) (+ end 12))
     (write-sequence (frame-header frame) stream :start start)
     (write-sequence (frame-data frame) stream :end end)
     (+ end 12)))

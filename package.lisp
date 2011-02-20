@@ -324,10 +324,13 @@
   (:export
    :state
    :channel-state
+   :chunked
    :connection-state
+   :input
    :open
    :open-connection
    :open-channel
+   :output
    :use
    :use-connection
    :use-channel
@@ -403,6 +406,7 @@
                 #:stream-force-output
                 #:stream-fresh-line
                 #:stream-listen
+                #:stream-position
                 #:stream-read-byte
                 #:stream-write-byte
                 #:stream-write-string
@@ -439,6 +443,7 @@
                 #:stream-clear-input
                 #:stream-clear-output
                 #:stream-element-type
+                #:stream-file-position
                 #:stream-finish-output
                 #:stream-force-output
                 #:stream-fresh-line
@@ -467,6 +472,7 @@
   #+sbcl
   (:import-from :sb-simple-streams
                 :device-close
+                :device-file-position
                 :device-open
                 :device-read
                 :device-write
@@ -720,6 +726,7 @@
    :decode-method-arguments             ; function
    :dequeue
    :device-close                        ; function
+   :device-file-position                ; function
    :device-flush                        ; function
    :device-listen                       ; function
    :device-open                         ; function
@@ -815,6 +822,7 @@
    :stream-eofp                         ; function
    :stream-eol-marker                   ; function
    :stream-finish-output                ; function
+   :stream-file-position                ; function
    :stream-force-output                 ; function
    :stream-fresh-line                   ; function
    :stream-line-buffer                  ; function
@@ -822,6 +830,7 @@
    :stream-listen                       ; function
    :stream-peek-char                    ; function
    :stream-plist                        ; function
+   :stream-position                     ; function
    :stream-read-byte                    ; function
    :stream-read-char                    ; function
    :stream-read-char-no-hang            ; function

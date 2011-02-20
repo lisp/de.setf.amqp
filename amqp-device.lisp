@@ -32,37 +32,44 @@
    (body-length
     :initform 0
     :accessor device-body-length)
+   (frame-position
+    :initform 0
+    :accessor device-frame-position
+    :documentation "Counts the byte offset of the beginning of the current frame in the
+     content stream. It is reset to zero by device-read/write-content and incremented for
+     each successively completed frame. It combines as the base offset with buffpos
+     to yield the device-file-position and therby also the stream-position.")
    (free-input-frames
     :accessor device-free-input-frames
     :type locked-stack
     :documentation "This stack resources frames to be used to
- read data from the device. It is shared directly by a connection and
- all of its channels.")
+     read data from the device. It is shared directly by a connection and
+     all of its channels.")
    (free-output-frames
     :accessor device-free-output-frames
     :type locked-stack
     :documentation "This stack resources frames to be used to
- write data to the device. It is shared directly by a connection and
- all of its channels.")
+     write data to the device. It is shared directly by a connection and
+     all of its channels.")
    (read-frames
     :accessor device-read-frames
     :type locked-queue
     :documentation "This queue buffers frames which have been read from a
- device, but not yet processed by the respective channel or (for channel 0)
- by the connection.")
+     device, but not yet processed by the respective channel or (for channel 0)
+     by the connection.")
    (encoded-frames
     :accessor device-encoded-frames
     :type locked-queue
     :documentation "This stack resources frames to be used to
- read data from the device. It is shared directly by a connection and
- all of its channels.")
+     read data from the device. It is shared directly by a connection and
+     all of its channels.")
    (content-type
     :initarg :content-type
     :reader device-content-type :writer setf-device-content-type
     :type mime:*/*
     :documentation "Specifies the encoding type for character-oriented stream
- operations. The publish, deliver, and get operations consult it to determine
- which encoding filter to install. (See (setf channel-content-type).)")
+     operations. The publish, deliver, and get operations consult it to determine
+     which encoding filter to install. (See (setf channel-content-type).)")
    (element-type
     :initarg :element-type
     :accessor device-element-type
@@ -220,6 +227,20 @@
     (when (next-method-p) (call-next-method))
     (setf (stream-external-format device) :void)))
 
+
+(defmethod device-file-position ((device amqp-device))
+  "Add together the current frame offset and frame buffer position to return the
+ effective position since the last call to device-read-content-body"
+  (with-slots (outpos buffpos) device
+    (+ (device-frame-position device)
+       (typecase (device-state device)
+         (amqp.s:output outpos)
+         (amqp.s:input buffpos)
+         (t 0)))))
+
+(defmethod (setf device-file-position) (position (device amqp-device))
+  (declare (ignore position))
+  nil)
 
 (defmethod device-close ((device amqp-connection-device) (abort t))
   (call-next-method)

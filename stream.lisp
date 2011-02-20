@@ -300,6 +300,13 @@
 (defmethod stream-element-type ((stream amqp-device))
   (device-element-type stream))
 
+(defmethod stream-position ((stream amqp-device) &optional new)
+  (when (null new) 
+    (device-file-position stream)))
+
+(defmethod stream-file-position ((stream amqp-device) &optional new)
+  (when (null new) 
+    (device-file-position stream)))
 
 ;; pathname : NYI
 
@@ -349,7 +356,6 @@
   (let ((count (device-read stream sequence start end nil)))
     (when (plusp count) (+ start count))))
 
- 
 
 
 (defmethod stream-read-sequence ((stream amqp-device) (sequence string)

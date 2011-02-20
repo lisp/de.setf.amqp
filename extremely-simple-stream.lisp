@@ -113,7 +113,6 @@
     :initform nil :initarg :output-handle :type (or null stream)
     :accessor stream-output-handle
     :documentation "Bound to the same value as input-handle.")
-   
    (buffer
     :initform nil :type (or simple-stream-buffer null)
     :reader stream-buffer :writer set-stream-buffer
@@ -141,12 +140,14 @@
  implementation."))
 
 (defmethod device-file-position ((stream simple-stream))
-  (with-slots (buffpos) stream
-    buffpos))
+  "The base implementation just returns 0. It must be overridden by specializations
+ which manage buffers."
+  0)
 
 (defmethod (setf device-file-position) ((value integer) (stream simple-stream))
-  (with-slots (buffpos) stream
-    (setf buffpos value)))
+  "The base implementation just returns nil. It must be overridden by specializations
+ which manage buffers."
+  nil)
 
 (defmethod device-file-length ((stream simple-stream))
   nil)

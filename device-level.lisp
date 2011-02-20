@@ -87,8 +87,14 @@ eof behaviour. Where the size was unkown, the channel implemented chunked transf
 sized messages, and relies on device-flush and device-clear-input to indicate and manage the effective
 eof.
 
- The state operators for position and length return meaningful information for fixed content sizes only
-and have no effect to modify channel state. 
+ The channels position operators track the position during stream read/write operations only. They combine
+the frame position with the current buffer position to yield the byte offset in the effective stream.
+The device-read/write-content operators reset the position and subsequent body frame read/write operators
+accumulate the last frame's buffer size.
+For connections, the frame position accumulates the start position of all frames (including header frames)
+as they are read and written over the connection, but neither accounts for partial buffer lengths nor
+distinguishes between header and body frames. (see read/write-frame)
+The position operators have no effect on channel state. 
 
  For more information on simple streams, see Franz's documentation[3] and the sbcl implementation[4] of same,
 as well as the discussions of the the alternative fu interface.[5]
@@ -291,6 +297,7 @@ as well as the discussions of the the alternative fu interface.[5]
                               (rotatef buffer data)
                               (setf-frame-data data frame)
                               (release-frame frame)
+                              (incf (device-frame-position device) buffpos)
                               (setf buffpos 0)
                               (setf buffer-ptr length)
                               (setf buf-len (length buffer))   ; could change iff possible to re-tune
@@ -360,7 +367,7 @@ as well as the discussions of the the alternative fu interface.[5]
 
 
 (defmethod device-flush ((device amqp:channel) &optional (complete nil))
-  "Push data to the channel'c connection.
+  "Push data to the channel's connection.
  DEVICE : amqp:channel : an open channel
  COMPLETE : boolean : iff true, an in-progress chunked body stream is closed. 
 
@@ -398,6 +405,9 @@ as well as the discussions of the the alternative fu interface.[5]
                     (setf-frame-channel-number (channel-number device) frame)
                     (setf-frame-track-number (channel-track device) frame)
                     (setf-frame-size outpos frame)
+                    ;; update start of the next frame -
+                    ;; nb. here v/s when frames are written as only body/content frames contribute
+                    (incf (device-frame-position device) outpos)
                     (put-encoded-frame device frame)
                     (setf outpos 0)
                     (setf max-out-pos (length out-buffer))
@@ -436,8 +446,8 @@ as well as the discussions of the the alternative fu interface.[5]
                        (setf outpos 0
                              max-out-pos (length out-buffer)
                              ;; start a new body
-                             body-length (class-body-size basic)
-                             body-position 0)
+                             body-length (class-body-size basic))
+                       (setf body-position 0)
                        (amqp:log :debug basic "Starting next chunk: header...")
                        (send-header basic)
                        (amqp:log :debug basic "Starting next chunk: done."))))))
@@ -679,6 +689,8 @@ as well as the discussions of the the alternative fu interface.[5]
          0))))
 
 (defmethod device-file-position ((device amqp:connection))
+  "Return the body position, but note that this is maintained in terms of complete frames
+ for all channels, which does not reflect the position in any given channel's stream." 
   (device-body-position device))
 
 (defmethod (setf device-file-position) (position (device amqp:connection))
@@ -879,16 +891,20 @@ returned.")
            (package (getf headers :package))
            (content-type (mime:mime-type (amqp:basic-content-type basic))))
       ;; element-type in the basic header combines the read values with the channel's content-type
+      (warn "element-type: ~s." element-type)
       (when element-type
-        (setf element-type (or (find-symbol element-type package)
-                               (error "Invalid type x package combination: ~s, ~s."
-                                      element-type package))))
+        (let ((found-element-type (find-symbol element-type package)))
+          (unless found-element-type
+            (warn "Invalid type x package combination: ~s, ~s." element-type package))
+          (setf element-type found-element-type)))
       (amqp:log :debug channel "device-read-content: in (~s ~s) in state ~s x~s"
                 element-type content-type (channel-state channel) (device-body-length channel))
       (with-slots (buffpos buffer-ptr) channel
         ;; clear possible past EOF; permits immediate device-clear to skip w/o first reading any input
         (setf buffpos 0)
-        (setf buffer-ptr 0))
+        (setf buffer-ptr 0)
+        ;;(setf (device-frame-position channel) 0)
+        )
       (device-read-content-body channel (or body element-type) content-type))))
 
 
@@ -918,8 +934,8 @@ returned.")
                   amqp.s:use-channel.body.input)) 
           (return-from command-loop basic))))))
 
-(defgeneric device-read-content-body (device type content-type)
 
+(defgeneric device-read-content-body (device type content-type)
   (:method ((channel amqp:channel) (type (eql 'string)) (content-type mime:text/plain))
     (let* ((body-length (device-body-length channel))
            ;; construct a string with the message content
@@ -1023,7 +1039,7 @@ returned.")
     ;; combination. this resolve the body size, the transfer encoding, and the 
     ;; transfer element type
     (let* ((basic (apply #'device-write-content-header channel body args)))
-
+      (setf (device-frame-position channel) 0)
       (prog1 (apply #'device-write-content-body channel body (mime:mime-type (amqp:basic-content-type basic)) args)
         (device-flush channel t)))))
 
