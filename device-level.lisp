@@ -891,7 +891,6 @@ returned.")
            (package (getf headers :package))
            (content-type (mime:mime-type (amqp:basic-content-type basic))))
       ;; element-type in the basic header combines the read values with the channel's content-type
-      (warn "element-type: ~s." element-type)
       (when element-type
         (let ((found-element-type (find-symbol element-type package)))
           (unless found-element-type
