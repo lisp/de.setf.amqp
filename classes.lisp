@@ -839,10 +839,17 @@
   (:documentation "Returns the basic instance's headers."))
 
 (defun amqp.u:basic-header (context keyword)
-  (getf (amqp:basic-headers context) keyword))
+  (loop for (key value) on (amqp:basic-headers context) by #'cddr
+        when (string-equal key keyword)
+        do (return value)))
 
 (defun (setf amqp.u:basic-header) (value context keyword)
   (setf (getf (amqp:basic-headers context) keyword) value))
+
+(defun amqp.u:basic-header-list (context keyword)
+  (loop for (key value) on (amqp:basic-headers context) by #'cddr
+        when (string-equal key keyword)
+        collect value))
 
 
 (macrolet ((def-basic-accessors (&rest names)
