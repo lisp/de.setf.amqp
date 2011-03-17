@@ -288,7 +288,9 @@
 
 (defgeneric frame-decoder (frame)
   (:method ((frame amqp:frame))
-    (c2mop:class-prototype (find-class (frame-type-class-name frame)))))
+    (let ((class (find-class (frame-type-class-name frame))))
+      (c2mop:ensure-finalized class)
+      (c2mop:class-prototype class))))
 
 (defgeneric frame-type (frame)
   (:method ((frame 7-byte-header-frame))

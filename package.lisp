@@ -515,6 +515,7 @@
    ; :basic-headers                       ; function
    ; :basic-no-ack                        ; function
    :basic-header                        ; function
+   :basic-header-list                   ; function
    :basic.ack                           ; function
    :basic.cancel                        ; function
    :basic.cancel-ok                     ; function
