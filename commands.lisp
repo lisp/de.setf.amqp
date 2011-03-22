@@ -352,6 +352,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
        (amqp:consume-ok ((class amqp:basic) &key consumer-tag)
          (amqp:log :debug class "consume ok: ~s"  consumer-tag)
          (setf (amqp:basic-consumer-tag basic) consumer-tag)
+         (setf (channel-acknowledge-messages (object-channel basic)) (not no-ack))
          ;; once the request is acknowledged, return the consumer tag
          (return-from command-loop consumer-tag))))))
 
@@ -438,12 +439,12 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
     adjustments to stream parameters for future reading.")
   
   (:response
-   (:method ((basic amqp:basic) &rest args)
+   (:method ((basic amqp:basic) &rest args &key delivery-tag &allow-other-keys)
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
        (prog1 (apply #'device-read-content channel args)
          (when (channel-acknowledge-messages channel)
-           (amqp::send-ack basic)))))))
+           (amqp::send-ack basic :delivery-tag delivery-tag)))))))
 
 
 (def-amqp-command amqp:Flow (class &key active)
