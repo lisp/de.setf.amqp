@@ -298,7 +298,7 @@
     `(simple-array (unsigned-byte 8) (*))
     `(simple-array (unsigned-byte 8) (,length))))
 
-#+(or clozure sbcl)
+#+(or clozure sbcl lispworks)
 ;; don't tell it more than it needs to know, otherwise shorter vectors conflict with declarations
 (deftype amqp:frame-buffer (&optional length)
   (declare (ignore length))

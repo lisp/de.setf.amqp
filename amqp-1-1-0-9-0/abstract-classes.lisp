@@ -18,9 +18,10 @@
   If not, see the GNU [site](http://www.gnu.org/licenses/)."))
 
 
-(defvar amqp-1-1-0-9-0::+protocol-version+
-  :amqp-1-1-0-9-0
-  "Specifies the protocol header for the highest supported version.")
+(eval-when (:compile-toplevel :load-toplevel :execute)          ; lw wants this for the shared slot
+  (defvar amqp-1-1-0-9-0::+protocol-version+
+    :amqp-1-1-0-9-0
+    "Specifies the protocol header for the highest supported version."))
 
 (setf (version-protocol-header amqp-1-1-0-9-0::+protocol-version+) #(65 77 81 80 1 1 0 9))
 

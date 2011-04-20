@@ -30,8 +30,8 @@
                ;; conformant
                ;; (:file "data-wire-coding")
                ;; rabbitmq-like
-               (:file "data-wire-coding-rmq")
                (:file "abstract-classes")
+               (:file "data-wire-coding-rmq")
                (:file "classes")
                (:file "device-level"))
   :description

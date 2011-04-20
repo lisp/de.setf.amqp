@@ -27,8 +27,8 @@
   :version 20100111.1
   :depends-on (:de.setf.amqp)
   :components ((:file "package")
-               (:file "data-wire-coding")
                (:file "abstract-classes")
+               (:file "data-wire-coding")
                (:file "classes")
                (:file "device-level"))
   :description

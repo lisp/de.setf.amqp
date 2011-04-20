@@ -147,3 +147,14 @@
       (eval '(+ single-float-positive-infinity single-float-negative-infinity)))
     (defconstant double-float-nan
       (eval '(+ double-float-positive-infinity double-float-negative-infinity)))))
+
+#+lispworks
+(progn
+  (defconstant double-float-positive-infinity system::*plus-infinity-double*)
+  (defconstant double-float-negative-infinity system::*minus-infinity-double*)
+  (defconstant single-float-positive-infinity (coerce system::*plus-infinity-double* 'single-float))
+  (defconstant single-float-negative-infinity (coerce system::*minus-infinity-double* 'single-float))
+
+  (defconstant single-float-nan (+ single-float-positive-infinity single-float-negative-infinity))
+  (defconstant double-float-nan (+ double-float-positive-infinity double-float-negative-infinity))
+  )

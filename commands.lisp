@@ -96,6 +96,18 @@
      "Do nothing more than log the message."
      class)))
 
+;; 20110402 lw required the -ok be defined before the typecase refrence
+(def-amqp-command amqp:bind-ok (class &key)
+  (:documentation "C<--S : Confirm bind successful.
+ This command appears as eventual response to a Bind, and should be processed
+ synchronously by a request-bind. If one appears independently, log it.
+ and continue.")
+  
+  (:response
+   (:method ((queue amqp:queue) &key)
+     "Simply log and continue."
+     queue)))
+
 
 (def-amqp-command amqp:bind (class &key ticket queue exchange routing-key no-wait arguments)
   (:documentation "C-->S: Bind queue to an exchange")
@@ -128,16 +140,18 @@
      queue-class)))
 
 
-(def-amqp-command amqp:bind-ok (class &key)
-  (:documentation "C<--S : Confirm bind successful.
- This command appears as eventual response to a Bind, and should be processed
- synchronously by a request-bind. If one appears independently, log it.
+;; 20110402 lw required the -ok be defined before the typecase refrence
+(def-amqp-command amqp:cancel-ok (class &key consumer-tag)
+  (:documentation "C<--S : confirm a canceled consumer.
+ This command appears as eventual response to Cancel and should be processed
+ synchronously by a request-cancel. If one appears independently, log it.
  and continue.")
-  
+
   (:response
-   (:method ((queue amqp:queue) &key)
+   (:method ((basic amqp::basic) &key consumer-tag)
+     (declare (ignore consumer-tag))
      "Simply log and continue."
-     queue)))
+     basic)))
 
 
 (def-amqp-command amqp:cancel (class &rest args &key consumer-tag no-wait)
@@ -165,17 +179,27 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
        (amqp:body (frame) t)))))
 
 
-(def-amqp-command amqp:cancel-ok (class &key consumer-tag)
-  (:documentation "C<--S : confirm a canceled consumer.
- This command appears as eventual response to Cancel and should be processed
- synchronously by a request-cancel. If one appears independently, log it.
- and continue.")
+;; 20110402 lw required the -ok be defined before the typecase refrence
+(def-amqp-command amqp:close-ok (class &key)
+  (:documentation "C<->S : confirm a channel or connection close close : Sync response to Close.
+ This command appears as the eventual response to Cancel and should be processes
+ synchronously together with that. I one appears independently, ignore it.")
+
+  (:request
+   (:method ((class amqp:connection) &key)
+     (amqp::send-close-ok class)
+     class)
+   
+   (:method ((class amqp:channel) &key)
+     (amqp::send-close-ok class)
+     class))
 
   (:response
-   (:method ((basic amqp::basic) &key consumer-tag)
-     (declare (ignore consumer-tag))
-     "Simply log and continue."
-     basic)))
+   (:method ((class amqp:connection) &key)
+     class)
+   
+   (:method ((class amqp:channel) &key)
+     class)))
 
 
 (def-amqp-command amqp:close (class &key reply-code reply-text class-id method-id)
@@ -268,28 +292,6 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
        ;; once the response is sent, close the stream
        (close connection))
      connection)))
-
-
-(def-amqp-command amqp:close-ok (class &key)
-  (:documentation "C<->S : confirm a channel or connection close close : Sync response to Close.
- This command appears as the eventual response to Cancel and should be processes
- synchronously together with that. I one appears independently, ignore it.")
-
-  (:request
-   (:method ((class amqp:connection) &key)
-     (amqp::send-close-ok class)
-     class)
-   
-   (:method ((class amqp:channel) &key)
-     (amqp::send-close-ok class)
-     class))
-
-  (:response
-   (:method ((class amqp:connection) &key)
-     class)
-   
-   (:method ((class amqp:channel) &key)
-     class)))
 
 
 (def-amqp-command amqp:commit (class &key)
@@ -442,9 +444,15 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
    (:method ((basic amqp:basic) &rest args &key delivery-tag &allow-other-keys)
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
+       (when (channel-acknowledge-messages channel)
+         (setf (amqp:basic-delivery-tag basic) delivery-tag))
        (prog1 (apply #'device-read-content channel args)
-         (when (channel-acknowledge-messages channel)
+         (when (and (channel-acknowledge-messages channel)
+                    ;; in case the ack was managed elsewhere, set the tag to zero
+                    (eql (amqp:basic-delivery-tag basic) delivery-tag))
+           (setf (amqp:basic-delivery-tag basic) 0)
            (amqp::send-ack basic :delivery-tag delivery-tag)))))))
+
 
 
 (def-amqp-command amqp:Flow (class &key active)
