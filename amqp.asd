@@ -58,6 +58,7 @@
                :de.weitz.cl-ppcre
                :com.b9.puri.puri-ppcre
                :de.setf.utility
+               :de.setf.utility.codecs
                :de.setf.utility.mime
                #+sbcl :sb-simple-streams)
   :components ((:file "package")

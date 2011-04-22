@@ -349,6 +349,7 @@
 
 (defpackage :de.setf.amqp.utility
   (:use :common-lisp  :puri )
+  (:use ::de.setf.utility.codecs)
   (:documentation "The :de.setf.amqp.utility package exports names to make library components available to
     applications. It uses no package, but is intended to be used - as is the case with the library implementation
     itself. It cross-exports several terms from the AMQP standard package for this purpose.")
@@ -390,105 +391,6 @@
                 :string-32-p
                 :string-8-p
                 )
-  (:import-from :de.setf.utility
-                :stream-reader
-                :stream-writer
-                )
-  #+ccl
-  (:import-from :ccl
-                #:open-stream-p
-                #:stream-clear-input
-                #:stream-clear-output
-                #:stream-direction
-                #:stream-element-type
-                #:stream-eofp
-                #:stream-finish-output
-                #:stream-force-output
-                #:stream-fresh-line
-                #:stream-listen
-                #:stream-position
-                #:stream-read-byte
-                #:stream-write-byte
-                #:stream-write-string
-                )
-  #+clozure
-  (:import-from :ccl
-                :double-float-positive-infinity
-                :double-float-negative-infinity
-                #+ccl-1.4 :double-float-nan
-                #:stream-advance-to-column
-                #:stream-line-column
-                #:stream-peek-char
-                #:stream-read-char-no-hang
-                #:stream-read-char
-                #:stream-read-line
-                #:stream-start-line-p
-                #:stream-terpri
-                #:stream-unread-char
-                #:stream-write-char
-                )
-  #+lispworks
-  (:import-from :stream
-                #:stream-advance-to-column
-                #:stream-clear-input
-                #:stream-clear-output
-                #:stream-file-position
-                #:stream-line-column
-                #:stream-peek-char
-                #:stream-read-byte
-                #:stream-read-char
-                #:stream-read-char-no-hang
-                #:stream-read-line
-                #:stream-read-sequence
-                #:stream-start-line-p
-                #:stream-terpri
-                #:stream-unread-char
-                #:stream-write-char
-                #:stream-write-byte
-                #:stream-write-sequence
-                #:stream-write-string)
-  #+mcl
-  (:import-from :ccl
-                #:stream-close
-                #:stream-read-sequence
-                #:stream-untyi
-                #:stream-tyi
-                #:stream-tyo
-                #:stream-write-sequence
-                )
-  #+sbcl
-  (:import-from :sb-gray
-                #:open-stream-p
-                #:stream-advance-to-column
-                #:stream-clear-input
-                #:stream-clear-output
-                #:stream-element-type
-                #:stream-file-position
-                #:stream-finish-output
-                #:stream-force-output
-                #:stream-fresh-line
-                #:stream-line-column
-                #:stream-listen
-                #:stream-peek-char
-                #:stream-read-byte
-                #:stream-read-char
-                #:stream-read-char-no-hang
-                #:stream-read-line
-                #:stream-read-sequence
-                #:stream-start-line-p
-                #:stream-terpri
-                #:stream-unread-char
-                #:stream-write-byte
-                #:stream-write-char
-                #:stream-write-sequence
-                #:stream-write-string
-                )
-  #+sbcl
-  (:import-from :sb-ext
-                :double-float-positive-infinity
-                :double-float-negative-infinity
-                :single-float-positive-infinity
-                :single-float-negative-infinity)
   #+sbcl
   (:import-from :sb-simple-streams
                 :device-close

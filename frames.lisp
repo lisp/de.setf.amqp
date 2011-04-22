@@ -151,12 +151,12 @@
 
   (:method ((frame input-frame))
     (when (frame-connection frame)
-      (setf-frame-channel-number 0 frame))
+      (setf (frame-channel-number frame) 0))
     (enqueue frame (device-free-input-frames (frame-connection frame))))
 
   (:method ((frame output-frame))
     (when (frame-connection frame)
-      (setf-frame-channel-number 0 frame)
+      (setf (frame-channel-number frame) 0)
     (enqueue frame (device-free-output-frames (frame-connection frame))))))
 
 
@@ -353,29 +353,28 @@
     cycle))
 
 
-(defgeneric frame-channel-number (frame)
-  (:method ((frame 7-byte-header-frame))
-    (buffer-unsigned-byte-16 (frame-header frame) 1))
+(defmethod frame-channel-number ((frame 7-byte-header-frame))
+  (buffer-unsigned-byte-16 (frame-header frame) 1))
 
-  (:method ((frame 8-byte-header-frame))
-    (buffer-unsigned-byte-16 (frame-header frame) 2))
+(defmethod frame-channel-number ((frame 8-byte-header-frame))
+  (buffer-unsigned-byte-16 (frame-header frame) 2))
 
-  (:method ((frame 12-byte-header-frame))
-    (buffer-unsigned-byte-16 (frame-header frame) 6)))
+(defmethod frame-channel-number ((frame 12-byte-header-frame))
+  (buffer-unsigned-byte-16 (frame-header frame) 6))
 
-(defgeneric setf-frame-channel-number (number frame)
-  (:method (number (frame 7-byte-header-frame))
-    (setf (buffer-unsigned-byte-16 (frame-header frame) 1) number))
 
-  (:method (number (frame 8-byte-header-frame))
-    (setf (buffer-unsigned-byte-16 (frame-header frame) 2) number))
+(defmethod (setf frame-channel-number) (number (frame 7-byte-header-frame))
+  (setf (buffer-unsigned-byte-16 (frame-header frame) 1) number))
 
-  (:method (number (frame 12-byte-header-frame))
-    number
-    (error "NYI")))
+(defmethod (setf frame-channel-number) (number (frame 8-byte-header-frame))
+  (setf (buffer-unsigned-byte-16 (frame-header frame) 2) number))
 
-(setf (fdefinition '(setf frame-channel-number))
-  #'setf-frame-channel-number)
+(defmethod (setf frame-channel-number) (number (frame 12-byte-header-frame))
+  number
+  (error "NYI"))
+
+(setf (fdefinition 'setf-frame-channel-number)
+      #'(setf frame-channel-number))
 
 
 (defgeneric frame-track-number (frame)

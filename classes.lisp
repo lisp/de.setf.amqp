@@ -1410,18 +1410,19 @@
 ;;; allocate, resource-manage, read, and write immediately through
 ;;; a connection or indirectly through a channel.
 
+(defgeneric frame-channel-number (frame) )
+
+(defgeneric (setf frame-channel-number) (number frame) )
 
 (defgeneric claim-input-frame (device)
   (:documentation "Returns a free input frame or creates a new one.")
 
   (:method ((channel amqp:channel))
-    (declare (ftype function (setf frame-channel-number)))
     (let ((frame (dequeue (device-free-input-frames channel))))
       (setf (frame-channel-number frame) (channel-number channel))
       frame))
 
   (:method ((connection amqp:connection))
-    (declare (ftype function (setf frame-channel-number)))
     (let ((frame (dequeue (device-free-input-frames connection))))
       (setf (frame-channel-number frame) 0)
       frame)))
@@ -1435,7 +1436,6 @@
     (flet ((make-channel-frame ()
              (make-output-frame channel)))
       (declare (dynamic-extent #'make-channel-frame))
-      (declare (ftype function (setf frame-channel-number)))
       (let ((frame (dequeue (device-free-output-frames channel)
                             :if-empty #'make-channel-frame)))
         (setf (frame-channel-number frame) (channel-number channel))
@@ -1448,7 +1448,6 @@
     (flet ((make-connection-frame ()
              (make-output-frame connection)))
       (declare (dynamic-extent #'make-connection-frame))
-      (declare (ftype function (setf frame-channel-number)))
       (let ((frame (dequeue (device-free-output-frames connection)
                             :if-empty #'make-connection-frame)))
         (setf (frame-channel-number frame) 0)
