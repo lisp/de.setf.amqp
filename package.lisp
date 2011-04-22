@@ -430,15 +430,23 @@
   #+lispworks
   (:import-from :stream
                 #:stream-advance-to-column
+                #:stream-clear-input
+                #:stream-clear-output
+                #:stream-file-position
                 #:stream-line-column
                 #:stream-peek-char
-                #:stream-read-char-no-hang
+                #:stream-read-byte
                 #:stream-read-char
+                #:stream-read-char-no-hang
                 #:stream-read-line
+                #:stream-read-sequence
                 #:stream-start-line-p
                 #:stream-terpri
                 #:stream-unread-char
-                #:stream-write-char)
+                #:stream-write-char
+                #:stream-write-byte
+                #:stream-write-sequence
+                #:stream-write-string)
   #+mcl
   (:import-from :ccl
                 #:stream-close
