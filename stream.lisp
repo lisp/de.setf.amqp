@@ -351,9 +351,10 @@
 
 
 
-(defmethod stream-read-sequence ((stream amqp-device) (sequence vector)
-                                 #+ccl &key #-ccl &optional
-                                 (start 0) end)
+(defmethod stream-read-sequence
+           #+ccl ((stream amqp-device) (sequence vector) &key (start 0) end)
+           #+lispworks ((stream amqp-device) (sequence vector) start end)
+           #-(or ccl lispworks) ((stream amqp-device) (sequence vector) #-ccl &optional  (start 0) end)
   "Read a byte sequence from an open channel on an amqp-device. Invokes device-read to read and transfer data 
  directly via the device frame buffers."
   (setf end (or end (length sequence)))
@@ -362,9 +363,10 @@
 
 
 
-(defmethod stream-read-sequence ((stream amqp-device) (sequence string)
-                                 #+ccl &key #-ccl &optional
-                                 (start 0) end)
+(defmethod stream-read-sequence
+           #+ccl ((stream amqp-device) (sequence string) &key (start 0) end)
+           #+lispworks ((stream amqp-device) (sequence string) start end)
+           #-(or ccl lispworks) ((stream amqp-device) (sequence string) #-ccl &optional  (start 0) end)
   "Read a character sequence from an open channel on an amqp-device. Arrange to read bytes from the device buffer,
  construct characters, and return the the next position. Iff the first byte read shows eof, return nil."
   (setf end (or end (length sequence)))
@@ -391,18 +393,20 @@
 
   
 
-(defmethod stream-write-sequence ((stream amqp-device) (sequence vector)
-                                 #+ccl &key #-ccl &optional
-                                 (start 0) end)
+(defmethod stream-write-sequence
+           #+ccl ((stream amqp-device) (sequence vector) &key (start 0) end)
+           #+lispworks ((stream amqp-device) (sequence vector) start end)
+           #-(or ccl lispworks) ((stream amqp-device) (sequence vector) #-ccl &optional  (start 0) end)
   "Write a byte sequence to an open channel on an amqp-device. Invokes device-read to transfer data write
  directly via the device frame buffers."
   (setf end (or end (length sequence)))
   (device-write stream sequence start end 0))
 
 
-(defmethod stream-write-sequence ((stream amqp-device) (sequence string)
-                                 #+ccl &key #-ccl &optional
-                                 (start 0) end)
+(defmethod stream-write-sequence
+           #+ccl ((stream amqp-device) (sequence string) &key (start 0) end)
+           #+lispworks ((stream amqp-device) (sequence string) start end)
+           #-(or ccl lispworks) ((stream amqp-device) (sequence string) #-ccl &optional  (start 0) end)
   "Write a character sequence from an open channel on an amqp-device. Arrange to read bytes from the device buffer,
  construct characters, and return the the next position."
   (setf end (or end (length sequence)))
