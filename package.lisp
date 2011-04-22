@@ -427,6 +427,9 @@
                 #:stream-unread-char
                 #:stream-write-char
                 )
+  #+lispworks
+  (:import-from :stream
+                
   #+mcl
   (:import-from :ccl
                 #:stream-close
