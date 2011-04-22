@@ -661,6 +661,7 @@
    :double-float-nan                    ; variable
    :double-float-negative-infinity      ; variable
    :double-float-positive-infinity      ; variable
+   :double-float-nan                    ; variable
    :dtx-channel                         ; function
    :encode-method                       ; function
    :enqueue
@@ -732,6 +733,7 @@
    :simple-stream                       ; class
    :single-float-nan                    ; variable
    :single-float-negative-infinity      ; variable
+   :single-float-nan                    ; variable
    :single-float-positive-infinity      ; variable
    :stream-advance-to-column            ; function
    :stream-buffer                       ; function
