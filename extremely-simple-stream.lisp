@@ -97,7 +97,8 @@
 ;; socket stream specializations. these are excerpted from the sbcl port
 
 (defclass simple-stream (#-lispworks stream
-                         #+lispworks stream:fundamental-stream)
+                         #+lispworks stream:fundamental-input-stream
+                         #+lispworks stream:fundamental-output-stream)
   ((plist
     :initform nil :type list
     :accessor stream-plist)
