@@ -429,7 +429,16 @@
                 )
   #+lispworks
   (:import-from :stream
-                
+                #:stream-advance-to-column
+                #:stream-line-column
+                #:stream-peek-char
+                #:stream-read-char-no-hang
+                #:stream-read-char
+                #:stream-read-line
+                #:stream-start-line-p
+                #:stream-terpri
+                #:stream-unread-char
+                #:stream-write-char)
   #+mcl
   (:import-from :ccl
                 #:stream-close
