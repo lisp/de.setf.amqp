@@ -304,9 +304,13 @@
   (when (null new) 
     (device-file-position stream)))
 
+#-lispworks
 (defmethod stream-file-position ((stream amqp-device) &optional new)
   (when (null new) 
     (device-file-position stream)))
+#+lispworks
+(defmethod stream-file-position ((stream amqp-device))
+  (device-file-position stream))
 
 ;; pathname : NYI
 
