@@ -65,7 +65,7 @@
                (:file "states")
                (:file "utilities")
                (:file "amqp-uri")
-               #+(or mcl clozure)
+               #+(or mcl clozure lispworks)
                (:file "extremely-simple-stream")
                (:file "amqp-device")
                (:file "stream")

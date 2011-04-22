@@ -96,7 +96,8 @@
 ;; the essential classes are the simple stream classitself and the
 ;; socket stream specializations. these are excerpted from the sbcl port
 
-(defclass simple-stream (stream)
+(defclass simple-stream (#-lispworks stream
+                         #+lispworks stream:fundamental-stream)
   ((plist
     :initform nil :type list
     :accessor stream-plist)
