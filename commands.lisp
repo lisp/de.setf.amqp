@@ -444,12 +444,13 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
    (:method ((basic amqp:basic) &rest args &key delivery-tag &allow-other-keys)
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
-       (when (channel-acknowledge-messages channel)
-         (setf (amqp:basic-delivery-tag basic) delivery-tag))
+       ;; save the tag for eventual acknowledgment - either by app or below
+       (setf (amqp:basic-delivery-tag basic) delivery-tag)
        (prog1 (apply #'device-read-content channel args)
          (when (and (channel-acknowledge-messages channel)
-                    ;; in case the ack was managed elsewhere, set the tag to zero
+                    ;; in case the ack was managed elsewhere, test
                     (eql (amqp:basic-delivery-tag basic) delivery-tag))
+           ;; then, set the tag to zero
            (setf (amqp:basic-delivery-tag basic) 0)
            (amqp::send-ack basic :delivery-tag delivery-tag)))))))
 
