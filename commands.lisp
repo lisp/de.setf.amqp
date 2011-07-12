@@ -446,7 +446,8 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      (let ((channel (object-channel basic)))
        ;; save the tag for eventual acknowledgment - either by app or below
        (setf (amqp:basic-delivery-tag basic) delivery-tag)
-       (prog1 (apply #'device-read-content channel args)
+       (multiple-value-prog1 (values (apply #'device-read-content channel args)
+                                     (amqp:basic-headers basic))
          (when (and (channel-acknowledge-messages channel)
                     ;; in case the ack was managed elsewhere, test
                     (eql (amqp:basic-delivery-tag basic) delivery-tag))
@@ -530,7 +531,8 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
          (amqp:log :debug basic "respond-to-get, get-ok: ~s"  get-ok-args)
          (let ((channel (object-channel basic)))
            (return-from command-case
-             (prog1 (apply #'device-read-content channel :body body get-ok-args)
+             (multiple-value-prog1 (values (apply #'device-read-content channel :body body get-ok-args)
+                                           (amqp:basic-headers basic))
                (unless (amqp:basic-no-ack basic)
                  (amqp::send-ack basic :delivery-tag delivery-tag))))))))))
 
@@ -543,7 +545,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      (declare (dynamic-extent args))
      (let ((channel (object-channel basic)))
        ;;; nb. do not ack a get-ok
-       (prog1 (apply #'device-read-content channel args))))))
+       (apply #'device-read-content channel args)))))
 
 
 (def-amqp-command amqp:Get-Empty (class &key)
@@ -616,28 +618,15 @@ any, is committed.")
      (apply #'amqp::request-publish (amqp:channel.basic channel) args))
    
    (:method ((basic amqp:basic) &rest args &key (body nil body-s)
-             (ticket nil t-s)
-             (exchange (amqp:basic-exchange basic))
-             (routing-key (amqp:basic-routing-key basic))
-             (mandatory (amqp:basic-mandatory basic))
-             (immediate (amqp:basic-immediate basic))
-             content-type content-encoding headers delivery-mode
-             priority correlation-id reply-to expiration message-id timestamp
-             type user-id)
-     (declare (ignore content-type content-encoding headers delivery-mode
-                      priority correlation-id reply-to expiration message-id timestamp
-                      type user-id))
-     (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
-     (setf (amqp:basic-exchange basic) exchange)     ; cache for possible use in chunk headers
+             (exchange nil e-s)
+             &allow-other-keys)
+     (when e-s
+       (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
+       (setf (amqp:basic-exchange basic) exchange))     ; cache for possible use in chunk headers
      (when body-s
        (setf args (copy-list args))
        (remf args :body))
-     (if t-s                            ; version variation
-       (amqp::send-publish basic :ticket ticket :exchange exchange :routing-key routing-key
-                           :mandatory mandatory :immediate immediate)
-       (amqp::send-publish basic :exchange exchange :routing-key routing-key
-                           :mandatory mandatory :immediate immediate))
-     
+     (apply #'shared-initialize basic t args)
      (let ((channel (object-channel basic)))
        (apply #'device-write-content channel body :exchange exchange args)))))
 

@@ -706,7 +706,7 @@
       ;; try to determine the size
       (setf body-size (channel-compute-body-size channel body content-type))
       (etypecase body-size
-        (null 
+        (null
          (setf (getf headers :transfer-encoding) "chunked")
          (setf body-size (device-buffer-length channel)))
         (integer

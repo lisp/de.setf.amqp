@@ -45,7 +45,7 @@
 (defmacro amqp:log (criteria class &rest args)
   (let ((log-op (gensym)))
     `(flet ((,log-op (stream)
-              (format stream "~&[~/date::format-iso-time/] ~a ~a: ~@?"
+              (format stream "~&[~/date::format-iso-time/] ~a ~a: ~@?~%"
                       (get-universal-time) ',criteria ,class ,@args)))
        (declare (dynamic-extent (function ,log-op)))
        (log-when ',criteria (function ,log-op)))))
@@ -53,7 +53,7 @@
 (defmacro amqp:log* (criteria class &rest args)
   (let ((log-op (gensym)))
     `(flet ((,log-op (stream)
-              (apply #'format stream "~&[~/date::format-iso-time/] ~a ~a: ~@?"
+              (apply #'format stream "~&[~/date::format-iso-time/] ~a ~a: ~@?~%"
                       (get-universal-time) ',criteria ,class ,@args)))
        (declare (dynamic-extent (function ,log-op)))
        (log-when ',criteria (function ,log-op)))))
@@ -437,6 +437,23 @@
     (bt:with-lock-held ((stack-lock stack))
       (call-next-method))))
 
+
+(defgeneric undequeue (queue entry)
+  (:documentation "put an entry back in the queue at the head.")
+
+  (:method ((queue queue) entry)
+    (push entry (cdr (queue-header queue)))))
+
+#+(or)
+(let ((q (make-instance 'queue)))
+  (list (enqueue 1 q)
+        (list :header (copy-list (queue-header q)) :pointer (copy-list (queue-pointer q)))
+        (enqueue 2 q)
+        (list :header (copy-list (queue-header q)) :pointer (copy-list (queue-pointer q)))
+        (enqueue 3 q)
+        (list :header (copy-list (queue-header q)) :pointer (copy-list (queue-pointer q)))
+        (undequeue q (dequeue q))
+        (list :header (copy-list (queue-header q)) :pointer (copy-list (queue-pointer q)))))
 
 
 #+:de.setf.utility.test

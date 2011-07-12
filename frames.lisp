@@ -272,6 +272,11 @@
                :test #'frame-matches-connection-p
                :if-empty (when (or wait (stream-listen connection))
                            #'read-connection-frame)))))
+
+(defgeneric unget-read-frame (channel frame)
+  (:method ((channel amqp:channel) frame)
+    (undequeue (device-read-frames channel) frame)))
+
 ;;;
 ;;; frame accessors
 
@@ -588,7 +593,7 @@
   (:documentation "Read from the connection socket into the given frame.
  This varies per protocol as the header layout varies.")
   
-  
+  ;  #+amqp.log-frames
   (:method :around ((connection amqp:connection) (frame t) &key start end)
      (unless (open-stream-p connection)
        (error 'end-of-file :stream connection))
@@ -603,7 +608,7 @@
   (:documentation "Write from the given frame to the connection socket.
  This varies per protocol as the header layout varies.")
 
-   #+amqp.log-frames
+  ; #+amqp.log-frames
   (:method :around ((connection amqp:connection) (frame t) &key start end)
     (amqp:log :debug connection "write-frame: (~a,~a) ~s" start end frame)
     (call-next-method))
