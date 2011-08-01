@@ -816,7 +816,9 @@ as well as the discussions of the the alternative fu interface.[5]
                        (send-header basic)
                        ;; rabbitmq balks on the zero-length body frame
                        (amqp:log :debug basic "Sending EOC message: zero frame...")
-                       (flush-frame)))))
+                       (flush-frame))))
+                  ;; return the channel to a passive state
+                  (setf (channel-state device) amqp.s:use-channel))
                  (t
                   ;; if the output is to continue,
                   ;; - flush the frame
