@@ -979,7 +979,7 @@
                             (connection-uri connection)))
          initargs))
 
-(defmethod print-object ((instance amqp:channel) stream)
+(defmethod print-object ((instance amqp:channel) stream  &aux (*print-pretty* nil))
   ;; this signals an error if sbcl is tracing a function which is run during initialization
   ;; with an attempt to reference the %flags slot. 
   (handler-case (print-unreadable-object (instance stream :identity t :type t)
@@ -1262,7 +1262,7 @@
 (def-ensure-method (amqp:exchange amqp:delete-ok))
 
 
-(defmethod print-object ((instance amqp:exchange) stream)
+(defmethod print-object ((instance amqp:exchange) stream &aux (*print-pretty* nil))
   (print-unreadable-object (instance stream :identity t :type t)
     (format stream "[~a]" (or (ignore-errors (amqp:exchange-exchange instance)) "?"))))
 
@@ -1327,7 +1327,7 @@
 (def-ensure-method (amqp:queue amqp:delete-ok))
 
 
-(defmethod print-object ((instance amqp:queue) stream)
+(defmethod print-object ((instance amqp:queue) stream &aux (*print-pretty* nil))
   (print-unreadable-object (instance stream :identity t :type t)
     (format stream "[~a]" (or (ignore-errors (amqp:queue-queue instance)) "?"))))
 
