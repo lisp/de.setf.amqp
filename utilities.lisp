@@ -261,8 +261,9 @@
   (:method (data (o queue) &key if-empty)
     (declare (dynamic-extent if-empty) (ignore if-empty))
     (let ((elt (list data)))
-      (setf (cdr (queue-pointer o)) elt
-            (queue-pointer o) elt))
+      (setf (cdr (queue-pointer o)) elt)
+      #+sbcl (sb-thread:barrier (:write))
+      (setf (queue-pointer o) elt))
     data)
 
   (:method ((data t) (queue locked-queue) &key (if-empty (collection-if-empty queue)))
@@ -362,9 +363,11 @@
                     (setf (queue-pointer queue) head))
                   (return (values (car ptr) t)))))
             (t
+             ;; return the first value in the queue and advance the indirect pointer to the next one
+             ;; if this would fall off the end, then the queue is now empty and the last cell
+             ;;make it th new head anchor and leave with head == pointer (as of the advance)
              (let ((value (cadr head)))
-               (unless (setf (cdr head) (cddr head))
-                 (setf (queue-pointer queue) head))
+               (setf (queue-header queue) (cdr head))
                (values value t))))))
 
   (:method ((queue locked-queue) &key (if-empty (collection-if-empty queue)) test)
