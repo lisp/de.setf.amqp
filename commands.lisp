@@ -69,7 +69,11 @@
            (amqp:log* default-channel-respond-to class args))
   (:method ((channel amqp:channel) (class t) &rest args)
     (amqp:not-implemented-error :message-string "Unimplemented method: ~s . ~s"
-                                :message-arguments (list class args))))
+                                :message-arguments (list class args)))
+  (:method ((channel amqp:channel) (class (eql 'amqp::channel-respond-to-close)) &rest args)
+    "the default method for an unhandled close signals end-of-file"
+    (declare (ignore args))
+    (error 'end-of-file :stream channel)))
 
 
 (def-amqp-command amqp:ack (class &key delivery-tag multiple)
