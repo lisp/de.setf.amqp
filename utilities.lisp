@@ -262,7 +262,7 @@
     (declare (dynamic-extent if-empty) (ignore if-empty))
     (let ((elt (list data)))
       (setf (cdr (queue-pointer o)) elt)
-      #+sbcl (sb-thread:barrier (:write))
+      #+sb-thread (sb-thread:barrier (:write))
       (setf (queue-pointer o) elt))
     data)
 
