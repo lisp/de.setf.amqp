@@ -1161,6 +1161,10 @@
                     (uri 'amqp :scheme :amqp :host remote-host :port remote-port))
              initargs))))
 
+(defmethod print-object ((instance amqp:connection) stream)
+  ;; override simple-streams method
+  (print-unreadable-object (instance stream :identity t :type t)))
+
 
 (defmethod object-connection ((connection amqp:connection))
   connection)

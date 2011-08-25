@@ -675,7 +675,7 @@ as well as the discussions of the the alternative fu interface.[5]
                  (t
                   ;; if the output is to continue,
                   ;; - flush the frame
-                  ;; - interpose a new message is chunking
+                  ;; - interpose a new message if chunking
                   ;; check whether there is anything to flush
                   (setf result-length outpos)
                   (when (or (plusp outpos) ) ;; (zerop body-length))
@@ -756,7 +756,7 @@ as well as the discussions of the the alternative fu interface.[5]
                   (send-header basic)))
 
            (when (<= body-position max-out-pos)
-             ;; if this is the first frame
+             ;; if this is the first frame, write a header w/o chunking
              (when complete
                (setf body-length body-position
                      (class-body-size basic) body-position)
@@ -817,13 +817,13 @@ as well as the discussions of the the alternative fu interface.[5]
                        ;; rabbitmq balks on the zero-length body frame
                        (amqp:log :debug basic "Sending EOC message: zero frame...")
                        (flush-frame))))
+                  ;; force output on the base stream
+                  (force-output (channel-connection device))
                   ;; return the channel to a passive state
                   (setf (channel-state device) amqp.s:use-channel))
                  (t
-                  ;; if the output is to continue,
-                  ;; - flush the frame
-                  ;; - interpose a new message is chunking
-                  ;; check whether there is anything to flush
+                  ;; if the output is to continue, flush the frame and
+                  ;; reset counts
                   (setf result-length outpos)
                   (when (or (plusp outpos) (zerop body-length))
                     ;; if there is content, send the frame out.
