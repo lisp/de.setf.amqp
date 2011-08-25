@@ -818,7 +818,7 @@ as well as the discussions of the the alternative fu interface.[5]
                        (amqp:log :debug basic "Sending EOC message: zero frame...")
                        (flush-frame))))
                   ;; force output on the base stream
-                  (force-output (channel-connection device))
+                  (device-flush (channel-connection device))
                   ;; return the channel to a passive state
                   (setf (channel-state device) amqp.s:use-channel))
                  (t
@@ -1009,7 +1009,7 @@ as well as the discussions of the the alternative fu interface.[5]
 (defmethod device-write ((device amqp:connection) buffer-arg start end (blocking t))
   (assert-device-state device :use-connection device-write)
   (with-slots (out-buffer outpos max-out-pos) device
-    (cond (buffer-arg
+    (cond ((vectorp buffer-arg)
            ;; if a buffer is provided, use it+bounds together with the devices buffer+bounds
            ;; to iteratively empty the argument buffer. recurse for progressive output
            (let ((total-count 0))
@@ -1034,17 +1034,20 @@ as well as the discussions of the the alternative fu interface.[5]
                            (return-from device-write result)))
                        (incf (device-body-position device) count))))
              total-count))
-        (t
-         (assert (and (zerop start) (null end)) ()
-                 "Frame buffer i/o permitted for entire buffers only.")
-         (device-flush device)))))
+          ((eq buffer-arg :flush)
+           (device-flush device)
+           (finish-output (stream-output-handle device)))
+          (t
+           (assert (and (zerop start) (null end)) ()
+                   "Frame buffer i/o permitted for entire buffers only.")
+           (device-flush device)))))
 
 (defmethod device-flush ((device amqp:connection) &optional complete-p)
   (declare (ignore complete-p))
   (typecase (device-state device)
     (amqp.s:use-connection
      (with-slots (out-buffer outpos max-out-pos) device
-       (when (plusp outpos)
+       (when (typep outpos '(integer 1))
          (let* ((frame (claim-output-frame device))
                 (length outpos))
            (rotatef out-buffer (frame-data frame))
