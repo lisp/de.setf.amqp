@@ -40,7 +40,7 @@
 (defvar amqp.u:*version*
   (load-time-value (format nil "de.setf.amqp-~a" (date:|yyyyMMddTHHmmssZZ| (get-universal-time)))))
 
-(defvar amqp:*timestamp-epoch* (date:|yyyyMMddTHHmmssZZ| "19700101T00000000"))
+(defvar amqp:*timestamp-epoch* (date:|yyyyMMddTHHmmssZZ| "19700101T000000Z"))
 
 (defconstant +string-element-type+ 'character)
 

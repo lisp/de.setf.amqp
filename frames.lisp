@@ -637,6 +637,81 @@
     (force-output stream)
     (+ end 7 1)))                       ; total count
 
+#+(or)                                  ; for debugging
+(defmethod write-frame ((connection amqp:connection) (frame amqp.u:7-byte-header-output-frame) &key (start 0) (end nil))
+  (let ((stream (stream-output-handle connection)))
+    (setf end (or end (frame-size frame)))
+    (incf (device-frame-position connection) (+ end 7 1))
+    (write-sequence (frame-header frame) stream :start start)
+    (unwind-protect
+      (let ((sequence (frame-data frame)))
+        (unless (= end (length sequence))
+          (setf sequence (subseq sequence start end)))
+        (trace sb-impl::ansi-stream-write-sequence
+               sb-impl::fd-stream-p
+               sb-impl::compatible-vector-and-stream-element-types-p
+               sb-impl::buffer-output
+               sb-impl::write-or-buffer-output
+               sb-impl::write-output-from-queue
+               sb-impl::%queue-and-replace-output-buffer
+               sb-impl::flush-output-buffer)
+        (write-sequence sequence stream :start 0 :end end)
+        (write-sequence #(#xCE) stream)
+        (force-output stream))
+      (untrace sb-impl::ansi-stream-write-sequence
+               sb-impl::fd-stream-p
+               sb-impl::compatible-vector-and-stream-element-types-p
+               sb-impl::buffer-output
+               sb-impl::write-or-buffer-output
+               sb-impl::write-output-from-queue
+               sb-impl::%queue-and-replace-output-buffer
+               sb-impl::flush-output-buffer))
+    (+ end 7 1)))
+#+(or)
+(progn
+  (in-package :spocq.i)
+  (main)
+  (stop)
+  ;;
+  (in-package :sb-unix)
+  (defparameter *trace-sap-buffer-lock* (bt:make-lock "sap-lock"))
+  (defun trace-sap-buffer (fd sap offset len)
+    (bt:with-lock-held (*trace-sap-buffer-lock*)
+      (format *trace-output* "~&[[~a ~a ~8x ~a]: '"
+              (de.setf.utility::iso-time) fd (sb-sys:sap-int sap)
+              (sb-thread:thread-name sb-thread:*current-thread*))
+      (loop for i from offset for count from 0 below len
+            do (let* ((byte (sb-impl::sap-ref-8 sap i))
+                      (char (code-char byte)))
+                 (write-char (if (graphic-char-p char) char #\.) *trace-output*)))
+      (format *trace-output* "]~%")))
+  
+  (defun unix-write (fd buf offset len)
+    (declare (type unix-fd fd)
+             (type (unsigned-byte 32) offset len))
+    (flet ((%write (sap)
+             (declare (system-area-pointer sap))
+             (when (>= fd 12)
+               (trace-sap-buffer fd sap offset len))
+             (int-syscall ("write" int (* char) int)
+                          fd
+                          (with-alien ((ptr (* char) sap))
+                            (addr (deref ptr offset)))
+                          len)))
+      (etypecase buf
+        ((simple-array * (*))
+         (with-pinned-objects (buf)
+           (%write (vector-sap buf))))
+        (system-area-pointer
+         (%write buf)))))
+  ;; set up the tracer
+  ;; /development/downloads/rabbitmq-java-client-bin-2.4.1/runjava.sh com.rabbitmq.tools.Tracer
+  ;; change the broker uri
+  (in-package :spocq.i)
+  (setq *broker-uri* (puri:uri "amqp://HETZNERkopakooooooooo:HETZNERasdjfi2j3o4iajs@hetzner.dydra.com:5673"))
+  (setq *log-level* :warn)
+  (run)
+  )
 
 (defmethod read-frame ((connection amqp:connection) (frame amqp.u:8-byte-header-input-frame) &rest args)
   (declare (dynamic-extent args))
