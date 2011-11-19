@@ -613,13 +613,15 @@ any, is committed.")
      (declare (dynamic-extent args))
      (apply #'amqp::request-publish (amqp:channel.basic (amqp.u:exchange-channel exchange)) args))
    
-   (:method ((channel amqp:channel) &rest args)
+   (:method ((channel amqp:channel) &rest args &key (user-id (or (channel-user-id channel) "")) &allow-other-keys)
      "The class' channel is state is set to use-channel.body.output, the stream is cleared,
  and the encoding is asserted. If a body is supplied, then, it is written. Otherwise the
  channel is left available as a stream."
      (declare (dynamic-extent args))
      ;; delegate to the channel's basic class
-     (apply #'amqp::request-publish (amqp:channel.basic channel) args))
+     (apply #'amqp::request-publish (amqp:channel.basic channel) 
+            :user-id user-id
+            args))
    
    (:method ((basic amqp:basic) &rest args &key (body nil body-s)
              (exchange nil e-s)

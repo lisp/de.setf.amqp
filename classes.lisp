@@ -1012,6 +1012,12 @@
 (defmethod (setf channel-content-type) (type (channel amqp:channel))
   (setf (device-content-type channel) type))
 
+(defgeneric channel-user-id (channel)
+  (:documentation "Return the user id specified in the channel's connection.")
+
+  (:method ((channel amqp:channel))
+    (connection-user-id (channel-connection channel))))
+
 
 ;;; nb. the channel number is one-based! so channel[0] is always the connection's.
 
@@ -1189,7 +1195,12 @@
   (:method (state (connection amqp:connection))
     (setf (class-state connection) state)))
 
-           
+(defgeneric connection-user-id (connection)
+  (:documentation "Return the user id specified in the connection's url or NIL of none is present.")
+
+  (:method ((connection amqp:connection))
+    (uri-user (connection-uri connection))))
+
 (defmethod channel-number ((class amqp:connection))
   0)
 
