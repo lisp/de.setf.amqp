@@ -168,6 +168,7 @@ and a [trac](http://trac.common-lisp.net/de-setf-amqp/) instance for discussions
 ### Changes
 
  * 2010-06-10 : corrected and completed float codecs
+ * 2011-11-20 : added user-id default for publish to cooperate with rabbitmq @2.6
 
 ### Downloading
 
