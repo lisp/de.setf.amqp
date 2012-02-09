@@ -32,17 +32,17 @@
     
     (amqp:request-declare publish-queue)
     (amqp:request-declare exchange)
-    (amqp:request-bind publish-queue :exchange exchange :queue publish-queue :routing-key routing-key)
-    
+    (amqp:bind publish-queue :exchange exchange :queue publish-queue :routing-key routing-key)
+
     (dotimes (i count)
       (dolist (datum data)
-        (amqp:request-publish publish-basic :exchange exchange :body datum :routing-key routing-key)
-        (amqp:request-get get-basic :queue get-queue)))))
+        (amqp:request-publish publish-basic :exchange (amqp:exchange-exchange exchange) :body datum :routing-key routing-key)
+        (print (amqp:request-get get-basic :queue get-queue))))))
       
 
 (defparameter *c* (make-instance 'amqp:connection :uri "amqp://guest:guest@localhost/"))
-(defparameter *ch1* (amqp:channel *c* :uri (uri "amqp:/")))
-(defparameter *ch2* (amqp:channel *c* :uri (uri "amqp:/")))
+(defparameter *ch1* (amqp:channel *c* :uri (puri:uri "amqp:/")))
+(defparameter *ch2* (amqp:channel *c* :uri (puri:uri "amqp:/")))
 
 (publish-get-loop *ch1* *ch2* '("this is a test") 1)
 
@@ -62,3 +62,7 @@
 ;;; [20100215T155724Z00] DEBUG #<CONNECTION #x4F1C566>: open-connection: [ok=1], updated class to: AMQP-1-1-0-9-1:CONNECTION.
 ;;; even thoug an r8 broker, it accepts the connection. ?
 ;;; (publish-get-loop *ch1* *ch2* '("a") 1 :log-level :debug)
+
+
+;;; (defparameter *c* (make-instance 'amqp:connection :uri "amqp://guest:guest@ec2-175-41-174-180.ap-southeast-1.compute.amazonaws.com/"))
+

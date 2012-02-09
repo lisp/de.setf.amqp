@@ -1503,7 +1503,6 @@ returned.")
  first, write a content header based on the properties, then write the content
  according to the combined channel data type and content type. Combine the header's possibly
  incomplete content type with the channel's to specify the effective encoding.")
-  (declare (dynamic-extent args))
 
   (:method ((channel amqp:channel) body &rest args)
     ;; configure the respective basic for the (content x element-type x content-type)

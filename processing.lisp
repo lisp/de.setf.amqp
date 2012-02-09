@@ -436,7 +436,6 @@ processing. On the other hand, it impedes streaming.
              args)))
 
 (defgeneric call-with-encoded-arguments (operator class method &rest args)
-  (declare (dynamic-extent args))
   (:method (op (class amqp:object) (method symbol) &rest args)
     (declare (dynamic-extent args))
     (apply #'call-with-encoded-arguments op class (amqp:ensure-method class method)
@@ -448,7 +447,6 @@ processing. On the other hand, it impedes streaming.
 
 
 (defgeneric call-with-decoded-properties (operator class frame &rest args)
-  (declare (dynamic-extent args))
   (:method ((operator function) class (frame amqp:frame) &rest args)
     "Given a frame, decode the properties from the data buffer and continue."
     (declare (dynamic-extent args))
@@ -460,7 +458,7 @@ processing. On the other hand, it impedes streaming.
 
 
 (defgeneric call-with-encoded-properties (operator class  &rest args)
-  (declare (dynamic-extent args)))
+  )
 
 
 #+(or ) ;; this is ambiguous: is it the response or request side?
@@ -608,7 +606,6 @@ processing. On the other hand, it impedes streaming.
   (:documentation "Process a decoded, read frame as a 'command'. This applies to
  both method and content frames. A method is dispatched to the respective
  respond-to operator.")
-  (declare (dynamic-extent args))
 
   (:method ((channel amqp:channel) (class amqp:object) (operation frame-decoder) &rest args)
     ;; at this point, the frame object has been reified, and any operation arguments or properties
@@ -621,7 +618,6 @@ processing. On the other hand, it impedes streaming.
            channel class operation args)))
 
 (defgeneric dynamic-process-command (dynamic-handler channel class type &rest args)
-  (declare (dynamic-extent args))
 
   (:method ((operator t) (channel t)  (class t) (method amqp:method) &rest args)
     "Given an unhandled method, apply its own operator, for which the initial definition 

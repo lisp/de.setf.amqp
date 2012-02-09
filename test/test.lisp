@@ -675,7 +675,6 @@
 ;;; generic dispatch and keyword processing overhead
 
 (defgeneric test-keywords (context1 context2 &rest args &key key1 key2 key3 key4 key5)
-  (declare (dynamic-extent args))
   (:method ((context1 t) (context2 null) &rest args)
     (declare (dynamic-extent args))
     (every #'identity args))

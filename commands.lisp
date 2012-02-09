@@ -598,7 +598,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      class)))
 
 
-(def-amqp-command amqp:Publish (class &key  body exchange routing-key mandatory immediate
+(def-amqp-command amqp:publish (class &key  body exchange routing-key mandatory immediate
                                       content-type content-encoding headers delivery-mode
                                       priority correlation-id reply-to expiration message-id timestamp
                                       type user-id)

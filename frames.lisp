@@ -170,7 +170,6 @@
   (:documentation "Allocate a new output frame and bind it to the
  connection. The concrete frame class will depend on the connection version.
  Given a channel, delegate to the respective connection.")
-  (declare (dynamic-extent args))
 
   (:method ((channel amqp:channel) &rest args)
     (declare (dynamic-extent args))
@@ -187,7 +186,6 @@
   (:documentation "Allocate a new input frame and bind it to the
  connection. The concrete frame class will depend on the connection version.
  Given a channel, delegate to the respective connection.")
-  (declare (dynamic-extent args))
 
   (:method ((channel amqp:channel) &rest args)
     (declare (dynamic-extent args))
