@@ -728,8 +728,6 @@
          (export ',exports :amqp))
        ,@(when send-op
            `((defgeneric ,send-op ,lambda-list
-               ,@(let ((rest (member '&rest lambda-list)))
-                   (when rest `((declare (dynamic-extent ,(second rest))))))
                ,@send)))
        ,@(when response-op
            `((defgeneric ,qualified-response-op ,qualified-lambda-list
