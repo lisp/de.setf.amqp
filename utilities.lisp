@@ -238,7 +238,6 @@
     (length (collection-content collection))))
 
 (defgeneric enqueue (data queue &key if-empty)
-  (declare (dynamic-extent if-empty))
   (:argument-precedence-order queue data)
 
   #+(or) ;; this version caches the released queue cells
@@ -319,7 +318,6 @@
       (call-next-method))))
 
 (defgeneric dequeue (queue &key if-empty test)
-  (declare (dynamic-extent if-empty))
 
   #+(or) ;; this version caches the released queue cells
   (:method ((queue queue) &key test if-empty)

@@ -733,8 +733,6 @@
                ,@send)))
        ,@(when response-op
            `((defgeneric ,qualified-response-op ,qualified-lambda-list
-               ,@(let ((rest (member '&rest qualified-lambda-list)))
-                   (when rest `((declare (dynamic-extent ,(second rest))))))
                ,@qualified-response)
 
              (defun ,response-op (class &rest args)
@@ -742,8 +740,6 @@
                (apply #',qualified-response-op (object-channel class) class args))))
        ,@(when request-op
            `((defgeneric ,qualified-request-op ,qualified-lambda-list
-               ,@(let ((rest (member '&rest qualified-lambda-list)))
-                   (when rest `((declare (dynamic-extent ,(second rest))))))
                ,@qualified-request)
              (defun ,request-op (class &rest args)
                (declare (dynamic-extent args))
@@ -751,7 +747,6 @@
              ;; this claims the simple name for the request operator
              ;; note that the approach precludes the simple constructor
              (defgeneric ,name (class &rest args)
-               (declare (dynamic-extent args))
                (:method ((object amqp:object) &rest args)
                  (declare (dynamic-extent args))
                  (apply ',request-op object args))))))))
