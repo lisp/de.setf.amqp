@@ -582,10 +582,7 @@
   (:documentation "Retrieve or create a version-specific method instance given the a class instance and a
   method designator. As designator, accept either a wire code or an abstract method name. Concrete method
  names should not be specified. The name is used as a cache key to treat the methon as a singleton with
- respect to the class.  If none exists, a new instance is cached and returned.")
-  (declare (dynamic-extent initargs))
-
-  )
+ respect to the class.  If none exists, a new instance is cached and returned."))
 
 
 (defgeneric amqp:ensure-object (context class-designator &rest initargs)
@@ -597,9 +594,7 @@
 
  A connection allows channels only. A channel treats the channel and connection
  types as designating the respective instances and everything else as a
- channel-relative singleton. All other conntected contexts delegate to their channel.")
-
-  (declare (dynamic-extent initargs)))
+ channel-relative singleton. All other conntected contexts delegate to their channel."))
 
 
 
