@@ -214,8 +214,7 @@
     (format stream "~@[~a~]" (collection-name instance))))
 
 (defmethod initialize-instance :after ((o queue) &key)
-  (let ((head (list nil))) 
-    (setf (queue-header o) head (queue-pointer o) head)))
+  (collection-clear o))
 
 (defmethod initialize-instance :after ((instance stack) &key)
   (with-slots (data) instance
@@ -236,6 +235,12 @@
 (defgeneric collection-size (collection)
   (:method ((collection collection))
     (length (collection-content collection))))
+
+(defgeneric collection-clear (collection)
+  (:method ((collection queue))
+    (let ((head (list nil))) 
+      (setf (queue-header collection) head (queue-pointer collection) head)
+      (setf (queue-cache collection) nil))))
 
 (defgeneric enqueue (data queue &key if-empty)
   (:argument-precedence-order queue data)
@@ -363,9 +368,13 @@
             (t
              ;; return the first value in the queue and advance the indirect pointer to the next one
              ;; if this would fall off the end, then the queue is now empty and the last cell
-             ;;make it th new head anchor and leave with head == pointer (as of the advance)
-             (let ((value (cadr head)))
-               (setf (queue-header queue) (cdr head))
+             ;; make it the new head anchor and leave with head == pointer (as of the advance)
+             ;; clear the cell in order to keep sbcl's conservativ collector on a diet
+             (let* ((rest (rest head))
+                    (value (first rest)))
+               (setf (first rest) nil
+                     (rest head) nil
+                     (queue-header queue) rest)
                (values value t))))))
 
   (:method ((queue locked-queue) &key (if-empty (collection-if-empty queue)) test)
