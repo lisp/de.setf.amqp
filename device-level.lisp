@@ -1332,7 +1332,7 @@ returned.")
 
   (:method ((channel amqp:channel) (body-op function) (content-type mime:*/*))
     "Given a the null type, just return the channel as a stream to be read."
-    (prog1 (funcall body-op channel content-type)
+    (multiple-value-prog1 (funcall body-op channel content-type)
       ;; once the operator has read, clear to the end of the message
       (device-clear-input channel nil)))
 
@@ -1457,6 +1457,7 @@ returned.")
     "Given a null body , configure the channel to write the message body
      and return the stream."
     (declare (dynamic-extent args) (ignore args))
+    (stream-write-string channel "" 0 0)
     nil)
 
   (:method ((channel amqp:channel) (body string) (content-type mime:text/plain) &rest args)
@@ -1509,7 +1510,9 @@ returned.")
     ;; combination. this resolve the body size, the transfer encoding, and the 
     ;; transfer element type
     (let* ((basic ;; (apply #'device-write-content-header channel body args)))
-            (apply #'device-initialize-content-header channel body args)))
+            (apply #'device-initialize-content-header channel body args))
+           (start-position (device-file-position channel)))
       (setf (device-frame-position channel) 0)
-      (prog1 (apply #'device-write-content-body channel body (mime:mime-type (amqp:basic-content-type basic)) args)
-        (device-flush channel t)))))
+      (apply #'device-write-content-body channel body (mime:mime-type (amqp:basic-content-type basic)) args)
+      (device-flush channel t)
+      (- (device-file-position channel) start-position))))

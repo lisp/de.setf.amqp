@@ -624,11 +624,13 @@ any, is committed.")
             args))
    
    (:method ((basic amqp:basic) &rest args &key (body nil body-s)
-             (exchange nil e-s)
+             (exchange nil e-s) (routing-key nil rk-s)
              &allow-other-keys)
      (when e-s
        (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
        (setf (amqp:basic-exchange basic) exchange))     ; cache for possible use in chunk headers
+     (when rk-s
+       (setf (amqp:basic-routing-key basic) routing-key))
      (when body-s
        (setf args (copy-list args))
        (remf args :body))
