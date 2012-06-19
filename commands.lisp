@@ -450,8 +450,7 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
      (let ((channel (object-channel basic)))
        ;; save the tag for eventual acknowledgment - either by app or below
        (setf (amqp:basic-delivery-tag basic) delivery-tag)
-       (multiple-value-prog1 (values (apply #'device-read-content channel args)
-                                     (amqp:basic-headers basic))
+       (multiple-value-prog1 (apply #'device-read-content channel args)
          (when (and (channel-acknowledge-messages channel)
                     ;; in case the ack was managed elsewhere, test
                     (eql (amqp:basic-delivery-tag basic) delivery-tag))
