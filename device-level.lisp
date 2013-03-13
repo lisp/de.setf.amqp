@@ -1440,7 +1440,7 @@ returned.")
                                          type user-id)
 
   (:method ((channel amqp:channel) (body t) &rest args)
-    "Send the header frame and set up the channel to continu with output as a single message or as a sequence of chunks."
+    "Send the header frame and set up the channel to continue with output as a single message or as a sequence of chunks."
     (let ((basic (apply #'device-initialize-content-header channel body args)))
       (send-header basic)
       basic)))

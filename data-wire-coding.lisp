@@ -1250,8 +1250,8 @@ In addition compound buffer accessors are defined for the types
                          (declare (type fixnum position)
                                   (type string value))
                          (assert-argument-type (setf ,buffer-iso-name) buffer frame-buffer)
-                         (assert-argument-type (setf ,buffer-iso-name) value string)   ; no remorse
-                         (let* ((length (length value)))
+                         ;; (assert-argument-type (setf ,buffer-iso-name) value string)   ; no remorse
+                         (let* ((length (etypecase value (string (length value)) (null 0))))
                            ; (print (list length value buffer (+ position length ,length-bytes) (length buffer)))
                            (assert-condition (< length ,(expt 2 length-bits))
                                              (setf ,buffer-iso-name) "String overflows the size constraint")
