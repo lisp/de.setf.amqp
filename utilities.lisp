@@ -238,8 +238,10 @@
 
 (defgeneric collection-clear (collection)
   (:method ((collection queue))
-    (fill (queue-header collection) nil)
-    (fill (queue-pointer collection) nil)
+    (if (slot-boundp collection 'header)
+      (fill (queue-header collection) nil))
+    (if (slot-boundp collection 'pointer)
+      (fill (queue-pointer collection) nil))
     (let ((head (list nil))) 
       (setf (queue-header collection) head (queue-pointer collection) head)
       (setf (queue-cache collection) nil))))
