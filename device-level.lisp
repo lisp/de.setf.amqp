@@ -466,8 +466,9 @@ as well as the discussions of the the alternative fu interface.[5]
                            (return-from device-write result)))
                        (incf (device-body-position device) count))))
              total-count))
-          (buffer-arg                   ; sbcl calls w/ :flush
-           (device-flush device))
+          (buffer-arg                   ; sbcl calls w/ :flush do it only if there is output
+           (when (plusp outpos)
+             (device-flush device)))
           (t
            (assert (and (zerop start) (or (null end) (= end (length out-buffer)))) ()
                    "Frame buffer i/o permitted for entire buffers only.")
