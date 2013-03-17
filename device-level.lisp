@@ -466,7 +466,7 @@ as well as the discussions of the the alternative fu interface.[5]
                            (return-from device-write result)))
                        (incf (device-body-position device) count))))
              total-count))
-          (buffer                       ; sbcl calls w/ :flush
+          (buffer-arg                   ; sbcl calls w/ :flush
            (device-flush device))
           (t
            (assert (and (zerop start) (or (null end) (= end (length out-buffer)))) ()
