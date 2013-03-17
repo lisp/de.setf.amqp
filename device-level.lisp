@@ -441,7 +441,7 @@ as well as the discussions of the the alternative fu interface.[5]
  specified 'blocking' mode has no affect on output."
   (assert-device-state device use-channel.body device-write)
   (with-slots (out-buffer outpos max-out-pos) device
-    (cond (buffer-arg
+    (cond ((vectorp buffer-arg)
            ;; if a buffer is provided, use it+bounds together with the devices buffer+bounds
            ;; to iteratively empty the argument buffer. recurse for progressive output
            (let ((total-count 0))
@@ -466,6 +466,8 @@ as well as the discussions of the the alternative fu interface.[5]
                            (return-from device-write result)))
                        (incf (device-body-position device) count))))
              total-count))
+          (buffer                       ; sbcl calls w/ :flush
+           (device-flush device))
           (t
            (assert (and (zerop start) (or (null end) (= end (length out-buffer)))) ()
                    "Frame buffer i/o permitted for entire buffers only.")
