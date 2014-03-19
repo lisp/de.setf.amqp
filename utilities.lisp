@@ -470,7 +470,8 @@
         (list :header (copy-list (queue-header q)) :pointer (copy-list (queue-pointer q)))))
 
 
-#+:de.setf.utility.test
+#+(or) ;; #+:de.setf.utility.test
+;; at one point sbcl refused to start threads while building...
 (with-test-situation (:define)
   (test:test parse-version-keyword/1 (parse-version-keyword :amqp-1-1-0-8-0)
              '(:AMQP 1 1 0 8 0))
