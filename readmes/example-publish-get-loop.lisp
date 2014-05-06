@@ -24,7 +24,7 @@
                                          (routing-key "/")
                                          ;; specify :debug to observe the protocol exchange
                                          ((:log-level *log-level*) *log-level*))
-  (let* ((publish-basic (amqp:basic publish-channel))
+  (let* ((publish-basic (amqp:basic publish-channel :delivery-mode 1))
          (get-basic (amqp:basic get-channel))
          (exchange (amqp:exchange publish-channel :exchange exchange :type "direct"))
          (publish-queue (amqp:queue publish-channel :queue queue))

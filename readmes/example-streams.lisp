@@ -24,6 +24,7 @@
 (amqp:connection-server-properties *c*)
 
 (amqp:with-open-channel (output *c*  :exchange "ex" :type "direct" :queue "q1")
+  (amqp:basic output :delivery-mode 1)
   (format output "~a, ~a, ~a~%"
           (lisp-implementation-type)
           (lisp-implementation-version)
