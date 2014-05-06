@@ -40,7 +40,8 @@
 (defparameter *ch1.basic* (amqp:basic *ch1* :delivery-mode 1))
 (defparameter *ch1.ex* (amqp:exchange *ch1*  :exchange "spocq.store" :type "direct"))
 (defparameter *ch1.q*  (amqp:queue *ch1* :queue "spocq.store"))
-;; don't redeclare if it exists (amqp:request-declare *ch1.ex*)
+;; don't redeclare if it exists
+(ignore-errors (amqp:request-declare *ch1.ex*))
 (amqp:request-declare *ch1.q*)
 (amqp:request-bind *ch1.q* :exchange *ch1.ex* :queue *ch1.q* :routing-key "foaf")
 

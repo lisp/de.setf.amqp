@@ -745,6 +745,16 @@
   instance )
 
 
+(defgeneric basic-user-id (channel)
+  (:documentation "Return the user id specified in the basic's channel, which
+    should then delegate to the channel's connection.")
+
+  (:method ((basic amqp:basic))
+    (let ((channel (basic-channel basic)))
+      (if channel
+        (channel-user-id channel)
+        ""))))
+
 (defgeneric channel-compute-body-size (channel object encoding)
   (:method ((channel amqp:channel) (object null) (encoding mime:*/*))
     0)

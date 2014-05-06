@@ -624,6 +624,7 @@ any, is committed.")
    
    (:method ((basic amqp:basic) &rest args &key (body nil body-s)
              (exchange nil e-s) (routing-key nil rk-s)
+             (user-id (or (basic-user-id basic) ""))
              &allow-other-keys)
      (when e-s
        (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
@@ -635,7 +636,7 @@ any, is committed.")
        (remf args :body))
      (apply #'shared-initialize basic t args)
      (let ((channel (object-channel basic)))
-       (apply #'device-write-content channel body :exchange exchange args)))))
+       (apply #'device-write-content channel body :exchange exchange :user-id user-id args)))))
 
 
 (def-amqp-command amqp:purge (class &key queue no-wait)
