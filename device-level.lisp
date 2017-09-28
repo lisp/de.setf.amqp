@@ -1450,7 +1450,7 @@ returned.")
 
 (defgeneric device-write-content-body (device body content-type
                                        &key
-                                       body-size class-id consumer-tag content-type content-encoding correlation-id
+                                       body-size class-id consumer-tag content-encoding correlation-id
                                        delivery-mode delivery-tag exchange expiration headers immediate
                                        mandatory message-count
                                        priority routing-key reply-to message-id
