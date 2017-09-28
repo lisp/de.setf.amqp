@@ -34,6 +34,27 @@
   (read-line input))
 
 
+;;; fails
+
+  DEVICE-READ: Required device state USE-CHANNEL.BODY.INPUT is not satisfied by #<USE-CHANNEL
+
+                                                                                  {1001DFFF11}>.
+
+Type HELP for debugger help, or (SB-EXT:QUIT) to exit from SBCL.
+
+restarts (invokable by number or by possibly-abbreviated name):
+  0: [CONTINUE] Retry assertion.
+  1: [ABORT   ] Exit debugger, returning to top level.
+
+(SB-KERNEL:ASSERT-ERROR
+ (TYPEP #:G360 'AMQP.S:USE-CHANNEL.BODY.INPUT)
+ NIL
+ "~@[~a: ~]Required device state ~a is not satisfied by ~a."
+ DEVICE-READ
+ AMQP.S:USE-CHANNEL.BODY.INPUT
+ #<AMQP.S:USE-CHANNEL {1001DFFF11}>)
+0]
+
 
 (amqp:with-open-channel (output *c*  :exchange "ex" :type "direct" :queue "q1")
   (let ((message '("there" "comes" "a" "time" "when" "the" "mind" "takes" "a" "higher" "plane"
@@ -50,3 +71,5 @@
   (loop
     (unless (print (read-line input nil nil))
       (return))))
+
+(close *c* :abort t)

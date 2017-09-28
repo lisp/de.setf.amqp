@@ -596,6 +596,8 @@ messages in between sending the cancel method and receiving the cancel-ok reply.
    (:method ((class amqp::channel) &key &allow-other-keys)
      class)))
 
+(defparameter *publish-expiration* "100000"
+  "Value in milliseconds. COuld also be a default value in the instance, but this is more direct,")
 
 (def-amqp-command amqp:publish (class &key  body exchange routing-key mandatory immediate
                                       content-type content-encoding headers delivery-mode
@@ -625,6 +627,7 @@ any, is committed.")
    (:method ((basic amqp:basic) &rest args &key (body nil body-s)
              (exchange nil e-s) (routing-key nil rk-s)
              (user-id (or (basic-user-id basic) ""))
+             (expiration *publish-expiration*)
              &allow-other-keys)
      (when e-s
        (setf exchange (amqp:exchange-exchange exchange))          ; coerce to a string
@@ -636,7 +639,8 @@ any, is committed.")
        (remf args :body))
      (apply #'shared-initialize basic t args)
      (let ((channel (object-channel basic)))
-       (apply #'device-write-content channel body :exchange exchange :user-id user-id args)))))
+       (apply #'device-write-content channel body :exchange exchange :user-id user-id
+              :expiration expiration args)))))
 
 
 (def-amqp-command amqp:purge (class &key queue no-wait)

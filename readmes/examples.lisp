@@ -53,7 +53,9 @@
  (amqp:request-publish *ch1.basic* :exchange *ch1.ex*
                        :body (format nil "a test message")
                        :routing-key "foaf")
+ ;; should yield the message
  (amqp:request-get *ch2.basic* :queue *ch2.q*)
+ ;; should be empty
  (amqp:request-get *ch1.basic* :queue *ch1.q*))
 
 #|
