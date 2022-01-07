@@ -44,7 +44,7 @@
                     ;;  exclusive passive active write read 
                     (apply #'amqp:request-request  (amqp:ensure-object device 'amqp:access
                                                                        :realm realm)
-                           realm)
+                           initargs)
                     (command-case (device)
                       (amqp:request-ok ((access amqp:access) &key ticket)
                          (amqp:log :debug device "device-open: for realm: ~s, ~s"

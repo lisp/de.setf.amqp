@@ -31,7 +31,7 @@
    (data
     :initarg :buffer :initarg :data :initform  nil ; (error "buffer required.")
     :reader frame-data :writer setf-frame-data :writer (setf frame-data)
-    :type (simple-array (unsigned-byte 8) (*))
+    :type (or (simple-array (unsigned-byte 8) (*)) null)
     :documentation "A byte buffer serves to capture the i/o for any frames
  which are not streamed. the encoding operators use the buffer if it is present.")
    (end-marker :initform #xce :allocation :class
